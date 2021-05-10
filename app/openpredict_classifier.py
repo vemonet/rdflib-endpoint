@@ -5,8 +5,6 @@ from joblib import dump, load
 from rdflib import Graph, Literal, RDF, URIRef, Namespace
 import pathlib
 
-pathlib.Path(__file__).parent.absolute()
-
 def get_dir(path=''):
     """Return the full path to the provided files in the OpenPredict data folder
     Where models and features for runs are stored
