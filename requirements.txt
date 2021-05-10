@@ -2,3 +2,7 @@ fastapi
 uvicorn[standard]
 rdflib
 requests
+joblib
+numpy==1.16.1
+# numpy==1.16.5
+pandas==1.1.1

@@ -1,7 +1,8 @@
-FROM python:3.8
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
+# FROM python:3.8
 
 # cf. https://fastapi.tiangolo.com/deployment/docker/
-COPY . /app/
+COPY ./app /app
 
 RUN pip install -r /app/requirements.txt
 
