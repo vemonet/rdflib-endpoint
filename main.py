@@ -7,7 +7,7 @@ from rdflib.plugins.sparql.processor import translateQuery
 
 app = FastAPI(
     title="SPARQL query engine for ML model",
-    description="A SPARQL endpoint to query machine learning models directly with SPARQL",
+    description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python",
     version="0.0.1",
 )
 
