@@ -25,7 +25,7 @@ app = FastAPI(
                 }
             },
         },
-    },
+    }
 )
 def sparql_query(
     request: Request,

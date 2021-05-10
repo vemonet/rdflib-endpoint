@@ -1,7 +1,7 @@
 version: '3'
 services:
-  openpredict-api:
-    container_name: sparql-engine-for-ml
+  sparql-engine-for-python:
+    container_name: sparql-engine-for-python
     build: .
     restart: unless-stopped
     # ports:
