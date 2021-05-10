@@ -1,10 +1,9 @@
 FROM python:3.8
 
-WORKDIR /app 
+# cf. https://fastapi.tiangolo.com/deployment/docker/
+COPY . /app/
 
-COPY . /app
-
-RUN pip install -r requirements.txt
+RUN pip install -r /app/requirements.txt
 
 EXPOSE 8000
 
