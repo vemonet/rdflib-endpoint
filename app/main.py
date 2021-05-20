@@ -187,7 +187,7 @@ class Payload(BaseModel):
         }, 
     }
 )
-def post_sparql_endpoint(
+async def post_sparql_endpoint(
     request: Request,
     # query: str = Body(...)):
     # query: Payload = None):
@@ -203,7 +203,8 @@ def post_sparql_endpoint(
     print('POST OPERATION. Query:')
     print(query)
     if not query:
-        print(request.body())
+        query = await request.body()
+        print(query)
         # query = request.json()['query']
     return sparql_endpoint(request, query)
 
