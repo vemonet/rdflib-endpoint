@@ -6,10 +6,10 @@ from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
 from openpredict_classifier import query_classifier_from_sparql
-# Import for custom function calculation
-# from Levenshtein import distance as levenshtein_distance # python-Levenshtein==0.12.2
 
-
+# Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
+# StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
+# Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
 
 def SPARQL_openpredict(ctx:object, part:object) -> object:
     """
@@ -86,24 +86,3 @@ def SPARQL_openpredict(ctx:object, part:object) -> object:
         return cs
     raise NotImplementedError()
 
-
-# namespace = Namespace('//custom/')
-# openpredict = rdflib.term.URIRef(namespace + 'openpredict')
-
-
-# query = """
-# PREFIX custom: <%s>
-
-# SELECT ?label1 ?label2 ?openpredict WHERE {
-#   BIND("Hello" AS ?label1)
-#   BIND("World" AS ?label2)
-#   BIND(custom:openpredict(?label1, ?label2) AS ?openpredict)
-# }
-# """ % (namespace,)
-
-# # Save custom function in custom evaluation dictionary.
-# rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict'] = SPARQL_openpredict
-
-
-# for row in rdflib.Graph().query(query):
-#     print(row)

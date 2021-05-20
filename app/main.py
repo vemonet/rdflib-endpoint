@@ -67,8 +67,8 @@ def sparql_endpoint(
         
         # Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
         # StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
-        namespace = Namespace('//custom/')
-        openpredict = rdflib.term.URIRef(namespace + 'openpredict')
+        # Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
+
 
         # Save custom function in custom evaluation dictionary.
         rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict'] = SPARQL_openpredict
@@ -77,9 +77,6 @@ def sparql_endpoint(
             predictions_list.append(row)
 
         return predictions_list
-
-        # TODO: checkout how they do: query = QueryHandler(flask.request, flask.g)
-        # https://github.com/bas-stringer/scry/blob/master/query_handler.py
 
 
 @app.get("/", include_in_schema=False)
