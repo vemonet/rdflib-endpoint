@@ -86,7 +86,8 @@ def sparql_endpoint(
     if not query:
         # Return the SPARQL endpoint service description
         service_graph = rdflib.Graph()
-        service_graph.parse('app/service-description.ttl', format="ttl")
+        # service_graph.parse('app/service-description.ttl', format="ttl")
+        service_graph.parse(data=service_description_ttl, format="ttl")
         if request.headers['accept'] == 'application/xml':
             return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
         else:
@@ -123,3 +124,26 @@ def sparql_endpoint(
 async def redirect_root_to_docs():
     response = RedirectResponse(url='/docs')
     return response
+
+service_description_ttl = """
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix ent: <http://www.w3.org/ns/entailment/> .
+@prefix prof: <http://www.w3.org/ns/owl-profile/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+[] a sd:Service ;
+    sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
+    sd:extensionFunction <https://w3id.org/um/openpredict/openpredict> ;
+    sd:feature sd:DereferencesURIs ;
+    sd:defaultEntailmentRegime ent:RDFS ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+        ] 
+    ] .
+
+<https://w3id.org/um/openpredict/openpredict> a sd:Function .
+"""
