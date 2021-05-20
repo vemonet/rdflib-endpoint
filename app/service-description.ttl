@@ -1,0 +1,20 @@
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix ent: <http://www.w3.org/ns/entailment/> .
+@prefix prof: <http://www.w3.org/ns/owl-profile/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+[] a sd:Service ;
+    sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
+    sd:extensionFunction <//custom/openpredict> ;
+    sd:feature sd:DereferencesURIs ;
+    sd:defaultEntailmentRegime ent:RDFS ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+        ] 
+    ] .
+
+<//custom/openpredict> a sd:Function .

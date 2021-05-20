@@ -24,3 +24,19 @@ uvicorn main:app --reload --app-dir app
 docker-compose up -d --build
 ```
 
+## Try a federated query
+
+```SPARQL
+PREFIX custom: <//custom/> 
+SELECT *
+{
+  SERVICE <https://sparql-openpredict.137.120.31.102.nip.io/sparql> {
+    SELECT ?label1 ?label2 ?concat WHERE {      
+     BIND("Hello" AS ?label1)     
+     BIND("World" AS ?label2)     
+     BIND(custom:openpredict(?label1, ?label2) AS ?concat) 
+    }
+  }
+}
+```
+
