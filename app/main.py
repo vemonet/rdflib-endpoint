@@ -1,6 +1,7 @@
 from typing import Optional
-from fastapi import FastAPI, Request, Response, Query
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse, PlainTextResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 import json
 import rdflib
@@ -21,6 +22,13 @@ app = FastAPI(
     description="""A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
     \n[Source code](https://github.com/vemonet/sparql-engine-for-python)""",
     version="0.0.1",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get(
