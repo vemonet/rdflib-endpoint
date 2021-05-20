@@ -28,43 +28,14 @@ docker-compose up -d --build
 
 ```SPARQL
 PREFIX openpredict: <https://w3id.org/um/openpredict/>
-
 SELECT * WHERE
 {
   SERVICE <https://sparql-openpredict.137.120.31.102.nip.io/sparql> {
-
-    SELECT ?label1 ?label2 ?concat WHERE {
-        BIND("Hello" AS ?label1)
-        BIND("World" AS ?label2)
-      BIND(openpredict:similarity(?label1, ?label2) AS ?concat)
-    }
+	SELECT ?drugOrDisease ?predictedForTreatment WHERE {
+    	BIND("OMIM:246300" AS ?drugOrDisease)
+    	BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
+	}
   }
 }
 ```
 
-Error with OpenLink Virtuoso:
-
-> ```
-> Virtuoso 22003 Error SR017: aref: Bad array subscript (zero-based) 2 for an arg of type ARRAY_OF_POINTER (193) and length 1.
-> ```
-
-No results with Ontotext GraphDB:
-
-> ```
-> {
->   "head": {
->     "vars": [
->       "label1",
->       "label2",
->       "concat"
->     ]
->   },
->   "results": {
->     "bindings": []
->   }
-> }
-> ```
-
-According to [W3C docs about Federated queries](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#defn_service):
-
-> The evaluation of `SERVICE` is defined in terms of the [SPARQL Results](http://www.w3.org/TR/rdf-sparql-XMLres/) [[RESULTS](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#RESULTS)] returned by a SPARQL Protocol [[SPROT](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#SPROT)] execution of the nested graph pattern:

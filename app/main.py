@@ -13,7 +13,7 @@ from rdflib.namespace import Namespace
 import re
 from urllib import parse
 
-from function_openpredict import SPARQL_openpredict_similarity
+from function_openpredict import SPARQL_openpredict_similarity, SPARQL_openpredict_prediction
 from openpredict_classifier import query_classifier_from_sparql
 
 # Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
@@ -77,16 +77,14 @@ def sparql_endpoint(
     # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
     """
     Send a SPARQL query to be executed. 
-    - Example with a drug: https://identifiers.org/DRUGBANK:DB00394
-    - Example with a disease: https://identifiers.org/OMIM:246300
+    - Example with a drug: DRUGBANK:DB00394
+    - Example with a disease: OMIM:246300
     Example with custom concat function:
     ```
     PREFIX openpredict: <https://w3id.org/um/openpredict/>
-
-    SELECT ?label1 ?label2 ?concat WHERE {
-        BIND("Hello" AS ?label1)
-        BIND("World" AS ?label2)
-        BIND(openpredict:similarity(?label1, ?label2) AS ?concat)
+    SELECT ?drugOrDisease ?predictedForTreatment WHERE {
+        BIND("OMIM:246300" AS ?drugOrDisease)
+        BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
     }
     ```
     \f
@@ -117,9 +115,10 @@ def sparql_endpoint(
     # predictions_list = query_classifier_from_sparql(parsed_query)
 
     # Save custom function in custom evaluation dictionary
-    rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_similarity'] = SPARQL_openpredict_similarity
+    rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_prediction'] = SPARQL_openpredict_prediction
+    # rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_similarity'] = SPARQL_openpredict_similarity
 
-    # Query an empty graph with the custom function available
+    # Query an empty graph with the custom functions available
     query_results = rdflib.Graph().query(query)
 
     # Format and return results depending on Accept mime type in request header
@@ -253,5 +252,6 @@ service_description_ttl = """
         ] 
     ] .
 
+<https://w3id.org/um/openpredict/prediction> a sd:Function .
 <https://w3id.org/um/openpredict/similarity> a sd:Function .
 """
