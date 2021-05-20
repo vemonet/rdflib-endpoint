@@ -138,11 +138,12 @@ def sparql_endpoint(
     elif output_mime_type == 'application/xml' or output_mime_type == 'application/sparql-results+xml':
         return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
     else:
+        return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
         # By default (for federated queries)
         # return Response(query_results.serialize(format = 'sparql-results+xml'), media_type='application/sparql-results+xml')
         # return Response(XMLResultSerializer(query_results), media_type='application/sparql-results+xml')
-        ## This XML serializer actually returns JSON:
-        return XMLResultSerializer(query_results)
+        ## This XML serializer actually returns weird JSON not recognized by YASGUI:
+        # return XMLResultSerializer(query_results)
 
         # return FileResponse(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml', filename='sparql_results.srx')
 
@@ -209,9 +210,8 @@ async def post_sparql_endpoint(
         # body = json.loads(query_body.decode('utf-8'))
         if query.startswith('query='):
             query = query[6:]
-        print('query')
-        print(query)
-        # query = request.json()['query']
+        # print('query')
+        # print(query)
     return sparql_endpoint(request, query)
 
 
