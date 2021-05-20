@@ -42,3 +42,26 @@ SELECT * WHERE
 }
 ```
 
+Error with OpenLink Virtuoso:
+
+> ```
+> Virtuoso 22003 Error SR017: aref: Bad array subscript (zero-based) 2 for an arg of type ARRAY_OF_POINTER (193) and length 1.
+> ```
+
+No results with Ontotext GraphDB:
+
+> ```
+> {
+>   "head": {
+>     "vars": [
+>       "label1",
+>       "label2",
+>       "concat"
+>     ]
+>   },
+>   "results": {
+>     "bindings": []
+>   }
+> }
+> ```
+

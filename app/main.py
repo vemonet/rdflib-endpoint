@@ -180,7 +180,7 @@ service_description_ttl = """
     sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
     sd:supportedLanguage sd:SPARQL11Query ;
     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
-    sd:extensionFunction <https://w3id.org/um/openpredict/openpredict> ;
+    sd:extensionFunction <https://w3id.org/um/openpredict/similarity> ;
     sd:feature sd:DereferencesURIs ;
     sd:defaultEntailmentRegime ent:RDFS ;
     sd:defaultDataset [
