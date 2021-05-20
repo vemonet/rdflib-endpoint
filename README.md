@@ -1,12 +1,12 @@
-# SPARQL endpoint for Python custom functions ✨️🐍
+# SPARQL endpoint for RDFLib custom functions ✨️🐍
 
 A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
 
 Built with RDFLib and FastAPI, CORS enabled.
 
-* See `function_openpredict.py` for examples to define a custom SPARQL function for RDFLib graphs.
+* See `app/function_openpredict.py` for examples to define a custom SPARQL function for RDFLib graphs.
 
-* Register the functions in the get `sparql_endpoint` function in `main.py` with:
+* Register the functions in the get `sparql_endpoint` function in `app/main.py` with:
 
   * ```python
     rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_prediction'] = SPARQL_openpredict_prediction

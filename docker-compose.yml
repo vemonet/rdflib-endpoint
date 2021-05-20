@@ -1,7 +1,7 @@
 version: '3'
 services:
-  sparql-engine-for-python:
-    container_name: sparql-engine-for-openpredict
+  rdflib-endpoint:
+    container_name: rdflib-endpoint-openpredict
     build: .
     restart: unless-stopped
     environment: 

@@ -26,7 +26,7 @@ from openpredict_classifier import query_classifier_from_sparql
 app = FastAPI(
     title="SPARQL endpoint for Python functions",
     description="""A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
-    \n[Source code](https://github.com/vemonet/sparql-engine-for-python)""",
+    \n[Source code](https://github.com/vemonet/rdflib-endpoint)""",
     version="0.0.1",
 )
 app.add_middleware(
