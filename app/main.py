@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse, RedirectResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 import json
@@ -17,6 +17,8 @@ from openpredict_classifier import query_classifier_from_sparql
 # StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
 # Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
 # https://www.w3.org/TR/sparql11-service-description/#example-turtle
+
+# Federated query: https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#defn_service
 
 app = FastAPI(
     title="SPARQL endpoint for Python functions",
@@ -49,6 +51,9 @@ app.add_middleware(
                 },
                 "text/turtle": {
                     "example": "service description"
+                },
+                "application/sparql-results+xml": {
+                    "example": "<root></root>"
                 },
                 "application/xml": {
                     "example": "<root></root>"
@@ -111,14 +116,23 @@ def sparql_endpoint(
 
     # Format and return results
     print(query_results.serialize(format = 'json'))
-    if request.headers['accept'] == 'text/csv':
-        return Response(query_results.serialize(format = 'csv'), media_type='text/csv')
-    elif request.headers['accept'] == 'application/xml':
-        return Response(query_results.serialize(format = 'xml'), media_type='application/xml')
+    output_mime_type = request.headers['accept']
+    if not output_mime_type:
+        output_mime_type = 'application/xml'
+
+    print(output_mime_type)
+    if output_mime_type == 'text/csv' or output_mime_type == 'application/sparql-results+csv':
+        return Response(query_results.serialize(format = 'csv'), media_type=output_mime_type)
+    elif output_mime_type == 'application/json' or output_mime_type == 'application/sparql-results+json':
+        return Response(query_results.serialize(format = 'json'), media_type=output_mime_type)
+    elif output_mime_type == 'application/xml' or output_mime_type == 'application/sparql-results+xml':
+        return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
     else:
-        return Response(query_results.serialize(format = 'json'), media_type=request.headers['accept'])
-        # return json.loads(query_results.serialize(format = 'json'))
-        # return Response(json.loads(query_results.serialize(format = 'json')), media_type=request.headers['accept'])
+        # Return XML by default for federated queries
+        return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
+        # return FileResponse(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml', filename='sparql_results.srx')
+
+        # return Response(json.loads(query_results.serialize(format = 'json')), media_type=output_mime_type)
 
 
 @app.post(
