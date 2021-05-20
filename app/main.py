@@ -205,9 +205,13 @@ async def post_sparql_endpoint(
         # url = 'http://foo.appspot.com/abc?def=ghi'
         # parsed = parse.urlparse(body)
         # parsed = parse.urlsplit(body)
+        # query = parse.parse_qs(parsed)
         print('parsed query')
         # print(parsed)
-        query = parse.parse_qsl(body)
+        parsed_query = parse.parse_qsl(body)
+        for params in parsed_query:
+            if params[0] == 'query':
+                query = params[1]
         print(query)
 
         # body = json.loads(query_body.decode('utf-8'))
