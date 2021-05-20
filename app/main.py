@@ -198,11 +198,13 @@ async def post_sparql_endpoint(
     if not query:
         query_body = await request.body()
         body = unquote(query_body.decode('utf-8'))
-
+        print(body)
         import urllib.parse as urlparse
         from urllib.parse import parse_qs
         # url = 'http://foo.appspot.com/abc?def=ghi'
         parsed = urlparse.urlparse(body)
+        print('parsed query')
+        print(parsed)
         query = parse_qs(parsed.query)['query']
 
         # body = json.loads(query_body.decode('utf-8'))
