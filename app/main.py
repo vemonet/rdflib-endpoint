@@ -11,6 +11,7 @@ from rdflib.plugins.sparql.results.xmlresults import XMLResult
 from rdflib.plugins.sparql.results.xmlresults import XMLResultSerializer
 from rdflib.namespace import Namespace
 import re
+from urllib.parse import unquote
 
 from function_openpredict import SPARQL_openpredict_similarity
 from openpredict_classifier import query_classifier_from_sparql
@@ -204,9 +205,11 @@ async def post_sparql_endpoint(
     print(query)
     if not query:
         query_body = await request.body()
-        body = query_body.decode('utf-8')
+        body = unquote(query_body.decode('utf-8'))
         # body = json.loads(query_body.decode('utf-8'))
-        query = body.replace('query=', '')
+        if body.startswith('query='):
+            body = body[6:]
+        # query = body.replace('query=', '')
         print('query_body')
         print(query_body)
         print('body')
