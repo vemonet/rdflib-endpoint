@@ -205,15 +205,10 @@ async def post_sparql_endpoint(
     print(query)
     if not query:
         query_body = await request.body()
-        body = unquote(query_body.decode('utf-8'))
+        query = unquote(query_body.decode('utf-8'))
         # body = json.loads(query_body.decode('utf-8'))
-        if body.startswith('query='):
-            body = body[6:]
-        # query = body.replace('query=', '')
-        print('query_body')
-        print(query_body)
-        print('body')
-        print(body)
+        if query.startswith('query='):
+            query = query[6:]
         print('query')
         print(query)
         # query = request.json()['query']
