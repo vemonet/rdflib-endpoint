@@ -95,6 +95,8 @@ def sparql_endpoint(
     \f
     :param query: SPARQL query input.
     """
+    print('GET OPERATION. Query:')
+    print(query)
     if not query:
         # Return the SPARQL endpoint service description
         service_graph = rdflib.Graph()
@@ -115,13 +117,13 @@ def sparql_endpoint(
     print(query_operation)
     # predictions_list = query_classifier_from_sparql(parsed_query)
 
-    # Save custom function in custom evaluation dictionary.
+    # Save custom function in custom evaluation dictionary
     rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_similarity'] = SPARQL_openpredict_similarity
 
     # Query an empty graph with the custom function available
     query_results = rdflib.Graph().query(query)
 
-    # Format and return results
+    # Format and return results depending on Accept mime type in request header
     print(query_results.serialize(format = 'json'))
     output_mime_type = request.headers['accept']
     if not output_mime_type:
@@ -135,8 +137,7 @@ def sparql_endpoint(
     elif output_mime_type == 'application/xml' or output_mime_type == 'application/sparql-results+xml':
         return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
     else:
-        # Return XML by default for federated queries
-        # XMLResult
+        # By default (for federated queries)
         # return Response(query_results.serialize(format = 'sparql-results+xml'), media_type='application/sparql-results+xml')
         # return Response(XMLResultSerializer(query_results), media_type='application/sparql-results+xml')
         ## This XML serializer actually returns JSON:
@@ -192,6 +193,8 @@ def post_sparql_endpoint(
     \f
     :param query: SPARQL query input.
     """
+    print('POST OPERATION. Query:')
+    print(query)
     return sparql_endpoint(request, query)
 
 
