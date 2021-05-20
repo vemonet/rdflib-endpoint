@@ -11,7 +11,7 @@ from rdflib.plugins.sparql.results.xmlresults import XMLResult
 from rdflib.plugins.sparql.results.xmlresults import XMLResultSerializer
 from rdflib.namespace import Namespace
 import re
-from urllib.parse import unquote
+from urllib import parse
 
 from function_openpredict import SPARQL_openpredict_similarity
 from openpredict_classifier import query_classifier_from_sparql
@@ -20,9 +20,7 @@ from openpredict_classifier import query_classifier_from_sparql
 # StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
 # Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
 # https://www.w3.org/TR/sparql11-service-description/#example-turtle
-
 # Federated query: https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#defn_service
-
 # XML method: https://rdflib.readthedocs.io/en/stable/apidocs/rdflib.plugins.sparql.results.html#module-rdflib.plugins.sparql.results.xmlresults
 
 app = FastAPI(
@@ -76,9 +74,7 @@ app.add_middleware(
 def sparql_endpoint(
     request: Request,
     query: Optional[str] = None):
-    # query: Optional[str] = Query(None)):
     # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
-    # def sparql_query(query: Optional[str] = None):
     """
     Send a SPARQL query to be executed. 
     - Example with a drug: https://identifiers.org/DRUGBANK:DB00394
@@ -96,8 +92,8 @@ def sparql_endpoint(
     \f
     :param query: SPARQL query input.
     """
-    print('GET OPERATION. Query:')
-    print(query)
+    # print('GET OPERATION. Query:')
+    # print(query)
     if not query:
         # Return the SPARQL endpoint service description
         service_graph = rdflib.Graph()
@@ -107,6 +103,8 @@ def sparql_endpoint(
             return Response(service_graph.serialize(format = 'turtle'), media_type='text/turtle')
         else:
             return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
+        # TODO: Iterate over the added functions to add them automatically to the service description
+        # <https://w3id.org/um/openpredict/similarity> a sd:Function .
 
     # Parse the query and retrieve the type of operation (e.g. SELECT)
     parsed_query = translateQuery(Query.parseString(query, parseAll=True))
@@ -138,8 +136,9 @@ def sparql_endpoint(
     elif output_mime_type == 'application/xml' or output_mime_type == 'application/sparql-results+xml':
         return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
     else:
-        return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
         ## By default (for federated queries)
+        return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
+
         # return Response(query_results.serialize(format = 'sparql-results+xml'), media_type='application/sparql-results+xml')
         # return Response(XMLResultSerializer(query_results), media_type='application/sparql-results+xml')
         ## This XML serializer actually returns weird JSON not recognized by YASGUI:
@@ -185,37 +184,21 @@ def sparql_endpoint(
 async def post_sparql_endpoint(
     request: Request,
     query: Optional[str] = None):
-    # query: Optional[str] = Query(None)):
-    # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
-    # def sparql_query(query: Optional[str] = None):
     """
     Send a SPARQL query to be executed through HTTP POST operation.
     \f
     :param query: SPARQL query input.
     """
-    print('POST OPERATION. Query:')
-    print(query)
+    # print('POST OPERATION. Query via params:')
+    # print(query)
     if not query:
         query_body = await request.body()
-        body = unquote(query_body.decode('utf-8'))
-        print(body)
-        from urllib import parse
-        # import urllib.parse as urlparse
-        # from urllib.parse import parse_qs
-        # url = 'http://foo.appspot.com/abc?def=ghi'
-        # parsed = parse.urlparse(body)
-        # parsed = parse.urlsplit(body)
-        # query = parse.parse_qs(parsed)
-        print('parsed query')
-        # print(parsed)
+        body = parse.unquote(query_body.decode('utf-8'))
         parsed_query = parse.parse_qsl(body)
         for params in parsed_query:
             if params[0] == 'query':
                 query = params[1]
-        print(query)
-
-        # body = json.loads(query_body.decode('utf-8'))
-        # print('query')
+        # print('Query from payload/body')
         # print(query)
     return sparql_endpoint(request, query)
 
@@ -270,5 +253,5 @@ service_description_ttl = """
         ] 
     ] .
 
-<https://w3id.org/um/openpredict/openpredict> a sd:Function .
+<https://w3id.org/um/openpredict/similarity> a sd:Function .
 """

@@ -7,9 +7,6 @@ from rdflib.term import Literal
 
 from openpredict_classifier import query_classifier_from_sparql
 
-# Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
-# StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
-# Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
 
 def SPARQL_openpredict_similarity(ctx:object, part:object) -> object:
     """
@@ -70,19 +67,19 @@ def SPARQL_openpredict_similarity(ctx:object, part:object) -> object:
                     # After finding the correct path for the custom SPARQL function the evaluation can begin.
                     # Here the levenshtein distance is calculated using ?label1 and ?label2 and stored as an Literal object.
                     # This object is than stored as an output value of the SPARQL-query (example: ?levenshtein)
-                    # evaluation = Literal(levenshtein_distance(argument1, argument2))
-                    evaluation = Literal(argument1 + argument2)
+                    # evaluation = Literal(argument1 + argument2)
+                    evaluation = [Literal(argument1 + argument2), Literal(argument2 + argument1)]
                     # predictions_list = query_classifier_from_sparql(parsed_query)
-
 
     # Standard error handling and return statements
                 else:
                     raise SPARQLError('Unhandled function {}'.format(part.expr.iri))
             else:
-                evaluation = _eval(part.expr, c.forget(ctx, _except=part._vars))
-                if isinstance(evaluation, SPARQLError):
-                    raise evaluation
-            cs.append(c.merge({part.var: evaluation}))
+                evaluation = [_eval(part.expr, c.forget(ctx, _except=part._vars))]
+                if isinstance(evaluation[0], SPARQLError):
+                    raise evaluation[0]
+            for result in evaluation:
+                cs.append(c.merge({part.var: result}))
         return cs
     raise NotImplementedError()
 
