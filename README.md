@@ -27,14 +27,16 @@ docker-compose up -d --build
 ## Try a federated query
 
 ```SPARQL
-PREFIX custom: <https://w3id.org/um/openpredict/> 
-SELECT *
+PREFIX openpredict: <https://w3id.org/um/openpredict/>
+
+SELECT * WHERE
 {
   SERVICE <https://sparql-openpredict.137.120.31.102.nip.io/sparql> {
-    SELECT ?label1 ?label2 ?concat WHERE {      
-     BIND("Hello" AS ?label1)     
-     BIND("World" AS ?label2)     
-     BIND(custom:openpredict(?label1, ?label2) AS ?concat) 
+
+    SELECT ?label1 ?label2 ?concat WHERE {
+        BIND("Hello" AS ?label1)
+        BIND("World" AS ?label2)
+      BIND(openpredict:similarity(?label1, ?label2) AS ?concat)
     }
   }
 }

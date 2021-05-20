@@ -113,8 +113,9 @@ def sparql_endpoint(
     print(query_results.serialize(format = 'json'))
     if request.headers['accept'] == 'text/csv':
         return Response(query_results.serialize(format = 'csv'), media_type='text/csv')
+    elif request.headers['accept'] == 'application/xml':
+        return Response(query_results.serialize(format = 'xml'), media_type='application/xml')
     else:
-        print(request.headers['accept'])
         return Response(query_results.serialize(format = 'json'), media_type=request.headers['accept'])
         # return json.loads(query_results.serialize(format = 'json'))
         # return Response(json.loads(query_results.serialize(format = 'json')), media_type=request.headers['accept'])
@@ -155,30 +156,19 @@ def post_sparql_endpoint(
     # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
     # def sparql_query(query: Optional[str] = None):
     """
-    Send a SPARQL query to be executed. 
-    - Example with a drug: https://identifiers.org/DRUGBANK:DB00394
-    - Example with a disease: https://identifiers.org/OMIM:246300
-    Example with custom concat function:
-    ```
-    PREFIX openpredict: <https://w3id.org/um/openpredict/>
-
-    SELECT ?label1 ?label2 ?concat WHERE {
-        BIND("Hello" AS ?label1)
-        BIND("World" AS ?label2)
-        BIND(openpredict:similarity(?label1, ?label2) AS ?concat)
-    }
-    ```
+    Send a SPARQL query to be executed through HTTP POST operation.
     \f
     :param query: SPARQL query input.
     """
     return sparql_endpoint(request, query)
 
 
-
 @app.get("/", include_in_schema=False)
 async def redirect_root_to_docs():
     response = RedirectResponse(url='/docs')
     return response
+
+
 
 service_description_ttl = """
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
