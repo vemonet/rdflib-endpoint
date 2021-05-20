@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Body
 from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -189,6 +189,7 @@ class Payload(BaseModel):
 )
 def post_sparql_endpoint(
     request: Request,
+    # query: str = Body(...)):
     # query: Payload = None):
     query: Optional[str] = None):
     # query: Optional[str] = Query(None)):
@@ -201,11 +202,13 @@ def post_sparql_endpoint(
     """
     print('POST OPERATION. Query:')
     print(query)
+    print(query.query)
     if not query:
-        print(request.keys)
-        print("request.body:")
-        print(request.items)
-        print(request.get('query'))
+        print(request.json())
+        query = request.json()['query']
+        # print("request.body:")
+        # print(request.items)
+        # print(request.get('query'))
     return sparql_endpoint(request, query)
 
 
