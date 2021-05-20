@@ -65,3 +65,6 @@ No results with Ontotext GraphDB:
 > }
 > ```
 
+According to [W3C docs about Federated queries](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#defn_service):
+
+> The evaluation of `SERVICE` is defined in terms of the [SPARQL Results](http://www.w3.org/TR/rdf-sparql-XMLres/) [[RESULTS](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#RESULTS)] returned by a SPARQL Protocol [[SPROT](https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#SPROT)] execution of the nested graph pattern:

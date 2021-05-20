@@ -7,6 +7,8 @@ import json
 import rdflib
 from rdflib.plugins.sparql.parser import Query
 from rdflib.plugins.sparql.processor import translateQuery
+from rdflib.plugins.sparql.results.xmlresults import XMLResult
+from rdflib.plugins.sparql.results.xmlresults import XMLResultSerializer
 from rdflib.namespace import Namespace
 import re
 
@@ -19,6 +21,8 @@ from openpredict_classifier import query_classifier_from_sparql
 # https://www.w3.org/TR/sparql11-service-description/#example-turtle
 
 # Federated query: https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#defn_service
+
+# XML method: https://rdflib.readthedocs.io/en/stable/apidocs/rdflib.plugins.sparql.results.html#module-rdflib.plugins.sparql.results.xmlresults
 
 app = FastAPI(
     title="SPARQL endpoint for Python functions",
@@ -47,6 +51,9 @@ app.add_middleware(
                     "example": {"id": "bar", "value": "The bar tenders"}
                 },
                 "text/csv": {
+                    "example": "s,p,o"
+                },
+                "application/sparql-results+csv": {
                     "example": "s,p,o"
                 },
                 "text/turtle": {
@@ -129,7 +136,12 @@ def sparql_endpoint(
         return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
     else:
         # Return XML by default for federated queries
-        return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
+        # XMLResult
+        # return Response(query_results.serialize(format = 'sparql-results+xml'), media_type='application/sparql-results+xml')
+        # return Response(XMLResultSerializer(query_results), media_type='application/sparql-results+xml')
+        ## This XML serializer actually returns JSON:
+        return XMLResultSerializer(query_results)
+
         # return FileResponse(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml', filename='sparql_results.srx')
 
         # return Response(json.loads(query_results.serialize(format = 'json')), media_type=output_mime_type)
@@ -150,8 +162,14 @@ def sparql_endpoint(
                 "text/csv": {
                     "example": "s,p,o"
                 },
+                "application/sparql-results+csv": {
+                    "example": "s,p,o"
+                },
                 "text/turtle": {
                     "example": "service description"
+                },
+                "application/sparql-results+xml": {
+                    "example": "<root></root>"
                 },
                 "application/xml": {
                     "example": "<root></root>"
