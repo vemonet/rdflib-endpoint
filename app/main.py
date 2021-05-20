@@ -10,7 +10,7 @@ from rdflib.plugins.sparql.processor import translateQuery
 from rdflib.namespace import Namespace
 import re
 
-from function_openpredict import SPARQL_openpredict
+from function_openpredict import SPARQL_openpredict_similarity
 from openpredict_classifier import query_classifier_from_sparql
 
 # Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
@@ -72,12 +72,12 @@ def sparql_endpoint(
     - Example with a disease: https://identifiers.org/OMIM:246300
     Example with custom concat function:
     ```
-    PREFIX custom: <//custom/>
+    PREFIX openpredict: <https://w3id.org/um/openpredict/>
 
     SELECT ?label1 ?label2 ?concat WHERE {
         BIND("Hello" AS ?label1)
         BIND("World" AS ?label2)
-        BIND(custom:openpredict(?label1, ?label2) AS ?concat)
+        BIND(openpredict:similarity(?label1, ?label2) AS ?concat)
     }
     ```
     \f
@@ -103,7 +103,7 @@ def sparql_endpoint(
     # predictions_list = query_classifier_from_sparql(parsed_query)
 
     # Save custom function in custom evaluation dictionary.
-    rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict'] = SPARQL_openpredict
+    rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_similarity'] = SPARQL_openpredict_similarity
 
     # Query an empty graph with the custom function available
     query_results = rdflib.Graph().query(query)

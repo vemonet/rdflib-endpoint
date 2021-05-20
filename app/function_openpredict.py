@@ -11,7 +11,7 @@ from openpredict_classifier import query_classifier_from_sparql
 # StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
 # Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
 
-def SPARQL_openpredict(ctx:object, part:object) -> object:
+def SPARQL_openpredict_similarity(ctx:object, part:object) -> object:
     """
     Retrieve variables from a SPARQL-query, then get predictions
     The score value is then stored in Literal object and added to the query results.
@@ -19,12 +19,12 @@ def SPARQL_openpredict(ctx:object, part:object) -> object:
     Example:
 
     Query:
-        PREFIX custom: <//custom/>
+        PREFIX custom: <https://w3id.org/um/openpredict/>
 
         SELECT ?label1 ?label2 ?prediction WHERE {
           BIND("Hello" AS ?label1)
           BIND("World" AS ?label2)
-          BIND(custom:openpredict(?label1, ?label2) AS ?prediction)
+          BIND(openpredict:similarity(?label1, ?label2) AS ?prediction)
         }
 
     Retrieve:
@@ -40,8 +40,8 @@ def SPARQL_openpredict(ctx:object, part:object) -> object:
     :param part:    <class 'rdflib.plugins.sparql.parserutils.CompValue'>
     :return:        <class 'rdflib.plugins.sparql.processor.SPARQLResult'>
     """
-    namespace = Namespace('//custom/')
-    openpredict = rdflib.term.URIRef(namespace + 'openpredict')
+    namespace = Namespace('https://w3id.org/um/openpredict/')
+    openpredict_similarity_uri = rdflib.term.URIRef(namespace + 'similarity')
 
     # This part holds basic implementation for adding new functions
     if part.name == 'Extend':
@@ -59,13 +59,13 @@ def SPARQL_openpredict(ctx:object, part:object) -> object:
                 argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except=part.expr._vars)))
                 argument2 = str(_eval(part.expr.expr[1], c.forget(ctx, _except=part.expr._vars)))
 
-                # Here it checks if it can find our levenshtein IRI (example: //custom/levenshtein)
+                # Here it checks if it can find our levenshtein IRI (example: https://w3id.org/um/openpredict/levenshtein)
                 # Please note that IRI and URI are almost the same.
                 # Earlier this has been defined with the following:
-                    # namespace = Namespace('//custom/')
+                    # namespace = Namespace('https://w3id.org/um/openpredict/')
                     # levenshtein = rdflib.term.URIRef(namespace + 'levenshtein')
 
-                if part.expr.iri == openpredict:
+                if part.expr.iri == openpredict_similarity_uri:
 
                     # After finding the correct path for the custom SPARQL function the evaluation can begin.
                     # Here the levenshtein distance is calculated using ?label1 and ?label2 and stored as an Literal object.

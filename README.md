@@ -27,7 +27,7 @@ docker-compose up -d --build
 ## Try a federated query
 
 ```SPARQL
-PREFIX custom: <//custom/> 
+PREFIX custom: <https://w3id.org/um/openpredict/> 
 SELECT *
 {
   SERVICE <https://sparql-openpredict.137.120.31.102.nip.io/sparql> {
