@@ -29,6 +29,9 @@ app = FastAPI(
         200: {
             "description": "SPARQL query results",
             "content": {
+                "application/sparql-results+json": {
+                    "example": {"id": "bar", "value": "The bar tenders"}
+                },
                 "application/json": {
                     "example": {"id": "bar", "value": "The bar tenders"}
                 },
