@@ -1,10 +1,18 @@
-# SPARQL endpoint for Python functions
+# SPARQL endpoint for Python custom functions ✨️🐍
 
 A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
 
-Built with FastAPI and RDFLib.
+Built with RDFLib and FastAPI, CORS enabled.
 
-## Install and run
+* See `function_openpredict.py` for examples to define a custom SPARQL function for RDFLib graphs.
+
+* Register the functions in the get `sparql_endpoint` function in `main.py` with:
+
+  * ```python
+    rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_prediction'] = SPARQL_openpredict_prediction
+    ```
+
+## Install and run ✨️
 
 1. Install dependencies
 
@@ -18,13 +26,17 @@ pip install -r requirements.txt
 uvicorn main:app --reload --app-dir app
 ```
 
-## Or run with docker
+## Or run with docker 🐳
+
+Checkout the `Dockerfile` to see how the image is built, and run it with the `docker-compose.yml`:
 
 ```bash
 docker-compose up -d --build
 ```
 
-## Try a federated query
+## Try a federated query 📬
+
+Use this federated query to retrieve predicted treatments for a drug or disease (OMIM or DRUGBANK) from any other SPARQL endpoint supporting federated queries.
 
 ```SPARQL
 PREFIX openpredict: <https://w3id.org/um/openpredict/>
