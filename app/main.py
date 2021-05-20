@@ -88,10 +88,10 @@ def sparql_endpoint(
         service_graph = rdflib.Graph()
         # service_graph.parse('app/service-description.ttl', format="ttl")
         service_graph.parse(data=service_description_ttl, format="ttl")
-        if request.headers['accept'] == 'application/xml':
-            return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
-        else:
+        if request.headers['accept'] == 'text/turtle':
             return Response(service_graph.serialize(format = 'turtle'), media_type='text/turtle')
+        else:
+            return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
 
     # Parse the query and retrieve the type of operation (e.g. SELECT)
     parsed_query = translateQuery(Query.parseString(query, parseAll=True))
