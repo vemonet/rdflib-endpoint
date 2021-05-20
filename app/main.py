@@ -120,6 +120,61 @@ def sparql_endpoint(
         # return Response(json.loads(query_results.serialize(format = 'json')), media_type=request.headers['accept'])
 
 
+@app.post(
+    "/sparql",
+    responses={
+        200: {
+            "description": "SPARQL query results",
+            "content": {
+                "application/sparql-results+json": {
+                    "example": {"id": "bar", "value": "The bar tenders"}
+                },
+                "application/json": {
+                    "example": {"id": "bar", "value": "The bar tenders"}
+                },
+                "text/csv": {
+                    "example": "s,p,o"
+                },
+                "text/turtle": {
+                    "example": "service description"
+                },
+                "application/xml": {
+                    "example": "<root></root>"
+                },
+            },
+        },
+        501:{
+            "description": " Not Implemented",
+        }, 
+    }
+)
+def post_sparql_endpoint(
+    request: Request,
+    query: Optional[str] = None):
+    # query: Optional[str] = Query(None)):
+    # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
+    # def sparql_query(query: Optional[str] = None):
+    """
+    Send a SPARQL query to be executed. 
+    - Example with a drug: https://identifiers.org/DRUGBANK:DB00394
+    - Example with a disease: https://identifiers.org/OMIM:246300
+    Example with custom concat function:
+    ```
+    PREFIX openpredict: <https://w3id.org/um/openpredict/>
+
+    SELECT ?label1 ?label2 ?concat WHERE {
+        BIND("Hello" AS ?label1)
+        BIND("World" AS ?label2)
+        BIND(openpredict:similarity(?label1, ?label2) AS ?concat)
+    }
+    ```
+    \f
+    :param query: SPARQL query input.
+    """
+    return sparql_endpoint(request, query)
+
+
+
 @app.get("/", include_in_schema=False)
 async def redirect_root_to_docs():
     response = RedirectResponse(url='/docs')
