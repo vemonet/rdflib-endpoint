@@ -1,3 +1,5 @@
+# SPARQL endpoint for Python functions
+
 A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
 
 Built with FastAPI and RDFLib.

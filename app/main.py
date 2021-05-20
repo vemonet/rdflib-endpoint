@@ -2,14 +2,17 @@ from typing import Optional
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse, PlainTextResponse
 
+import rdflib
 from rdflib.plugins.sparql.parser import Query
 from rdflib.plugins.sparql.processor import translateQuery
+from rdflib.namespace import Namespace
 import re
 
+from function_openpredict import SPARQL_openpredict
 from openpredict_classifier import query_classifier_from_sparql
 
 app = FastAPI(
-    title="SPARQL query engine for Python",
+    title="SPARQL endpoint for Python functions",
     description="""A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
     \n[Source code](https://github.com/vemonet/sparql-engine-for-python)""",
     version="0.0.1",
@@ -34,7 +37,7 @@ app = FastAPI(
         }, 
     }
 )
-def sparql_query(
+def sparql_endpoint(
     request: Request,
     query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
     # def sparql_query(query: Optional[str] = None):
@@ -57,13 +60,30 @@ def sparql_query(
         query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
         if query_operation != "Select Query":
             return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
+        
         print(parsed_query)
         print(query_operation)
-        predictions_list = query_classifier_from_sparql(parsed_query)
+        # predictions_list = query_classifier_from_sparql(parsed_query)
+        
+        # Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
+        # StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
+        namespace = Namespace('//custom/')
+        openpredict = rdflib.term.URIRef(namespace + 'openpredict')
+
+        # Save custom function in custom evaluation dictionary.
+        rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict'] = SPARQL_openpredict
+        predictions_list = []
+        for row in rdflib.Graph().query(query):
+            predictions_list.append(row)
+
         return predictions_list
+
+        # TODO: checkout how they do: query = QueryHandler(flask.request, flask.g)
+        # https://github.com/bas-stringer/scry/blob/master/query_handler.py
 
 
 @app.get("/", include_in_schema=False)
 async def redirect_root_to_docs():
     response = RedirectResponse(url='/docs')
     return response
+
