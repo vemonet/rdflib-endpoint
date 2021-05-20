@@ -2,7 +2,7 @@
 
 A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
 
-Built with RDFLib and FastAPI, CORS enabled.
+Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/), CORS enabled.
 
 * See `app/function_openpredict.py` for examples to define a custom SPARQL function for RDFLib graphs.
 
