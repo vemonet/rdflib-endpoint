@@ -16,6 +16,7 @@ from openpredict_classifier import query_classifier_from_sparql
 # Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
 # StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
 # Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
+# https://www.w3.org/TR/sparql11-service-description/#example-turtle
 
 app = FastAPI(
     title="SPARQL endpoint for Python functions",
@@ -112,34 +113,11 @@ def sparql_endpoint(
     if request.headers['accept'] == 'text/csv':
         return Response(query_results.serialize(format = 'csv'), media_type='text/csv')
     else:
-        return json.loads(query_results.serialize(format = 'json'))
+        # return json.loads(query_results.serialize(format = 'json'))
+        return Response(json.loads(query_results.serialize(format = 'json')), media_type=request.headers['accept'])
 
 
 @app.get("/", include_in_schema=False)
 async def redirect_root_to_docs():
     response = RedirectResponse(url='/docs')
     return response
-
-# https://www.w3.org/TR/sparql11-service-description/#example-turtle
-sparql_service_description = """
-@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
-@prefix ent: <http://www.w3.org/ns/entailment/> .
-@prefix prof: <http://www.w3.org/ns/owl-profile/> .
-@prefix void: <http://rdfs.org/ns/void#> .
-
-[] a sd:Service ;
-    sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
-    sd:supportedLanguage sd:SPARQL11Query ;
-    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
-    sd:extensionFunction <//custom/openpredict> ;
-    sd:feature sd:DereferencesURIs ;
-    sd:defaultEntailmentRegime ent:RDFS ;
-    sd:defaultDataset [
-        a sd:Dataset ;
-        sd:defaultGraph [
-            a sd:Graph ;
-        ] 
-    ] .
-
-<//custom/openpredict> a sd:Function .
-"""
