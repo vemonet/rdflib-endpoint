@@ -203,7 +203,14 @@ async def post_sparql_endpoint(
     print('POST OPERATION. Query:')
     print(query)
     if not query:
-        query = await request.body()
+        query_body = await request.body().decode('utf-8')
+        body = json.loads(query_body)
+        query = body['query']
+        print('query_body')
+        print(query_body)
+        print('body')
+        print(body)
+        print('query')
         print(query)
         # query = request.json()['query']
     return sparql_endpoint(request, query)
