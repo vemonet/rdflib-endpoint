@@ -113,8 +113,10 @@ def sparql_endpoint(
     if request.headers['accept'] == 'text/csv':
         return Response(query_results.serialize(format = 'csv'), media_type='text/csv')
     else:
+        print(request.headers['accept'])
+        return Response(query_results.serialize(format = 'json'), media_type=request.headers['accept'])
         # return json.loads(query_results.serialize(format = 'json'))
-        return Response(json.loads(query_results.serialize(format = 'json')), media_type=request.headers['accept'])
+        # return Response(json.loads(query_results.serialize(format = 'json')), media_type=request.headers['accept'])
 
 
 @app.get("/", include_in_schema=False)
