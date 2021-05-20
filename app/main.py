@@ -203,11 +203,8 @@ def post_sparql_endpoint(
     print('POST OPERATION. Query:')
     print(query)
     if not query:
-        print(request.json())
-        query = request.json()['query']
-        # print("request.body:")
-        # print(request.items)
-        # print(request.get('query'))
+        print(request.body())
+        # query = request.json()['query']
     return sparql_endpoint(request, query)
 
 
