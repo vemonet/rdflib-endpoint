@@ -37,7 +37,13 @@ app = FastAPI(
                 },
                 "text/csv": {
                     "example": "s,p,o"
-                }
+                },
+                "text/turtle": {
+                    "example": "service description"
+                },
+                "application/xml": {
+                    "example": "<root></root>"
+                },
             },
         },
         501:{
