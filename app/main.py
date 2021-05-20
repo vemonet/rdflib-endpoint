@@ -148,6 +148,11 @@ def sparql_endpoint(
         # return Response(json.loads(query_results.serialize(format = 'json')), media_type=output_mime_type)
 
 
+from pydantic import BaseModel
+
+class Payload(BaseModel):
+    query: str = ""
+
 @app.post(
     "/sparql",
     responses={
@@ -184,6 +189,7 @@ def sparql_endpoint(
 )
 def post_sparql_endpoint(
     request: Request,
+    # query: Payload = None):
     query: Optional[str] = None):
     # query: Optional[str] = Query(None)):
     # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
@@ -195,6 +201,10 @@ def post_sparql_endpoint(
     """
     print('POST OPERATION. Query:')
     print(query)
+    if not query:
+        print(request)
+        print("request.body:")
+        print(request.body)
     return sparql_endpoint(request, query)
 
 
