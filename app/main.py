@@ -139,21 +139,14 @@ def sparql_endpoint(
         return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
     else:
         return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
-        # By default (for federated queries)
+        ## By default (for federated queries)
         # return Response(query_results.serialize(format = 'sparql-results+xml'), media_type='application/sparql-results+xml')
         # return Response(XMLResultSerializer(query_results), media_type='application/sparql-results+xml')
         ## This XML serializer actually returns weird JSON not recognized by YASGUI:
         # return XMLResultSerializer(query_results)
 
         # return FileResponse(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml', filename='sparql_results.srx')
-
         # return Response(json.loads(query_results.serialize(format = 'json')), media_type=output_mime_type)
-
-
-from pydantic import BaseModel
-
-class Payload(BaseModel):
-    query: str = ""
 
 @app.post(
     "/sparql",
@@ -191,8 +184,6 @@ class Payload(BaseModel):
 )
 async def post_sparql_endpoint(
     request: Request,
-    # query: str = Body(...)):
-    # query: Payload = None):
     query: Optional[str] = None):
     # query: Optional[str] = Query(None)):
     # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
@@ -206,13 +197,41 @@ async def post_sparql_endpoint(
     print(query)
     if not query:
         query_body = await request.body()
-        query = unquote(query_body.decode('utf-8'))
+        body = unquote(query_body.decode('utf-8'))
+
+        import urllib.parse as urlparse
+        from urllib.parse import parse_qs
+        # url = 'http://foo.appspot.com/abc?def=ghi'
+        parsed = urlparse.urlparse(body)
+        query = parse_qs(parsed.query)['query']
+
         # body = json.loads(query_body.decode('utf-8'))
-        if query.startswith('query='):
-            query = query[6:]
         # print('query')
         # print(query)
     return sparql_endpoint(request, query)
+
+    ## YASGUI sends this payload:
+    # query=PREFIX%20openpredict%3A%20%3Chttps%3A%2F%2Fw3id.org%2Fum%2Fopenpredict%2F%3E%0A%0ASELECT%20%3Flabel1%20%3Flabel2%20%3Fconcat%20WHERE%20%7B%0A%20%20%20%20BIND(%22Hello%22%20AS%20%3Flabel1)%0A%20%20%20%20BIND(%22World%22%20AS%20%3Flabel2)%0A%20%20%20%20BIND(openpredict%3Asimilarity(%3Flabel1%2C%20%3Flabel2)%20AS%20%3Fconcat)%0A%7D
+
+    ## GraphDB sends this payload when doing a federated query:
+    # queryLn=SPARQL&query=PREFIX+openpredict:+<https://w3id.org/um/openpredict/>+PREFIX+rdf:+<http://www.w3.org/1999/02/22-rdf-syntax-ns#>+PREFIX+rdfs:+<http://www.w3.org/2000/01/rdf-schema#>+PREFIX+rdf4j:+<http://rdf4j.org/schema/rdf4j#>+PREFIX+sesame:+<http://www.openrdf.org/schema/sesame#>+PREFIX+owl:+<http://www.w3.org/2002/07/owl#>+PREFIX+xsd:+<http://www.w3.org/2001/XMLSchema#>+PREFIX+fn:+<http://www.w3.org/2005/xpath-functions#>+SELECT+?label1+?label2+?concat+WHERE+{
+    # ++++++++BIND("Hello"+AS+?label1)
+    # ++++++++BIND("World"+AS+?label2)
+    # ++++++++BIND(openpredict:similarity(?label1,+?label2)+AS+?concat)
+    # ++++}&infer=true
+
+    ## Payload sends by Virtuoso for federated query:
+    # query=SELECT  ?label1
+    # ?label2
+    # ?concat
+    # WHERE { 
+    #      { SELECT   ( "Hello" AS ?label1)
+    #          ( "World" AS ?label2)
+    #          ( <https://w3id.org/um/openpredict/similarity>( "Hello", "World") AS ?concat)
+    #         WHERE {  }
+    #        OFFSET  0 } }&maxrows=10000000
+
+    ## None of them can be parsed by JSON apparently (which is the expected payload format for POST queries)
 
 
 @app.get("/", include_in_schema=False)
