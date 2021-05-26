@@ -13,18 +13,22 @@ from rdflib.namespace import Namespace
 import re
 from urllib import parse
 
-from function_openpredict import SPARQL_openpredict_similarity, SPARQL_openpredict_prediction
+from function_openpredict import SPARQL_resolve_patterns, SPARQL_openpredict_similarity, SPARQL_openpredict_prediction
 from openpredict_classifier import query_classifier_from_sparql
 
+# EvalBGP https://rdflib.readthedocs.io/en/stable/_modules/rdflib/plugins/sparql/evaluate.html
+# Custom fct for rdf:type with auto infer super-classes: https://github.com/RDFLib/rdflib/blob/master/examples/custom_eval.py
+# BGP = Basic Graph Pattern
 # Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
 # StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
+
 # Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
 # https://www.w3.org/TR/sparql11-service-description/#example-turtle
 # Federated query: https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#defn_service
 # XML method: https://rdflib.readthedocs.io/en/stable/apidocs/rdflib.plugins.sparql.results.html#module-rdflib.plugins.sparql.results.xmlresults
 
 app = FastAPI(
-    title="SPARQL endpoint for Python functions",
+    title="SPARQL endpoint for RDFLib graph",
     description="""A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
     \n[Source code](https://github.com/vemonet/rdflib-endpoint)""",
     version="0.0.1",
@@ -82,7 +86,7 @@ def sparql_endpoint(
     Example with custom concat function:
     ```
     PREFIX openpredict: <https://w3id.org/um/openpredict/>
-    SELECT ?drugOrDisease ?predictedForTreatment WHERE {
+    SELECT ?drugOrDisease ?predictedForTreatment ?openpredictScore WHERE {
         BIND("OMIM:246300" AS ?drugOrDisease)
         BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
     }
@@ -115,6 +119,9 @@ def sparql_endpoint(
     # predictions_list = query_classifier_from_sparql(parsed_query)
 
     # Save custom function in custom evaluation dictionary
+    # rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_resolve_patterns'] = SPARQL_resolve_patterns
+    
+    # TODO: how to properly handle multiple functions? One custom eval should be enough
     rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_prediction'] = SPARQL_openpredict_prediction
     # rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_similarity'] = SPARQL_openpredict_similarity
 
@@ -200,29 +207,6 @@ async def post_sparql_endpoint(
         # print('Query from payload/body')
         # print(query)
     return sparql_endpoint(request, query)
-
-    ## YASGUI sends this payload:
-    # query=PREFIX%20openpredict%3A%20%3Chttps%3A%2F%2Fw3id.org%2Fum%2Fopenpredict%2F%3E%0A%0ASELECT%20%3Flabel1%20%3Flabel2%20%3Fconcat%20WHERE%20%7B%0A%20%20%20%20BIND(%22Hello%22%20AS%20%3Flabel1)%0A%20%20%20%20BIND(%22World%22%20AS%20%3Flabel2)%0A%20%20%20%20BIND(openpredict%3Asimilarity(%3Flabel1%2C%20%3Flabel2)%20AS%20%3Fconcat)%0A%7D
-
-    ## GraphDB sends this payload when doing a federated query:
-    # queryLn=SPARQL&query=PREFIX+openpredict:+<https://w3id.org/um/openpredict/>+PREFIX+rdf:+<http://www.w3.org/1999/02/22-rdf-syntax-ns#>+PREFIX+rdfs:+<http://www.w3.org/2000/01/rdf-schema#>+PREFIX+rdf4j:+<http://rdf4j.org/schema/rdf4j#>+PREFIX+sesame:+<http://www.openrdf.org/schema/sesame#>+PREFIX+owl:+<http://www.w3.org/2002/07/owl#>+PREFIX+xsd:+<http://www.w3.org/2001/XMLSchema#>+PREFIX+fn:+<http://www.w3.org/2005/xpath-functions#>+SELECT+?label1+?label2+?concat+WHERE+{
-    # ++++++++BIND("Hello"+AS+?label1)
-    # ++++++++BIND("World"+AS+?label2)
-    # ++++++++BIND(openpredict:similarity(?label1,+?label2)+AS+?concat)
-    # ++++}&infer=true
-
-    ## Payload sends by Virtuoso for federated query:
-    # query=SELECT  ?label1
-    # ?label2
-    # ?concat
-    # WHERE { 
-    #      { SELECT   ( "Hello" AS ?label1)
-    #          ( "World" AS ?label2)
-    #          ( <https://w3id.org/um/openpredict/similarity>( "Hello", "World") AS ?concat)
-    #         WHERE {  }
-    #        OFFSET  0 } }&maxrows=10000000
-
-    ## None of them can be parsed by JSON apparently (which is the expected payload format for POST queries)
 
 
 @app.get("/", include_in_schema=False)
