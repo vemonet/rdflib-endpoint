@@ -27,10 +27,9 @@ pip install -e .
 Create a `app/main.py` file in your project folder with your functions and endpoint parameters:
 
 ```python
+from rdflib_endpoint import SparqlEndpoint
 import rdflib
-from rdflib import Graph, Literal
 from rdflib.plugins.sparql.evalutils import _eval
-from rdflib_endpoint.sparql_endpoint import SparqlEndpoint
 
 def custom_concat(query_results, ctx, part, eval_part):
     """
@@ -56,13 +55,13 @@ def custom_concat(query_results, ctx, part, eval_part):
     # Append the results for our custom function
     for i, result in enumerate(evaluation):
         query_results.append(eval_part.merge({
-            part.var: Literal(result), 
-            rdflib.term.Variable(part.var + 'Length'): Literal(scores[i])
+            part.var: rdflib.Literal(result), 
+            rdflib.term.Variable(part.var + 'Length'): rdflib.Literal(scores[i])
         }))
     return query_results, ctx, part, eval_part
 
 # Start the SPARQL endpoint based on a RDFLib Graph
-g = Graph()
+g = rdflib.Graph()
 app = SparqlEndpoint(
     graph=g,
     functions={
@@ -79,7 +78,7 @@ Checkout the `example/` folder for a complete working app example (with docker-c
 
 ## Run the endpoint 🦄
 
-Run the server from the root folder with `uvicorn` on http://localhost:8000 
+Run the FastAPI server from the root folder with `uvicorn` on http://localhost:8000 
 
 ```bash
 uvicorn main:app --reload --app-dir app

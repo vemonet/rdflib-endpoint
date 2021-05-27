@@ -8,7 +8,7 @@ from rdflib.namespace import Namespace
 from openpredict.openpredict_model import query_omim_drugbank_classifier
 from openpredict.openpredict_utils import init_openpredict_dir
 
-from rdflib_endpoint.sparql_endpoint import SparqlEndpoint
+from rdflib_endpoint import SparqlEndpoint
 
 # EvalBGP https://rdflib.readthedocs.io/en/stable/_modules/rdflib/plugins/sparql/evaluate.html
 # Custom fct for rdf:type with auto infer super-classes: https://github.com/RDFLib/rdflib/blob/master/examples/custom_eval.py

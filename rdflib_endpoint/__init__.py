@@ -1,0 +1,1 @@
+from .sparql_endpoint import SparqlEndpoint
