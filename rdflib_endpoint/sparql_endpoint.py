@@ -30,6 +30,10 @@ class SparqlEndpoint(FastAPI):
             functions={},
             cors_enabled=True,
             public_url='https://sparql.openpredict.semanticscience.org/sparql') -> None:
+        """
+        Constructor of the SPARQL endpoint, everything happens here.
+        FastAPI calls are defined in this constructor
+        """
         self.graph = graph
         self.functions = functions
         self.title=title
@@ -87,7 +91,7 @@ class SparqlEndpoint(FastAPI):
             query: Optional[str] = None):
             # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
             """
-            Send a SPARQL query to be executed. 
+            Send a SPARQL query to be executed.
             
             Example with custom concat function:
             ```
@@ -106,6 +110,7 @@ class SparqlEndpoint(FastAPI):
             }
             ```
             \f
+            :param request: The HTTP request
             :param query: SPARQL query input.
             """
             if not query:
@@ -200,6 +205,7 @@ class SparqlEndpoint(FastAPI):
             """
             Send a SPARQL query to be executed through HTTP POST operation.
             \f
+            :param request: The HTTP request
             :param query: SPARQL query input.
             """
             if not query:
@@ -255,10 +261,13 @@ class SparqlEndpoint(FastAPI):
                     # Checks if the function is a URI (custom function)
                     if hasattr(part.expr, 'iri'):
 
-                        # Execute custom functions passed in the constructor
+                        # Execute the custom functions passed in the constructor
                         for function_uri, custom_function in self.functions.items():
+                            # Check if URI correspond to a registered custom function
                             if part.expr.iri == URIRef(function_uri):
+                                # Execute the function
                                 query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
+
 
                     else:
                         # For built-in SPARQL functions (that are not URIs)
@@ -276,9 +285,13 @@ class SparqlEndpoint(FastAPI):
 
         @self.get("/", include_in_schema=False)
         async def redirect_root_to_docs():
+            """
+            Redirect the route / to /docs
+
+            :return:    Redirection to /docs
+            """
             response = RedirectResponse(url='/docs')
             return response
-
 
         # Service description returned when no query provided
         service_description_ttl = """@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .

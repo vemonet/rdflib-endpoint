@@ -2,7 +2,7 @@
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml)
 
-A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. 
+A SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It can also be used to expose a RDFLib Graph as a SPARQL endpoint, with or without custon functions.
 
 The deployed SPARQL endpoint can be used as a `SERVICE <https://your-endpoint-url/sparql>` in a federated SPARQL query from regular triplestores. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based), it is also CORS enabled.
 
@@ -10,7 +10,7 @@ Only `SELECT` queries are currently supported, which is enough to support federa
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.6, 3.7 and 3.8
 
-## Install 📥
+## Install the package 📥
 
 Simply install directly from GitHub:
 
@@ -87,7 +87,7 @@ Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/ex
 cd example
 ```
 
-## Run the endpoint 🦄
+## Run the SPARQL endpoint 🦄
 
 Run the FastAPI server from the root folder with `uvicorn` on http://localhost:8000 
 
@@ -95,12 +95,12 @@ Run the FastAPI server from the root folder with `uvicorn` on http://localhost:8
 uvicorn main:app --reload --app-dir app
 ```
 
-## Run tests ✅️
+## Run the tests ✅️
 
 Install additional dependencies:
 
 ```bash
-pip install pytest requests openpredict
+pip install pytest requests
 ```
 
 Run the tests locally:
