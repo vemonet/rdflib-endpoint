@@ -1,4 +1,3 @@
-from openpredict.rdf_utils import OPENPREDICT
 import rdflib
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
