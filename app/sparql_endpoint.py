@@ -41,10 +41,7 @@ class SparqlEndpoint(FastAPI):
             cors_enabled=True) -> None:
         self.graph = graph
         self.functions = functions
-        # registered_functions = [
-        #             'https://w3id.org/um/openpredict/prediction',
-        #             'https://w3id.org/um/openpredict/most_similar'
-        #         ]
+        # Instantiate FastAPI
         super().__init__(title=title, description=description, version=version)
         
         if cors_enabled:
@@ -115,7 +112,7 @@ class SparqlEndpoint(FastAPI):
                 service_graph.parse(data=service_description_ttl, format="ttl")
 
                 for custom_function in self.functions.keys():
-                    service_graph.add(URIRef(custom_function), RDF.type, URIRef('http://www.w3.org/ns/sparql-service-description#Function'))
+                    service_graph.add((URIRef(custom_function), RDF.type, URIRef('http://www.w3.org/ns/sparql-service-description#Function')))
 
                 # Return the service description RDF as turtle or XML
                 if request.headers['accept'] == 'text/turtle':
@@ -280,64 +277,12 @@ class SparqlEndpoint(FastAPI):
                 for eval_part in evalPart(ctx, part.p):
                     # Checks if the function is a URI (custom function)
                     if hasattr(part.expr, 'iri'):
-                        # OPENPREDICT = Namespace('https://w3id.org/um/openpredict/')
 
                         # Execute custom functions passed in the constructor
                         for function_uri, custom_function in self.functions.items():
                             if part.expr.iri == URIRef(function_uri):
                                 query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
 
-                        ## Implementation of the function starts here
-                        # We check if the function URI is the same as our function
-                        # same as rdflib.term.URIRef('https://w3id.org/um/openpredict/prediction')
-                        # if part.expr.iri == OPENPREDICT['prediction']:
-                        #     argument1 = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
-
-                        #     # Run the classifier to get predictions and scores for the entity given as argument
-                        #     predictions_list = query_openpredict_classifier(argument1)
-                        #     evaluation = []
-                        #     scores = []
-                        #     for prediction in predictions_list:
-                        #         # Quick fix to get results for drugs or diseases
-                        #         if argument1.startswith('OMIM') or argument1.startswith('MONDO'):
-                        #             evaluation.append(prediction['drug'])
-                        #         else:
-                        #             evaluation.append(prediction['disease'])
-                        #         scores.append(prediction['score'])
-                        #     # Append the results for our custom function
-                        #     for i, result in enumerate(evaluation):
-                        #         query_results.append(eval_part.merge({
-                        #             part.var: Literal(result), 
-                        #             rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])
-                        #         }))
-
-
-                        ## TODO: Add a new function such as most_similar
-                        # elif part.expr.iri == OPENPREDICT['most_similar']:
-                        #     argument1 = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
-                        #     argument2 = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
-                            
-                        #     similarity_results = {}
-                        #     # TODO: get similarity from dataframe
-                            
-                        #     evaluation = []
-                        #     scores = []
-                        #     for most_similar in similarity_results:
-                        #         # Quick fix to get results for drugs or diseases
-                        #         evaluation.append(most_similar['entity'])
-                        #         scores.append(most_similar['score'])
-
-                        #     # Append the results for our custom function
-                        #     for i, result in enumerate(evaluation):
-                        #         query_results.append(eval_part.merge({
-                        #             part.var: Literal(result), 
-                        #             rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])
-                        #         }))
-
-
-                        # Handling when function not registered
-                        # else:
-                        #     raise SPARQLError('Unhandled function {}'.format(part.expr.iri))
                     else:
                         # For built-in SPARQL functions (that are not URIs)
                         evaluation = [_eval(part.expr, eval_part.forget(ctx, _except=part._vars))]
