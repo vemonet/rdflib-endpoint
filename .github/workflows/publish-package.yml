@@ -1,4 +1,4 @@
-name: Publish package
+name: Publish to PyPI
 # Publish to PyPI when new release on GitHub, if tests pass
 on:
   workflow_dispatch:
