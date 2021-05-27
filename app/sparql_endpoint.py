@@ -96,6 +96,14 @@ class SparqlEndpoint(FastAPI):
             - Example with a disease: OMIM:246300
             Example with custom concat function:
             ```
+            PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+            SELECT ?concat ?concatLength WHERE {
+                BIND("First" AS ?first)
+                BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+            }
+            ```
+            Example with custom function to get predictions from a classifier (works also with drugs, e.g. DRUGBANK:DB00394):
+            ```
             PREFIX openpredict: <https://w3id.org/um/openpredict/>
             SELECT ?drugOrDisease ?predictedForTreatment ?predictedForTreatmentScore WHERE {
                 BIND("OMIM:246300" AS ?drugOrDisease)
