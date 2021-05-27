@@ -135,9 +135,9 @@ class SparqlEndpoint(FastAPI):
                 return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
             
             # Pretty print the query object 
-            parsed_query = parser.parseQuery(query)
-            tq = translateQuery(parsed_query)
-            pprintAlgebra(tq)
+            # parsed_query = parser.parseQuery(query)
+            # tq = translateQuery(parsed_query)
+            # pprintAlgebra(tq)
 
             # Save custom function in custom evaluation dictionary
             # Handle multiple functions directly in the SPARQL_custom_functions function

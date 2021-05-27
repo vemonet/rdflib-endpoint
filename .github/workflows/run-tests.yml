@@ -1,0 +1,65 @@
+name: Run tests
+# Run test at each push to master or develop, if changes to package files
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+    - 'requirements.txt'
+    - 'rdflib_endpoint/**'
+    - 'tests/**'
+    - '.github/workflows/run-tests.yml'
+
+jobs:
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        pip install .
+
+    - name: Check code style with flake8 (lint)
+      run: |
+        # warnings if there are Python syntax errors or undefined names 
+        # (remove --exit-zero to fail when syntax error)
+        flake8 . --count --exit-zero --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest 
+      run: |
+        pytest
+
+    # - name: Setup SonarCloud
+    #   uses: warchant/setup-sonar-scanner@v3
+    # - name: Test with pytest with coverage
+    #   run: |
+    #     pip install pytest-cov
+    #     coverage erase
+    #     pytest --cov rdflib-endpoint --cov-report xml:coverage.xml tests/integration/*
+    #     cat coverage.xml
+    #     coverage combine --append || true
+    #     coverage report
+    #     coverage xml
+    #   # sonar-scanner
+    # - name: Run SonarCloud
+    #   env:
+    #     # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=vemonet  -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.projectKey=vemonet_rdflib-endpoint -Dsonar.python.coverage.reportPaths=coverage.xml
