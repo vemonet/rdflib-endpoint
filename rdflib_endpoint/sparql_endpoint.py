@@ -1,31 +1,21 @@
 import rdflib
-from rdflib import Graph
+from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
 from rdflib.plugins.sparql.evalutils import _eval
-from rdflib.namespace import Namespace
-from rdflib import Graph, Literal, RDF, URIRef
-
 from rdflib.plugins.sparql.parser import Query
-from rdflib.plugins.sparql.processor import translateQuery as processorTranslateQuery
-from rdflib.plugins.sparql import parser
-from rdflib.plugins.sparql.algebra import translateQuery, pprintAlgebra
-from rdflib.plugins.sparql.results.xmlresults import XMLResult
-from rdflib.plugins.sparql.results.xmlresults import XMLResultSerializer
-from rdflib.namespace import Namespace
-import re
-from urllib import parse
+from rdflib.plugins.sparql.processor import translateQuery as translateQuery
+# from rdflib.plugins.sparql import parser
+# from rdflib.plugins.sparql.algebra import algebraTranslateQuery, pprintAlgebra
+# from rdflib.namespace import Namespace
 
-from typing import Optional
 from fastapi import FastAPI, Request, Response, Body
 from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 
-from fastapi import FastAPI
-# from fastapi_utils.cbv import cbv
-# from fastapi_utils.inferring_router import InferringRouter
-
-# from openpredict_classifier import query_openpredict_classifier
+import re
+from urllib import parse
 
 class SparqlEndpoint(FastAPI):
     """
@@ -38,9 +28,15 @@ class SparqlEndpoint(FastAPI):
             version="0.0.1",
             graph=Graph(), 
             functions={},
-            cors_enabled=True) -> None:
+            cors_enabled=True,
+            public_url='https://sparql.openpredict.semanticscience.org/sparql') -> None:
         self.graph = graph
         self.functions = functions
+        self.title=title
+        self.description=description
+        self.version=version
+        self.public_url=public_url
+
         # Instantiate FastAPI
         super().__init__(title=title, description=description, version=version)
         
@@ -116,10 +112,13 @@ class SparqlEndpoint(FastAPI):
                 # Return the SPARQL endpoint service description
                 service_graph = rdflib.Graph()
                 # service_graph.parse('app/service-description.ttl', format="ttl")
+                print(service_description_ttl)
                 service_graph.parse(data=service_description_ttl, format="ttl")
 
-                for custom_function in self.functions.keys():
-                    service_graph.add((URIRef(custom_function), RDF.type, URIRef('http://www.w3.org/ns/sparql-service-description#Function')))
+                # Add custom functions URI to the service description
+                for custom_function_uri in self.functions.keys():
+                    service_graph.add((URIRef(custom_function_uri), RDF.type, URIRef('http://www.w3.org/ns/sparql-service-description#Function')))
+                    service_graph.add((URIRef(self.public_url), URIRef('http://www.w3.org/ns/sparql-service-description#extensionFunction'), URIRef(custom_function_uri)))
 
                 # Return the service description RDF as turtle or XML
                 if request.headers['accept'] == 'text/turtle':
@@ -128,14 +127,14 @@ class SparqlEndpoint(FastAPI):
                     return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
 
             # Parse the query and retrieve the type of operation (e.g. SELECT)
-            parsed_query = processorTranslateQuery(Query.parseString(query, parseAll=True))
+            parsed_query = translateQuery(Query.parseString(query, parseAll=True))
             query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
             if query_operation != "Select Query":
                 return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
             
             # Pretty print the query object 
             # parsed_query = parser.parseQuery(query)
-            # tq = translateQuery(parsed_query)
+            # tq = algebraTranslateQuery(parsed_query)
             # pprintAlgebra(tq)
 
             # Save custom function in custom evaluation dictionary
@@ -216,8 +215,8 @@ class SparqlEndpoint(FastAPI):
 
         def SPARQL_custom_functions(ctx:object, part:object) -> object:
             """
-            Retrieve variables from a SPARQL-query, then get predictions
-            The score value is then stored in Literal object and added to the query results.
+            Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
+            The results are then stored in Literal objects and added to the query results.
             
             Example:
 
@@ -282,17 +281,19 @@ class SparqlEndpoint(FastAPI):
 
 
         # Service description returned when no query provided
-        service_description_ttl = """
-        @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+        service_description_ttl = """@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
         @prefix ent: <http://www.w3.org/ns/entailment/> .
         @prefix prof: <http://www.w3.org/ns/owl-profile/> .
         @prefix void: <http://rdfs.org/ns/void#> .
+        @prefix dc: <http://purl.org/dc/elements/1.1/> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-        [] a sd:Service ;
-            sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
+        <{public_url}> a sd:Service ;
+            rdfs:label "{title}" ;
+            dc:description "{description}" ;
+            sd:endpoint <{public_url}> ;
             sd:supportedLanguage sd:SPARQL11Query ;
             sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
-            sd:extensionFunction <https://w3id.org/um/openpredict/similarity> ;
             sd:feature sd:DereferencesURIs ;
             sd:defaultEntailmentRegime ent:RDFS ;
             sd:defaultDataset [
@@ -300,5 +301,4 @@ class SparqlEndpoint(FastAPI):
                 sd:defaultGraph [
                     a sd:Graph ;
                 ] 
-            ] .
-        """
+            ] .""".format(public_url=self.public_url, title=self.title, description=self.description.replace("\n", ""))

@@ -1,10 +1,12 @@
 from fastapi.testclient import TestClient
 from example.app.main import app
 
+# Use app defined in example folder
 endpoint = TestClient(app)
 
 def test_service_description():
     response = endpoint.get('/sparql', headers={'accept': 'text/turtle'})
+    # print(response.text.strip())
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
@@ -17,6 +19,7 @@ def test_service_description():
 def test_custom_concat():
     response = endpoint.get('/sparql?query=' + custom_concat_query, 
         headers={'accept': 'application/json'})
+    # print(response.json())
     assert response.status_code == 200
     assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
@@ -34,22 +37,28 @@ SELECT ?concat ?concatLength WHERE {
 }"""
 
 
-service_description = """@prefix ent: <http://www.w3.org/ns/entailment/> .
+service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix ent: <http://www.w3.org/ns/entailment/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+
+<https://sparql-openpredict.137.120.31.102.nip.io/sparql> a sd:Service ;
+    rdfs:label "SPARQL endpoint for RDFLib graph" ;
+    dc:description "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. [Source code](https://github.com/vemonet/rdflib-endpoint)" ;
+    sd:defaultDataset [ a sd:Dataset ;
+            sd:defaultGraph [ a sd:Graph ] ] ;
+    sd:defaultEntailmentRegime ent:RDFS ;
+    sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
+    sd:extensionFunction <https://w3id.org/um/openpredict/most_similar>,
+        <https://w3id.org/um/openpredict/prediction>,
+        <https://w3id.org/um/sparql-functions/custom_concat> ;
+    sd:feature sd:DereferencesURIs ;
+    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
+        <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
+    sd:supportedLanguage sd:SPARQL11Query .
 
 <https://w3id.org/um/openpredict/most_similar> a sd:Function .
 
 <https://w3id.org/um/openpredict/prediction> a sd:Function .
 
-<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function .
-
-[] a sd:Service ;
-    sd:defaultDataset [ a sd:Dataset ;
-            sd:defaultGraph [ a sd:Graph ] ] ;
-    sd:defaultEntailmentRegime ent:RDFS ;
-    sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
-    sd:extensionFunction <https://w3id.org/um/openpredict/similarity> ;
-    sd:feature sd:DereferencesURIs ;
-    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
-        <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
-    sd:supportedLanguage sd:SPARQL11Query ."""
+<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function ."""

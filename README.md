@@ -6,7 +6,11 @@ A SPARQL endpoint to serve machine learning models, or any other logic implement
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/), CORS enabled.
 
-Tested for python 3.6 to 3.9.
+Tested for python 3.6 to 3.8
+
+The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores. Tested from OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based)
+
+Only `SELECT` queries are currently supported (enough to support federated queries). Feel free to create an issue, or send a pull request if you would like to see it implemented.
 
 ## Install 📥
 
@@ -26,7 +30,7 @@ cd rdflib-endpoint
 pip install -e .
 ```
 
-## Define custom functions 🐍
+## Define custom SPARQL functions 🐍
 
 Create a `app/main.py` file in your project folder with your functions and endpoint parameters:
 
@@ -78,7 +82,11 @@ app = SparqlEndpoint(
 )
 ```
 
-Checkout the `example/` folder for a complete working app example (with docker-compose based deployment)
+Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with docker-compose deployment
+
+```bash
+cd example
+```
 
 ## Run the endpoint 🦄
 
@@ -86,5 +94,19 @@ Run the FastAPI server from the root folder with `uvicorn` on http://localhost:8
 
 ```bash
 uvicorn main:app --reload --app-dir app
+```
+
+## Run tests ✅️
+
+Install additional dependencies:
+
+```bash
+pip install flake8 pytest requests openpredict
+```
+
+Run the tests locally:
+
+```bash
+pytest -s
 ```
 

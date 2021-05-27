@@ -131,5 +131,6 @@ app = SparqlEndpoint(
     title="SPARQL endpoint for RDFLib graph", 
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.0.1",
+    public_url='https://sparql-openpredict.137.120.31.102.nip.io/sparql',
     cors_enabled=True
 )
