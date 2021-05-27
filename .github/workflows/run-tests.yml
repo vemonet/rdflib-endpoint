@@ -31,7 +31,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest requests
+        pip install flake8 pytest-cov requests
         pip install .
       # pip install flake8 pytest requests openpredict@git+https://github.com/MaastrichtU-IDS/translator-openpredict@master
 
@@ -43,24 +43,29 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Test with pytest 
-      run: |
-        pytest
-
-    # - name: Setup SonarCloud
-    #   uses: warchant/setup-sonar-scanner@v3
-    # - name: Test with pytest with coverage
+    # - name: Test with pytest 
     #   run: |
-    #     pip install pytest-cov
-    #     coverage erase
-    #     pytest --cov rdflib-endpoint --cov-report xml:coverage.xml tests/integration/*
-    #     cat coverage.xml
-    #     coverage combine --append || true
-    #     coverage report
-    #     coverage xml
-    #   # sonar-scanner
-    # - name: Run SonarCloud
+    #     pytest
+
+    # - name: SonarCloud Scan
+    #   uses: SonarSource/sonarcloud-github-action@master
     #   env:
-    #     # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=vemonet  -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.projectKey=vemonet_rdflib-endpoint -Dsonar.python.coverage.reportPaths=coverage.xml
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+    #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: Setup SonarCloud
+      uses: warchant/setup-sonar-scanner@v3
+    - name: Test with pytest with coverage
+      run: |
+        coverage erase
+        pytest --cov rdflib_endpoint --cov-report xml:coverage.xml
+        cat coverage.xml
+        coverage combine --append || true
+        coverage report
+        coverage xml
+      # sonar-scanner
+    - name: Run SonarCloud
+      env:
+        # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=vemonet  -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.projectKey=vemonet_rdflib-endpoint -Dsonar.python.coverage.reportPaths=coverage.xml
