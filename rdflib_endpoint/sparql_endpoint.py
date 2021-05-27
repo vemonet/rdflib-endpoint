@@ -1,3 +1,4 @@
+from . import sparql_endpoint
 import rdflib
 from rdflib import Graph
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
