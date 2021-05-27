@@ -92,8 +92,7 @@ class SparqlEndpoint(FastAPI):
             # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
             """
             Send a SPARQL query to be executed. 
-            - Example with a drug: DRUGBANK:DB00394
-            - Example with a disease: OMIM:246300
+            
             Example with custom concat function:
             ```
             PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
