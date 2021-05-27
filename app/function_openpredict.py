@@ -133,42 +133,19 @@ def SPARQL_openpredict_prediction(ctx:object, part:object) -> object:
     if part.name == 'Extend':
         cs = []
 
-        # print('ctx.initBindings')
-        # print(ctx.initBindings)
-
         # Information is retrieved and stored and passed through a generator
         for c in evalPart(ctx, part.p):
 
-            # Checks if the function holds an internationalized resource identifier
-            # This will check if any custom functions are added.
+            # Checks if the function is an URI (custom function)
             if hasattr(part.expr, 'iri'):
 
-                print('Before getting argument:')
-                print(part.expr._vars)
-                print(part.expr.expr[0])
-                print(ctx)
+                ## Implementation of the function starts here
+                # We check if the function URI is the same as our function
+                if part.expr.iri == rdflib.term.URIRef('https://w3id.org/um/openpredict/prediction'):
+                    argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except=part.expr._vars)))
+                    # argument2 = str(_eval(part.expr.expr[1], c.forget(ctx, _except=part.expr._vars)))
 
-                # From here the real calculations begin.
-                # First we get the variable arguments, for example ?label1 and ?label2
-                argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except=part.expr._vars)))
-                # argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except=[rdflib.term.Variable('drugOrDisease'),rdflib.term.Variable('openpredictScore')])))
-                # argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except={rdflib.term.Variable('openpredictScore')})))
-                # print(argument1)
-
-                # argument2 = str(_eval(part.expr.expr[1], c.forget(ctx, _except=part.expr._vars)))
-
-                # Here it checks if it can find our levenshtein IRI (example: https://w3id.org/um/openpredict/levenshtein)
-                # Please note that IRI and URI are almost the same.
-                # Earlier this has been defined with the following:
-                    # namespace = Namespace('https://w3id.org/um/openpredict/')
-                    # levenshtein = rdflib.term.URIRef(namespace + 'levenshtein')
-
-                if part.expr.iri == openpredict_similarity_uri:
-
-                    # After finding the correct path for the custom SPARQL function the evaluation can begin.
-                    # Here the levenshtein distance is calculated using ?label1 and ?label2 and stored as an Literal object.
-                    # This object is than stored as an output value of the SPARQL-query (example: ?levenshtein)
-                    # evaluation = Literal(argument1 + argument2)
+                    # Run the classifier to get predictions for the entity given as argument
                     predictions_list = query_openpredict_classifier(argument1)
                     evaluation = []
                     scores = []
@@ -179,33 +156,29 @@ def SPARQL_openpredict_prediction(ctx:object, part:object) -> object:
                         else:
                             evaluation.append(prediction['disease'])
                         scores.append(prediction['score'])
+                    # Append the results for our custom function
+                    for i, result in enumerate(evaluation):
+                        if len(scores) < 1:
+                            cs.append(c.merge({part.var: Literal(result)}))
+                        else:
+                            cs.append(c.merge({
+                                part.var: Literal(result), 
+                                rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])
+                            }))
 
-                    # evaluation = [Literal(argument1 + argument2), Literal(argument2 + argument1)]
+                # Handling when function not registered
                 else:
-                    # When other function used  
-                    evaluation = []
-    # Standard error handling and return statements
-                # else:
-                #     raise SPARQLError('Unhandled function {}'.format(part.expr.iri))
+                    raise SPARQLError('Unhandled function {}'.format(part.expr.iri))
             else:
-                print('Not a custom function')
-                print(part.expr)
-                print(part._vars)
+                # For built-in SPARQL functions (that are not URIs)
                 evaluation = [_eval(part.expr, c.forget(ctx, _except=part._vars))]
                 # scores = [_eval(part.expr, c.forget(ctx, _except={rdflib.term.Variable('openpredictScore')}))]
-                scores = []
+                # scores = []
                 if isinstance(evaluation[0], SPARQLError):
                     raise evaluation[0]
-
-            # Return the results
-            for i, result in enumerate(evaluation):
-                if len(scores) < 1:
+                # Append results for built-in SPARQL functions
+                for result in evaluation:
                     cs.append(c.merge({part.var: Literal(result)}))
-                else:
-                    cs.append(c.merge({
-                        part.var: Literal(result), 
-                        rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])
-                    }))
                     
         # print(cs)
         return cs
