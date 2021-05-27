@@ -1,4 +1,4 @@
-# SPARQL endpoint for RDFLib custom functions ✨️
+# SPARQL endpoint for RDFLib custom functions
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml)
 
@@ -81,17 +81,14 @@ app = SparqlEndpoint(
 )
 ```
 
-Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with docker-compose deployment
-
-```bash
-cd example
-```
+Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with docker-compose deployment. The best way to create a new SPARQL endpoint is to copy this `example` folder and start from it.
 
 ## Run the SPARQL endpoint 🦄
 
 Run the FastAPI server from the root folder with `uvicorn` on http://localhost:8000 
 
 ```bash
+cd example
 uvicorn main:app --reload --app-dir app
 ```
 
@@ -109,3 +106,11 @@ Run the tests locally:
 pytest -s
 ```
 
+## Projects using rdflib-endpoint 📂
+
+Some projects using rdflib-endpoint to deploy custom SPARQL endpoints with python:
+
+* https://github.com/MaastrichtU-IDS/openpredict-sparql-service
+  * Serve predicted biomedical entities associations (e.g. disease treated by drug) using the OpenPredict classifier
+* https://github.com/vemonet/translator-sparql-service
+  * A SPARQL endpoint to serve NCATS Translator services as SPARQL custom functions.

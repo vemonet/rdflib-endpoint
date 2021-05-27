@@ -30,11 +30,6 @@ Or build and run with docker:
 
 ```bash
 docker build -t rdflib-endpoint .
-# Run locally
-docker run -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
-
-# Or using a reverse nginx-proxy
-docker run -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
 ```
 
 Run on http://localhost:8080
@@ -43,11 +38,6 @@ Run on http://localhost:8080
 docker run -p 8080:80 rdflib-endpoint
 ```
 
-Run using a reverse [nginx-proxy](https://github.com/nginx-proxy/nginx-proxy)
-
-```bash
-docker run -it -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
-```
 
 ## Try a federated query 📬
 
