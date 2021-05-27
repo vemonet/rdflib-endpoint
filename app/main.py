@@ -3,10 +3,12 @@ from fastapi import FastAPI, Request, Response, Body
 from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-import json
 import rdflib
-# from rdflib.plugins.sparql.parser import Query
-# from rdflib.plugins.sparql.processor import translateQuery
+from rdflib import Graph, Literal, RDF, URIRef
+# from rdflib.term import URIRef
+
+from rdflib.plugins.sparql.parser import Query
+from rdflib.plugins.sparql.processor import translateQuery as processorTranslateQuery
 from rdflib.plugins.sparql import parser
 from rdflib.plugins.sparql.algebra import translateQuery, pprintAlgebra
 from rdflib.plugins.sparql.results.xmlresults import XMLResult
@@ -15,7 +17,7 @@ from rdflib.namespace import Namespace
 import re
 from urllib import parse
 
-from function_openpredict import SPARQL_resolve_patterns, SPARQL_openpredict_similarity, SPARQL_openpredict_prediction
+from function_openpredict import SPARQL_custom_functions
 from openpredict_classifier import query_classifier_from_sparql
 
 # EvalBGP https://rdflib.readthedocs.io/en/stable/_modules/rdflib/plugins/sparql/evaluate.html
@@ -42,6 +44,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+## Suggestion to implement the package
+# def most_similar(ctx):
+#     return []
+# g = Graph()
+# endpoint = SparqlEndpoint(g)
+# endpoint.register(most_similar)
+# endpoint.start(host='0.0.0.0', port='8080')
 
 @app.get(
     "/sparql",
@@ -96,59 +106,50 @@ def sparql_endpoint(
     \f
     :param query: SPARQL query input.
     """
-    # print('GET OPERATION. Query:')
-    # print(query)
     if not query:
         # Return the SPARQL endpoint service description
         service_graph = rdflib.Graph()
         # service_graph.parse('app/service-description.ttl', format="ttl")
         service_graph.parse(data=service_description_ttl, format="ttl")
+
+        # TODO: handle global registered functions
+        registered_functions = [
+            'https://w3id.org/um/openpredict/prediction',
+            'https://w3id.org/um/openpredict/most_similar'
+        ]
+        for custom_function in registered_functions:
+            service_graph.add(URIRef(custom_function), RDF.type, URIRef('http://www.w3.org/ns/sparql-service-description#Function'))
+
+        # Return the service description RDF as turtle or XML
         if request.headers['accept'] == 'text/turtle':
             return Response(service_graph.serialize(format = 'turtle'), media_type='text/turtle')
         else:
             return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
-        # TODO: Iterate over the added functions to add them automatically to the service description
-        # <https://w3id.org/um/openpredict/similarity> a sd:Function .
 
     # Parse the query and retrieve the type of operation (e.g. SELECT)
-    # parsed_query = translateQuery(Query.parseString(query, parseAll=True))
-    # query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
-    # if query_operation != "Select Query":
-    #     return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
+    parsed_query = processorTranslateQuery(Query.parseString(query, parseAll=True))
+    query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
+    if query_operation != "Select Query":
+        return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
     
-    # print(parsed_query)
-    # print(query_operation)
-    # predictions_list = query_classifier_from_sparql(parsed_query)
-
-    # query_object = translateQuery(query)
-    # pprintAlgebra(query_object)
-
-    # Save custom function in custom evaluation dictionary
-    # rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_resolve_patterns'] = SPARQL_resolve_patterns
-    
-    # TODO: how to properly handle multiple functions? One custom eval should be enough
-    rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_prediction'] = SPARQL_openpredict_prediction
-    # rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_openpredict_similarity'] = SPARQL_openpredict_similarity
-
-    # Query an empty graph with the custom functions available
-    query_results = rdflib.Graph().query(query)
-    # query_results = rdflib.Graph().query(query, initBindings={'predictedForTreatmentScore': None})
-
     # Pretty print the query object 
-    pq = parser.parseQuery(query)
-    tq = translateQuery(pq)
+    parsed_query = parser.parseQuery(query)
+    tq = translateQuery(parsed_query)
     pprintAlgebra(tq)
 
-    # Format and return results depending on Accept mime type in request header
-    # print(query_results.serialize(format = 'json'))
-    # print('query_results.ctx.initBindings !!')
-    # print(query_results.ctx.initBindings)
+    # Save custom function in custom evaluation dictionary
+    # Handle multiple functions directly in the SPARQL_custom_functions function
+    rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_custom_functions'] = SPARQL_custom_functions
 
+    # Query an empty graph with the custom functions loaded
+    query_results = rdflib.Graph().query(query)
+
+    # Format and return results depending on Accept mime type in request header
     output_mime_type = request.headers['accept']
     if not output_mime_type:
         output_mime_type = 'application/xml'
 
-    print(output_mime_type)
+    # print(output_mime_type)
     if output_mime_type == 'text/csv' or output_mime_type == 'application/sparql-results+csv':
         return Response(query_results.serialize(format = 'csv'), media_type=output_mime_type)
     elif output_mime_type == 'application/json' or output_mime_type == 'application/sparql-results+json':
@@ -158,14 +159,6 @@ def sparql_endpoint(
     else:
         ## By default (for federated queries)
         return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
-
-        # return Response(query_results.serialize(format = 'sparql-results+xml'), media_type='application/sparql-results+xml')
-        # return Response(XMLResultSerializer(query_results), media_type='application/sparql-results+xml')
-        ## This XML serializer actually returns weird JSON not recognized by YASGUI:
-        # return XMLResultSerializer(query_results)
-
-        # return FileResponse(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml', filename='sparql_results.srx')
-        # return Response(json.loads(query_results.serialize(format = 'json')), media_type=output_mime_type)
 
 @app.post(
     "/sparql",
@@ -209,17 +202,14 @@ async def post_sparql_endpoint(
     \f
     :param query: SPARQL query input.
     """
-    # print('POST OPERATION. Query via params:')
-    # print(query)
     if not query:
+        # Handle federated query services which provide the query in the body
         query_body = await request.body()
         body = parse.unquote(query_body.decode('utf-8'))
         parsed_query = parse.parse_qsl(body)
         for params in parsed_query:
             if params[0] == 'query':
                 query = params[1]
-        # print('Query from payload/body')
-        # print(query)
     return sparql_endpoint(request, query)
 
 
@@ -229,7 +219,7 @@ async def redirect_root_to_docs():
     return response
 
 
-
+# Service description returned when no query provided
 service_description_ttl = """
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 @prefix ent: <http://www.w3.org/ns/entailment/> .
@@ -249,7 +239,4 @@ service_description_ttl = """
             a sd:Graph ;
         ] 
     ] .
-
-<https://w3id.org/um/openpredict/prediction> a sd:Function .
-<https://w3id.org/um/openpredict/similarity> a sd:Function .
 """
