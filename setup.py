@@ -10,7 +10,10 @@ setup(
     author='Vincent Emonet',
     author_email='vincent.emonet@gmail.com',
     url='https://github.com/vemonet/rdflib-endpoint',
-    packages=find_packages(),
+    # packages=find_packages(),
+    # packages=find_packages(include=['rdflib_endpoint']),
+    package_dir={'rdflib_endpoint': 'rdflib_endpoint'},
+
     python_requires='>=3.6.0',
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",

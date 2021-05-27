@@ -1,4 +1,3 @@
-from . import sparql_endpoint
 import rdflib
 from rdflib import Graph
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
@@ -216,35 +215,6 @@ class SparqlEndpoint(FastAPI):
             return sparql_endpoint(request, query)
 
 
-        @self.get("/", include_in_schema=False)
-        async def redirect_root_to_docs():
-            response = RedirectResponse(url='/docs')
-            return response
-
-
-        # Service description returned when no query provided
-        service_description_ttl = """
-        @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
-        @prefix ent: <http://www.w3.org/ns/entailment/> .
-        @prefix prof: <http://www.w3.org/ns/owl-profile/> .
-        @prefix void: <http://rdfs.org/ns/void#> .
-
-        [] a sd:Service ;
-            sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
-            sd:supportedLanguage sd:SPARQL11Query ;
-            sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
-            sd:extensionFunction <https://w3id.org/um/openpredict/similarity> ;
-            sd:feature sd:DereferencesURIs ;
-            sd:defaultEntailmentRegime ent:RDFS ;
-            sd:defaultDataset [
-                a sd:Dataset ;
-                sd:defaultGraph [
-                    a sd:Graph ;
-                ] 
-            ] .
-        """
-
-
         def SPARQL_custom_functions(ctx:object, part:object) -> object:
             """
             Retrieve variables from a SPARQL-query, then get predictions
@@ -295,8 +265,6 @@ class SparqlEndpoint(FastAPI):
                     else:
                         # For built-in SPARQL functions (that are not URIs)
                         evaluation = [_eval(part.expr, eval_part.forget(ctx, _except=part._vars))]
-                        # scores = [_eval(part.expr, eval_part.forget(ctx, _except={rdflib.term.Variable('openpredictScore')}))]
-                        # scores = []
                         if isinstance(evaluation[0], SPARQLError):
                             raise evaluation[0]
                         # Append results for built-in SPARQL functions
@@ -307,4 +275,31 @@ class SparqlEndpoint(FastAPI):
                 return query_results
             raise NotImplementedError()
 
-# app.include_router(router)
+
+        @self.get("/", include_in_schema=False)
+        async def redirect_root_to_docs():
+            response = RedirectResponse(url='/docs')
+            return response
+
+
+        # Service description returned when no query provided
+        service_description_ttl = """
+        @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+        @prefix ent: <http://www.w3.org/ns/entailment/> .
+        @prefix prof: <http://www.w3.org/ns/owl-profile/> .
+        @prefix void: <http://rdfs.org/ns/void#> .
+
+        [] a sd:Service ;
+            sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
+            sd:supportedLanguage sd:SPARQL11Query ;
+            sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
+            sd:extensionFunction <https://w3id.org/um/openpredict/similarity> ;
+            sd:feature sd:DereferencesURIs ;
+            sd:defaultEntailmentRegime ent:RDFS ;
+            sd:defaultDataset [
+                a sd:Dataset ;
+                sd:defaultGraph [
+                    a sd:Graph ;
+                ] 
+            ] .
+        """
