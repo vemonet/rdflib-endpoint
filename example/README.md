@@ -26,6 +26,29 @@ Checkout the `Dockerfile` to see how the image is built, and run it with the `do
 docker-compose up -d --build
 ```
 
+Or build and run with docker:
+
+```bash
+docker build -t rdflib-endpoint .
+# Run locally
+docker run -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
+
+# Or using a reverse nginx-proxy
+docker run -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
+```
+
+Run on http://localhost:8080
+
+```bash
+docker run -p 8080:80 rdflib-endpoint
+```
+
+Run using a reverse [nginx-proxy](https://github.com/nginx-proxy/nginx-proxy)
+
+```bash
+docker run -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
+```
+
 ## Try a federated query 📬
 
 Use this federated query to retrieve predicted treatments for a drug or disease (OMIM or DRUGBANK) from any other SPARQL endpoint supporting federated queries (note that this query use our test SPARQL endpoints, it might not be always up)
