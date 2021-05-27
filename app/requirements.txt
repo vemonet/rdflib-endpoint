@@ -1,0 +1,4 @@
+fastapi==0.65.1
+uvicorn[standard]>=0.13.4 
+rdflib
+openpredict@git+https://github.com/MaastrichtU-IDS/translator-openpredict@master

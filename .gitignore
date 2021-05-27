@@ -1,4 +1,6 @@
 __pycache__
+.eggs
+*.egg-info
 
 # OpenPredict folder
 data/
