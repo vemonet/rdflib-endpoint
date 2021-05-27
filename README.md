@@ -6,6 +6,8 @@ A SPARQL endpoint to serve machine learning models, or any other logic implement
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/), CORS enabled.
 
+Tested for python 3.6 to 3.9.
+
 ## Install 📥
 
 Simply install directly from GitHub:
