@@ -1,16 +1,14 @@
 # SPARQL endpoint for RDFLib custom functions ✨️
 
-[![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml)[![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml)
+[![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml)
 
-A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python.
+A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. 
 
-Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/), CORS enabled.
+The deployed SPARQL endpoint can be used as a `SERVICE <https://your-endpoint-url/sparql>` in a federated SPARQL query from regular triplestores. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based), it is also CORS enabled.
 
-Tested for python 3.6 to 3.8
+Only `SELECT` queries are currently supported, which is enough to support federated queries. Feel free to create an [issue](/issues), or send a pull request if you would like to see it implemented.
 
-The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores. Tested from OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based)
-
-Only `SELECT` queries are currently supported (enough to support federated queries). Feel free to create an issue, or send a pull request if you would like to see it implemented.
+Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.6, 3.7 and 3.8
 
 ## Install 📥
 
@@ -68,7 +66,7 @@ def custom_concat(query_results, ctx, part, eval_part):
         }))
     return query_results, ctx, part, eval_part
 
-# Start the SPARQL endpoint based on a RDFLib Graph
+# Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
 g = rdflib.Graph()
 app = SparqlEndpoint(
     graph=g,
@@ -78,6 +76,7 @@ app = SparqlEndpoint(
     title="SPARQL endpoint for RDFLib graph", 
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.0.1",
+    public_url='https://your-endpoint-url/sparql',
     cors_enabled=True
 )
 ```
@@ -101,7 +100,7 @@ uvicorn main:app --reload --app-dir app
 Install additional dependencies:
 
 ```bash
-pip install flake8 pytest requests openpredict
+pip install pytest requests openpredict
 ```
 
 Run the tests locally:
