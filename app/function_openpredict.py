@@ -3,6 +3,7 @@ import rdflib
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
 from rdflib.plugins.sparql.evalutils import _eval
+
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
@@ -25,8 +26,7 @@ def SPARQL_resolve_patterns(ctx:object, part:object) -> object:
                 rdf:predicate ?predicate ;
                 biolink:category biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation ;
                 biolink:has_confidence_level ?score .
-            BIND("OMIM:246300" AS ?drugOrDisease)
-            BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
+            BIND(?drugOrDisease AS "OMIM:000011")
         }
     
     Problem with this query: requires to run the classifier for all entities
@@ -52,9 +52,9 @@ def SPARQL_resolve_patterns(ctx:object, part:object) -> object:
     print('SPARQL query part:')
     print(part.name)
 
-    if part.name == 'Extend':
-        print('The part.expr:')
-        print(part.expr)
+    # if part.name == 'Extend':
+    #     print('The part.expr:')
+    #     print(part.expr)
 
     if part.name == "BGP":
 
@@ -64,11 +64,25 @@ def SPARQL_resolve_patterns(ctx:object, part:object) -> object:
             print('The triples:')
             print(t)
             # if t[1] == rdflib.RDF.type:
-            #     bnode = rdflib.BNode()
-            #     triples.append((t[0], t[1], bnode))
-            #     triples.append((bnode, inferredSubClass, t[2]))
-            # else:
-            triples.append(t)
+            if t[1] == BIOLINK['treats']:
+
+                bnode = rdflib.BNode()
+                triples.append((t[0], t[1], bnode))
+                triples.append((bnode, rdflib.RDFS.subClassOf * "*", t[2]))
+
+                predictions_list = query_openpredict_classifier()
+                evaluation = []
+                scores = []
+                for prediction in predictions_list:
+                    # Quick fix to get results for drugs or diseases
+                    if argument1.startswith('OMIM') or argument1.startswith('MONDO'):
+                        evaluation.append(prediction['drug'])
+                    else:
+                        evaluation.append(prediction['disease'])
+                    scores.append(prediction['score'])
+
+            else:
+                triples.append(t)
 
         # delegate to normal evalBGP
         return evalBGP(ctx, triples)
@@ -86,10 +100,13 @@ def SPARQL_openpredict_prediction(ctx:object, part:object) -> object:
 
     Query:
         PREFIX openpredict: <https://w3id.org/um/openpredict/>
-        SELECT ?drugOrDisease ?predictedForTreatment ?openpredictScore WHERE {
+        SELECT ?drugOrDisease ?predictedForTreatment ?predictedForTreatmentScore WHERE {
             BIND("OMIM:246300" AS ?drugOrDisease)
             BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
         }
+
+        BIND(openpredict:score(?drugOrDisease) AS ?predictedForTreatment)
+        https://github.com/w3c/sparql-12/issues/6
 
     Problem with this query: how to retrieve the ?score ? We just add it to the results?
 
@@ -109,9 +126,15 @@ def SPARQL_openpredict_prediction(ctx:object, part:object) -> object:
     namespace = Namespace('https://w3id.org/um/openpredict/')
     openpredict_similarity_uri = rdflib.term.URIRef(namespace + 'prediction')
 
+    print("part.name")
+    print(part.name)
+
     # This part holds basic implementation for adding new functions
     if part.name == 'Extend':
         cs = []
+
+        # print('ctx.initBindings')
+        # print(ctx.initBindings)
 
         # Information is retrieved and stored and passed through a generator
         for c in evalPart(ctx, part.p):
@@ -120,9 +143,18 @@ def SPARQL_openpredict_prediction(ctx:object, part:object) -> object:
             # This will check if any custom functions are added.
             if hasattr(part.expr, 'iri'):
 
+                print('Before getting argument:')
+                print(part.expr._vars)
+                print(part.expr.expr[0])
+                print(ctx)
+
                 # From here the real calculations begin.
                 # First we get the variable arguments, for example ?label1 and ?label2
                 argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except=part.expr._vars)))
+                # argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except=[rdflib.term.Variable('drugOrDisease'),rdflib.term.Variable('openpredictScore')])))
+                # argument1 = str(_eval(part.expr.expr[0], c.forget(ctx, _except={rdflib.term.Variable('openpredictScore')})))
+                # print(argument1)
+
                 # argument2 = str(_eval(part.expr.expr[1], c.forget(ctx, _except=part.expr._vars)))
 
                 # Here it checks if it can find our levenshtein IRI (example: https://w3id.org/um/openpredict/levenshtein)
@@ -156,25 +188,29 @@ def SPARQL_openpredict_prediction(ctx:object, part:object) -> object:
                 # else:
                 #     raise SPARQLError('Unhandled function {}'.format(part.expr.iri))
             else:
+                print('Not a custom function')
+                print(part.expr)
+                print(part._vars)
                 evaluation = [_eval(part.expr, c.forget(ctx, _except=part._vars))]
+                # scores = [_eval(part.expr, c.forget(ctx, _except={rdflib.term.Variable('openpredictScore')}))]
                 scores = []
                 if isinstance(evaluation[0], SPARQLError):
                     raise evaluation[0]
+
+            # Return the results
             for i, result in enumerate(evaluation):
-            # for result in evaluation:
-                print('evaluation and scores')
-                print(evaluation)
-                print(scores)
-                if len(scores) < i+1:
+                if len(scores) < 1:
                     cs.append(c.merge({part.var: Literal(result)}))
                 else:
-                    print(part.var)
-                    # cs.append(c.merge({part.var: Literal(result), 'openpredictScore': Literal(scores[i])}))
-                    cs.append(c.merge({part.var: Literal(result)}))
-                    cs.append(c.merge({'openpredictScore': Literal(scores[i])}))
+                    cs.append(c.merge({
+                        part.var: Literal(result), 
+                        rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])
+                    }))
+                    
+        # print(cs)
         return cs
     raise NotImplementedError()
-    
+
 
 def SPARQL_openpredict_similarity(ctx:object, part:object) -> object:
     """

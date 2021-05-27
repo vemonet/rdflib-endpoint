@@ -5,8 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import json
 import rdflib
-from rdflib.plugins.sparql.parser import Query
-from rdflib.plugins.sparql.processor import translateQuery
+# from rdflib.plugins.sparql.parser import Query
+# from rdflib.plugins.sparql.processor import translateQuery
+from rdflib.plugins.sparql import parser
+from rdflib.plugins.sparql.algebra import translateQuery, pprintAlgebra
 from rdflib.plugins.sparql.results.xmlresults import XMLResult
 from rdflib.plugins.sparql.results.xmlresults import XMLResultSerializer
 from rdflib.namespace import Namespace
@@ -86,7 +88,7 @@ def sparql_endpoint(
     Example with custom concat function:
     ```
     PREFIX openpredict: <https://w3id.org/um/openpredict/>
-    SELECT ?drugOrDisease ?predictedForTreatment ?openpredictScore WHERE {
+    SELECT ?drugOrDisease ?predictedForTreatment ?predictedForTreatmentScore WHERE {
         BIND("OMIM:246300" AS ?drugOrDisease)
         BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
     }
@@ -109,14 +111,17 @@ def sparql_endpoint(
         # <https://w3id.org/um/openpredict/similarity> a sd:Function .
 
     # Parse the query and retrieve the type of operation (e.g. SELECT)
-    parsed_query = translateQuery(Query.parseString(query, parseAll=True))
-    query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
-    if query_operation != "Select Query":
-        return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
+    # parsed_query = translateQuery(Query.parseString(query, parseAll=True))
+    # query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
+    # if query_operation != "Select Query":
+    #     return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
     
-    print(parsed_query)
-    print(query_operation)
+    # print(parsed_query)
+    # print(query_operation)
     # predictions_list = query_classifier_from_sparql(parsed_query)
+
+    # query_object = translateQuery(query)
+    # pprintAlgebra(query_object)
 
     # Save custom function in custom evaluation dictionary
     # rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_resolve_patterns'] = SPARQL_resolve_patterns
@@ -127,9 +132,18 @@ def sparql_endpoint(
 
     # Query an empty graph with the custom functions available
     query_results = rdflib.Graph().query(query)
+    # query_results = rdflib.Graph().query(query, initBindings={'predictedForTreatmentScore': None})
+
+    # Pretty print the query object 
+    pq = parser.parseQuery(query)
+    tq = translateQuery(pq)
+    pprintAlgebra(tq)
 
     # Format and return results depending on Accept mime type in request header
-    print(query_results.serialize(format = 'json'))
+    # print(query_results.serialize(format = 'json'))
+    # print('query_results.ctx.initBindings !!')
+    # print(query_results.ctx.initBindings)
+
     output_mime_type = request.headers['accept']
     if not output_mime_type:
         output_mime_type = 'application/xml'
