@@ -5,7 +5,9 @@ from rdflib.plugins.sparql.evalutils import _eval
 from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.namespace import Namespace
 
-from openpredict_classifier import query_openpredict_classifier
+from openpredict.openpredict_model import query_omim_drugbank_classifier
+from openpredict.openpredict_utils import init_openpredict_dir
+
 from sparql_endpoint import SparqlEndpoint
 
 # EvalBGP https://rdflib.readthedocs.io/en/stable/_modules/rdflib/plugins/sparql/evaluate.html
@@ -66,7 +68,8 @@ def get_predictions(query_results, ctx, part, eval_part):
     argument1 = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
 
     # Run the classifier to get predictions and scores for the entity given as argument
-    predictions_list = query_openpredict_classifier(argument1)
+    predictions_list = query_omim_drugbank_classifier(argument1, 'openpredict-baseline-omim-drugbank')
+
     evaluation = []
     scores = []
     for prediction in predictions_list:
@@ -113,7 +116,7 @@ def custom_concat(query_results, ctx, part, eval_part):
     return query_results, ctx, part, eval_part
 
 
-
+init_openpredict_dir()
 # Start the SPARQL endpoint based on a RDFLib Graph
 g = Graph()
 app = SparqlEndpoint(
