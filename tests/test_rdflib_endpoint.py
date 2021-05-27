@@ -50,7 +50,6 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
     sd:defaultEntailmentRegime ent:RDFS ;
     sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
     sd:extensionFunction <https://w3id.org/um/openpredict/most_similar>,
-        <https://w3id.org/um/openpredict/prediction>,
         <https://w3id.org/um/sparql-functions/custom_concat> ;
     sd:feature sd:DereferencesURIs ;
     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
@@ -58,7 +57,5 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
     sd:supportedLanguage sd:SPARQL11Query .
 
 <https://w3id.org/um/openpredict/most_similar> a sd:Function .
-
-<https://w3id.org/um/openpredict/prediction> a sd:Function .
 
 <https://w3id.org/um/sparql-functions/custom_concat> a sd:Function ."""

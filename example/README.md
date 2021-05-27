@@ -1,6 +1,6 @@
 # Example SPARQL endpoint for ML classifier ✨️🐍
 
-A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. Serve drug/disease predictions using the OpenPredict package.
+A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. Serve drug/disease predictions using the OpenPredict classifier.
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/), CORS enabled.
 
@@ -46,7 +46,7 @@ docker run -p 8080:80 rdflib-endpoint
 Run using a reverse [nginx-proxy](https://github.com/nginx-proxy/nginx-proxy)
 
 ```bash
-docker run -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
+docker run -it -e VIRTUAL_HOST=sparql-openpredict.137.120.31.102.nip.io -e VIRTUAL_PORT=80 rdflib-endpoint
 ```
 
 ## Try a federated query 📬
