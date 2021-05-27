@@ -1,7 +1,7 @@
 version: '3'
 services:
   rdflib-endpoint:
-    container_name: rdflib-endpoint-openpredict
+    container_name: openpredict-sparql-service
     build: .
     restart: unless-stopped
     environment: 
