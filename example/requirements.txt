@@ -1,3 +1,2 @@
-rdflib
 rdflib-endpoint@git+https://github.com/vemonet/rdflib-endpoint@main
-# openpredict@git+https://github.com/MaastrichtU-IDS/translator-openpredict@master
+rdflib>=5.0.0

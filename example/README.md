@@ -25,7 +25,7 @@ Use this federated query to retrieve predicted treatments for a drug or disease 
 PREFIX openpredict: <https://w3id.org/um/openpredict/>
 SELECT * WHERE
 {
-  SERVICE <https://sparql-openpredict.137.120.31.102.nip.io/sparql> {
+  SERVICE <https://service.openpredict.137.120.31.102.nip.io/sparql> {
 	SELECT ?drugOrDisease ?predictedForTreatment WHERE {
     	BIND("OMIM:246300" AS ?drugOrDisease)
     	BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)

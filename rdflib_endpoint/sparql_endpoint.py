@@ -10,8 +10,8 @@ from rdflib.plugins.sparql.processor import translateQuery as translateQuery
 # from rdflib.plugins.sparql.algebra import algebraTranslateQuery, pprintAlgebra
 # from rdflib.namespace import Namespace
 
-from fastapi import FastAPI, Request, Response, Query, Body
-from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
+from fastapi import FastAPI, Request, Response, Query
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
@@ -63,52 +63,53 @@ SELECT ?concat ?concatLength WHERE {
                 allow_headers=["*"],
             )
 
+        api_responses={
+            200: {
+                "description": "SPARQL query results",
+                "content": {
+                    "application/sparql-results+json": {
+                        "example": {"id": "bar", "value": "The bar tenders"}
+                    },
+                    "application/json": {
+                        "example": {"id": "bar", "value": "The bar tenders"}
+                    },
+                    "text/csv": {
+                        "example": "s,p,o"
+                    },
+                    "application/sparql-results+csv": {
+                        "example": "s,p,o"
+                    },
+                    "text/turtle": {
+                        "example": "service description"
+                    },
+                    "application/sparql-results+xml": {
+                        "example": "<root></root>"
+                    },
+                    "application/xml": {
+                        "example": "<root></root>"
+                    },
+                },
+            },
+            501:{
+                "description": " Not Implemented",
+            }, 
+        }
+
         @self.get(
             "/sparql",
             name="SPARQL endpoint",
             description=self.example_query,
-            responses={
-                200: {
-                    "description": "SPARQL query results",
-                    "content": {
-                        "application/sparql-results+json": {
-                            "example": {"id": "bar", "value": "The bar tenders"}
-                        },
-                        "application/json": {
-                            "example": {"id": "bar", "value": "The bar tenders"}
-                        },
-                        "text/csv": {
-                            "example": "s,p,o"
-                        },
-                        "application/sparql-results+csv": {
-                            "example": "s,p,o"
-                        },
-                        "text/turtle": {
-                            "example": "service description"
-                        },
-                        "application/sparql-results+xml": {
-                            "example": "<root></root>"
-                        },
-                        "application/xml": {
-                            "example": "<root></root>"
-                        },
-                    },
-                },
-                501:{
-                    "description": " Not Implemented",
-                }, 
-            }
+            responses=api_responses
         )
         async def sparql_endpoint(request: Request,
-            # query: Optional[str] = None):
             query: Optional[str] = Query(
                 None,
                 description=self.example_query,
             )):
             """
-            Send a SPARQL query to be executed.
+            Send a SPARQL query to be executed through HTTP GET operation.
             \f
-            :param request: The HTTP request
+            :param request: The HTTP GET request
             :param query: SPARQL query input.
             """
             # request = await request
@@ -173,37 +174,7 @@ SELECT ?concat ?concatLength WHERE {
             "/sparql",
             name="SPARQL endpoint",
             description=self.example_query,
-            responses={
-                200: {
-                    "description": "SPARQL query results",
-                    "content": {
-                        "application/sparql-results+json": {
-                            "example": {"id": "bar", "value": "The bar tenders"}
-                        },
-                        "application/json": {
-                            "example": {"id": "bar", "value": "The bar tenders"}
-                        },
-                        "text/csv": {
-                            "example": "s,p,o"
-                        },
-                        "application/sparql-results+csv": {
-                            "example": "s,p,o"
-                        },
-                        "text/turtle": {
-                            "example": "service description"
-                        },
-                        "application/sparql-results+xml": {
-                            "example": "<root></root>"
-                        },
-                        "application/xml": {
-                            "example": "<root></root>"
-                        },
-                    },
-                },
-                501:{
-                    "description": " Not Implemented",
-                }, 
-            }
+            responses=api_responses
         )
         async def post_sparql_endpoint(
             request: Request,
@@ -213,7 +184,7 @@ SELECT ?concat ?concatLength WHERE {
             )):
             """Send a SPARQL query to be executed through HTTP POST operation.
             \f
-            :param request: The HTTP request
+            :param request: The HTTP POST request with a .body()
             :param query: SPARQL query input.
             """
             if not query:
@@ -245,11 +216,11 @@ SELECT ?concat ?concatLength WHERE {
                     # Checks if the function is a URI (custom function)
                     if hasattr(part.expr, 'iri'):
 
-                        # Execute the custom functions passed in the constructor
+                        # Iterate through the custom functions passed in the constructor
                         for function_uri, custom_function in self.functions.items():
                             # Check if URI correspond to a registered custom function
                             if part.expr.iri == URIRef(function_uri):
-                                # Execute the function
+                                # Execute each function
                                 query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
 
 

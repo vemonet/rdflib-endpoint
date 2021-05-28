@@ -43,13 +43,13 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 
-<https://sparql-openpredict.137.120.31.102.nip.io/sparql> a sd:Service ;
+<https://service.openpredict.137.120.31.102.nip.io/sparql> a sd:Service ;
     rdfs:label "SPARQL endpoint for RDFLib graph" ;
     dc:description "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. [Source code](https://github.com/vemonet/rdflib-endpoint)" ;
     sd:defaultDataset [ a sd:Dataset ;
             sd:defaultGraph [ a sd:Graph ] ] ;
     sd:defaultEntailmentRegime ent:RDFS ;
-    sd:endpoint <https://sparql-openpredict.137.120.31.102.nip.io/sparql> ;
+    sd:endpoint <https://service.openpredict.137.120.31.102.nip.io/sparql> ;
     sd:extensionFunction <https://w3id.org/um/openpredict/most_similar>,
         <https://w3id.org/um/sparql-functions/custom_concat> ;
     sd:feature sd:DereferencesURIs ;

@@ -1,14 +1,16 @@
 # SPARQL endpoint for RDFLib custom functions
 
-[![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml)
+[![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=security_rating)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-A SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It can also be used to expose a RDFLib Graph as a SPARQL endpoint, with or without custon functions.
+A SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It can also be used to expose a RDFLib Graph as a SPARQL endpoint, with or without custom functions.
 
-The deployed SPARQL endpoint can be used as a `SERVICE <https://your-endpoint-url/sparql>` in a federated SPARQL query from regular triplestores. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based), it is also CORS enabled.
+The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled.
+
+Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.6, 3.7, 3.8 and 3.9
 
 Only `SELECT` queries are currently supported, which is enough to support federated queries. Feel free to create an [issue](/issues), or send a pull request if you would like to see it implemented.
 
-Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.6, 3.7 and 3.8
+⚠️ Fully supporting  all use-cases for SPARQL 1.1 is still a work in progress, especially federated queries. If you are facing any issue please report it by [creating an issue](/issues) to detail your problem (with error output and code example to reproduce the error).
 
 ## Install the package 📥
 
