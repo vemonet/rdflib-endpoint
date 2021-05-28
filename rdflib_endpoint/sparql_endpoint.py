@@ -132,13 +132,13 @@ SELECT ?concat ?concatLength WHERE {
                     return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
 
             # Parse the query and retrieve the type of operation (e.g. SELECT)
-            try:
-                parsed_query = translateQuery(QueryParser.parseString(query, parseAll=True))
-                query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
-                if query_operation != "Select Query":
-                    return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
-            except Exception as e:
-                print("Error parsing the SPARQL query: " + str(e))
+            # try:
+            #     parsed_query = translateQuery(QueryParser.parseString(query, parseAll=True))
+            #     query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
+            #     if query_operation != "Select Query":
+            #         return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
+            # except Exception as e:
+            #     print("Error parsing the SPARQL query: " + str(e))
                 # return JSONResponse(status_code=501, content={"message": "Error parsing the SPARQL query: " + str(e)})
                 # raise SPARQLError 
             
@@ -152,7 +152,10 @@ SELECT ?concat ?concatLength WHERE {
             rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_custom_functions'] = SPARQL_custom_functions
 
             # Query an empty graph with the custom functions loaded
-            query_results = rdflib.Graph().query(query)
+            try:
+                query_results = rdflib.Graph().query(query)
+            except Exception as e:
+                print("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
 
             # Format and return results depending on Accept mime type in request header
             output_mime_type = request.headers['accept']
