@@ -137,7 +137,7 @@ SELECT ?concat ?concatLength WHERE {
                 query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
                 if query_operation != "Select Query":
                     return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
-            except Error as e:
+            except Exception as e:
                 print("Error parsing the SPARQL query: " + str(e))
                 # return JSONResponse(status_code=501, content={"message": "Error parsing the SPARQL query: " + str(e)})
                 # raise SPARQLError 
