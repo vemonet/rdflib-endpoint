@@ -16,6 +16,17 @@ i.e. in your setup.py::
     }
 """
 
+# EvalBGP https://rdflib.readthedocs.io/en/stable/_modules/rdflib/plugins/sparql/evaluate.html
+# Custom fct for rdf:type with auto infer super-classes: https://github.com/RDFLib/rdflib/blob/master/examples/custom_eval.py
+# BGP = Basic Graph Pattern
+# Docs rdflib custom fct: https://rdflib.readthedocs.io/en/stable/intro_to_sparql.html
+# StackOverflow: https://stackoverflow.com/questions/43976691/custom-sparql-functions-in-rdflib/66988421#66988421
+
+# Another project: https://github.com/bas-stringer/scry/blob/master/query_handler.py
+# https://www.w3.org/TR/sparql11-service-description/#example-turtle
+# Federated query: https://www.w3.org/TR/2013/REC-sparql11-federated-query-20130321/#defn_service
+# XML method: https://rdflib.readthedocs.io/en/stable/apidocs/rdflib.plugins.sparql.results.html#module-rdflib.plugins.sparql.results.xmlresults
+
 import rdflib
 from rdflib import Literal, Variable, URIRef, BNode
 from rdflib.plugins.sparql import parser
@@ -134,7 +145,7 @@ if __name__ == "__main__":
 
     pq = parser.parseQuery(q)
     tq = translateQuery(pq)
-    #pprintAlgebra(tq)
+    pprintAlgebra(tq)
 
     # Find all FOAF Agents
     for x in g.query(q):

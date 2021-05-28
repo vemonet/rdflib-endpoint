@@ -78,6 +78,14 @@ def custom_concat(query_results, ctx, part, eval_part):
         }))
     return query_results, ctx, part, eval_part
 
+example_query = """Example query:\n
+```
+PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+SELECT ?concat ?concatLength WHERE {
+    BIND("First" AS ?first)
+    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+}
+```"""
 
 # Start the SPARQL endpoint based on a RDFLib Graph
 g = Graph()
@@ -92,8 +100,10 @@ app = SparqlEndpoint(
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.0.1",
     public_url='https://sparql-openpredict.137.120.31.102.nip.io/sparql',
-    cors_enabled=True
+    cors_enabled=True,
+    example_query=example_query
 )
+
 
 ## Query using the OpenPredict classifier, disable to reduce the size of the tests
 ## Feel free to try it!

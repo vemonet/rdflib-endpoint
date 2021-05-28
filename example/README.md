@@ -1,8 +1,38 @@
-# Example SPARQL endpoint for ML classifier ✨️🐍
+# Example SPARQL endpoint for ML classifier
 
 A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. Serve drug/disease predictions using the OpenPredict classifier.
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/), CORS enabled.
+
+## Example queries 📬
+
+### Get predictions
+
+Query OpenPredict classifier to get drug/disease predictions
+
+```SPARQL
+PREFIX openpredict: <https://w3id.org/um/openpredict/>
+SELECT ?drugOrDisease ?predictedForTreatment ?predictedForTreatmentScore WHERE {
+    BIND("OMIM:246300" AS ?drugOrDisease)
+    BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
+```
+
+### Try a federated query
+
+Use this federated query to retrieve predicted treatments for a drug or disease (OMIM or DRUGBANK) from any other SPARQL endpoint supporting federated queries (note that this query use our test SPARQL endpoints, it might not be always up)
+
+```SPARQL
+PREFIX openpredict: <https://w3id.org/um/openpredict/>
+SELECT * WHERE
+{
+  SERVICE <https://sparql-openpredict.137.120.31.102.nip.io/sparql> {
+	SELECT ?drugOrDisease ?predictedForTreatment WHERE {
+    	BIND("OMIM:246300" AS ?drugOrDisease)
+    	BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
+	}
+  }
+}
+```
 
 ## Install and run ✨️
 
@@ -36,23 +66,5 @@ Run on http://localhost:8080
 
 ```bash
 docker run -p 8080:80 rdflib-endpoint
-```
-
-
-## Try a federated query 📬
-
-Use this federated query to retrieve predicted treatments for a drug or disease (OMIM or DRUGBANK) from any other SPARQL endpoint supporting federated queries (note that this query use our test SPARQL endpoints, it might not be always up)
-
-```SPARQL
-PREFIX openpredict: <https://w3id.org/um/openpredict/>
-SELECT * WHERE
-{
-  SERVICE <https://sparql-openpredict.137.120.31.102.nip.io/sparql> {
-	SELECT ?drugOrDisease ?predictedForTreatment WHERE {
-    	BIND("OMIM:246300" AS ?drugOrDisease)
-    	BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
-	}
-  }
-}
 ```
 

@@ -1,15 +1,16 @@
+from copy import Error
 import rdflib
 from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
 from rdflib.plugins.sparql.evalutils import _eval
-from rdflib.plugins.sparql.parser import Query
+from rdflib.plugins.sparql.parser import Query as QueryParser
 from rdflib.plugins.sparql.processor import translateQuery as translateQuery
 # from rdflib.plugins.sparql import parser
 # from rdflib.plugins.sparql.algebra import algebraTranslateQuery, pprintAlgebra
 # from rdflib.namespace import Namespace
 
-from fastapi import FastAPI, Request, Response, Body
+from fastapi import FastAPI, Request, Response, Query, Body
 from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
@@ -29,17 +30,26 @@ class SparqlEndpoint(FastAPI):
             graph=Graph(), 
             functions={},
             cors_enabled=True,
-            public_url='https://sparql.openpredict.semanticscience.org/sparql') -> None:
+            public_url='https://sparql.openpredict.semanticscience.org/sparql',
+            example_query="""Example query:\n
+```
+PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+SELECT ?concat ?concatLength WHERE {
+    BIND("First" AS ?first)
+    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+}
+```""") -> None:
         """
         Constructor of the SPARQL endpoint, everything happens here.
         FastAPI calls are defined in this constructor
         """
-        self.graph = graph
-        self.functions = functions
+        self.graph=graph
+        self.functions=functions
         self.title=title
         self.description=description
         self.version=version
         self.public_url=public_url
+        self.example_query=example_query
 
         # Instantiate FastAPI
         super().__init__(title=title, description=description, version=version)
@@ -55,6 +65,8 @@ class SparqlEndpoint(FastAPI):
 
         @self.get(
             "/sparql",
+            name="SPARQL endpoint",
+            description=self.example_query,
             responses={
                 200: {
                     "description": "SPARQL query results",
@@ -87,32 +99,19 @@ class SparqlEndpoint(FastAPI):
                 }, 
             }
         )
-        def sparql_endpoint(request: Request,
-            query: Optional[str] = None):
-            # query: Optional[str] = "SELECT * WHERE { <https://identifiers.org/OMIM:246300> <https://w3id.org/biolink/vocab/treated_by> ?drug . }"):
+        async def sparql_endpoint(request: Request,
+            # query: Optional[str] = None):
+            query: Optional[str] = Query(
+                None,
+                description=self.example_query,
+            )):
             """
             Send a SPARQL query to be executed.
-            
-            Example with custom concat function:
-            ```
-            PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
-            SELECT ?concat ?concatLength WHERE {
-                BIND("First" AS ?first)
-                BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-            }
-            ```
-            Example with custom function to get predictions from a classifier (works also with drugs, e.g. DRUGBANK:DB00394):
-            ```
-            PREFIX openpredict: <https://w3id.org/um/openpredict/>
-            SELECT ?drugOrDisease ?predictedForTreatment ?predictedForTreatmentScore WHERE {
-                BIND("OMIM:246300" AS ?drugOrDisease)
-                BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
-            }
-            ```
             \f
             :param request: The HTTP request
             :param query: SPARQL query input.
             """
+            # request = await request
             if not query:
                 # Return the SPARQL endpoint service description
                 service_graph = rdflib.Graph()
@@ -132,10 +131,15 @@ class SparqlEndpoint(FastAPI):
                     return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
 
             # Parse the query and retrieve the type of operation (e.g. SELECT)
-            parsed_query = translateQuery(Query.parseString(query, parseAll=True))
-            query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
-            if query_operation != "Select Query":
-                return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
+            try:
+                parsed_query = translateQuery(QueryParser.parseString(query, parseAll=True))
+                query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
+                if query_operation != "Select Query":
+                    return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
+            except Error as e:
+                print("Error parsing the SPARQL query: " + str(e))
+                # return JSONResponse(status_code=501, content={"message": "Error parsing the SPARQL query: " + str(e)})
+                # raise SPARQLError 
             
             # Pretty print the query object 
             # parsed_query = parser.parseQuery(query)
@@ -167,6 +171,8 @@ class SparqlEndpoint(FastAPI):
 
         @self.post(
             "/sparql",
+            name="SPARQL endpoint",
+            description=self.example_query,
             responses={
                 200: {
                     "description": "SPARQL query results",
@@ -201,9 +207,11 @@ class SparqlEndpoint(FastAPI):
         )
         async def post_sparql_endpoint(
             request: Request,
-            query: Optional[str] = None):
-            """
-            Send a SPARQL query to be executed through HTTP POST operation.
+            query: Optional[str] = Query(
+                None,
+                description=self.example_query,
+            )):
+            """Send a SPARQL query to be executed through HTTP POST operation.
             \f
             :param request: The HTTP request
             :param query: SPARQL query input.
@@ -220,32 +228,8 @@ class SparqlEndpoint(FastAPI):
 
 
         def SPARQL_custom_functions(ctx:object, part:object) -> object:
-            """
-            Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
+            """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
             The results are then stored in Literal objects and added to the query results.
-            
-            Example:
-
-            Query:
-                PREFIX openpredict: <https://w3id.org/um/openpredict/>
-                SELECT ?drugOrDisease ?predictedForTreatment ?predictedForTreatmentScore WHERE {
-                    BIND("OMIM:246300" AS ?drugOrDisease)
-                    BIND(openpredict:prediction(?drugOrDisease) AS ?predictedForTreatment)
-                }
-
-                BIND(openpredict:score(?drugOrDisease) AS ?predictedForTreatment)
-                https://github.com/w3c/sparql-12/issues/6
-
-            Problem with this query: how to retrieve the ?score ? We just add it to the results?
-
-            Retrieve:
-                ?label1 ?label2
-
-            Calculation:
-                prediction(?label1, ?label2) =  score
-
-            Output:
-                Save score in Literal object.
 
             :param ctx:     <class 'rdflib.plugins.sparql.sparql.QueryContext'>
             :param part:    <class 'rdflib.plugins.sparql.parserutils.CompValue'>
