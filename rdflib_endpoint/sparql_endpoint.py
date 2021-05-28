@@ -224,7 +224,7 @@ SELECT ?concat ?concatLength WHERE {
                 for params in parsed_query:
                     if params[0] == 'query':
                         query = params[1]
-            return sparql_endpoint(request, query)
+            return await sparql_endpoint(request, query)
 
 
         def SPARQL_custom_functions(ctx:object, part:object) -> object:
