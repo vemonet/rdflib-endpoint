@@ -2,6 +2,7 @@ from rdflib_endpoint import SparqlEndpoint
 
 import rdflib
 from rdflib import Graph, Literal, RDF, URIRef
+from rdflib.graph import ConjunctiveGraph
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib import Graph, Literal, RDF, URIRef
@@ -81,8 +82,16 @@ SELECT ?concat ?concatLength WHERE {
 }
 ```"""
 
-# Start the SPARQL endpoint based on a RDFLib Graph
-g = Graph()
+# Use ConjunctiveGraph to support nquads and graphs in SPARQL queries
+# identifier is the default graph
+g = ConjunctiveGraph(
+    identifier=URIRef('https://w3id.org/um/sparql-functions/graph/default'), 
+)
+
+# Example to add a nquad
+g.add((URIRef('http://subject'), RDF.type, URIRef('http://object'), URIRef('http://graph')))
+
+# Start the SPARQL endpoint based on the RDFLib Graph
 app = SparqlEndpoint(
     graph=g,
     functions={

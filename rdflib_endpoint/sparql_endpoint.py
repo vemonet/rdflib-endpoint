@@ -153,7 +153,7 @@ SELECT ?concat ?concatLength WHERE {
 
             # Query an empty graph with the custom functions loaded
             try:
-                query_results = rdflib.Graph().query(query)
+                query_results = self.graph.query(query)
             except Exception as e:
                 print("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
 
