@@ -1,6 +1,7 @@
 from copy import Error
 import rdflib
 from rdflib import Graph, Literal, RDF, URIRef
+from rdflib.graph import ConjunctiveGraph
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
 from rdflib.plugins.sparql.evalutils import _eval
@@ -27,7 +28,7 @@ class SparqlEndpoint(FastAPI):
             title: str = "SPARQL endpoint for RDFLib graph", 
             description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
             version="0.0.1",
-            graph=Graph(), 
+            graph=ConjunctiveGraph(), 
             functions={},
             cors_enabled=True,
             public_url='https://sparql.openpredict.semanticscience.org/sparql',
@@ -104,7 +105,7 @@ SELECT ?concat ?concatLength WHERE {
         async def sparql_endpoint(request: Request,
             query: Optional[str] = Query(
                 None,
-                description=self.example_query,
+                # description=self.example_query,
             )):
             """
             Send a SPARQL query to be executed through HTTP GET operation.
@@ -115,7 +116,7 @@ SELECT ?concat ?concatLength WHERE {
             # request = await request
             if not query:
                 # Return the SPARQL endpoint service description
-                service_graph = rdflib.Graph()
+                service_graph = Graph()
                 # service_graph.parse('app/service-description.ttl', format="ttl")
                 print(service_description_ttl)
                 service_graph.parse(data=service_description_ttl, format="ttl")
@@ -156,6 +157,7 @@ SELECT ?concat ?concatLength WHERE {
                 query_results = self.graph.query(query)
             except Exception as e:
                 print("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
+                return JSONResponse(status_code=501, content={"message": "Error parsing the SPARQL query: " + str(e)})
 
             # Format and return results depending on Accept mime type in request header
             output_mime_type = request.headers['accept']
@@ -183,7 +185,7 @@ SELECT ?concat ?concatLength WHERE {
             request: Request,
             query: Optional[str] = Query(
                 None,
-                description=self.example_query,
+                # description=self.example_query,
             )):
             """Send a SPARQL query to be executed through HTTP POST operation.
             \f

@@ -88,7 +88,7 @@ g = ConjunctiveGraph(
     identifier=URIRef('https://w3id.org/um/sparql-functions/graph/default'), 
 )
 
-# Example to add a nquad
+# Example to add a nquad to the exposed graph
 g.add((URIRef('http://subject'), RDF.type, URIRef('http://object'), URIRef('http://graph')))
 
 # Start the SPARQL endpoint based on the RDFLib Graph
