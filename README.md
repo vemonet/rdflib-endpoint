@@ -2,9 +2,9 @@
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=security_rating)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It can also be used to expose a RDFLib Graph as a SPARQL endpoint.
+`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved in a query to another SPARQL endpoint.
 
-The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is deployed based on the FastAPI framework. It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels of specific identifiers, or run a classifier given entities retrieved in a query to another SPARQL endpoint.
+The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is deployed based on the FastAPI framework. 
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled.
 
