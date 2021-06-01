@@ -2,15 +2,15 @@
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=security_rating)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-A SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It can also be used to expose a RDFLib Graph as a SPARQL endpoint, with or without custom functions.
+`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It can also be used to expose a RDFLib Graph as a SPARQL endpoint.
+
+The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is deployed based on the FastAPI framework. It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels of specific identifiers, or run a classifier given entities retrieved in a query to another SPARQL endpoint.
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled.
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.6, 3.7, 3.8 and 3.9
 
-Only `SELECT` queries are currently supported, which is enough to support federated queries. Feel free to create an [issue](/issues), or send a pull request if you would like to see it implemented.
-
-⚠️ Fully supporting  all use-cases for SPARQL 1.1 is still a work in progress, especially federated queries. If you are facing any issue please report it by [creating an issue](/issues) to detail your problem (with error output and code example to reproduce the error).
+Please create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented
 
 ## Install the package 📥
 
@@ -30,7 +30,9 @@ cd rdflib-endpoint
 pip install -e .
 ```
 
-## Define custom SPARQL functions 🐍
+## Define custom SPARQL functions 🐍 
+
+Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with a docker deployment. The best way to create a new SPARQL endpoint is to copy this `example` folder and start from it.
 
 Create a `app/main.py` file in your project folder with your functions and endpoint parameters:
 
@@ -69,21 +71,31 @@ def custom_concat(query_results, ctx, part, eval_part):
     return query_results, ctx, part, eval_part
 
 # Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
-g = rdflib.Graph()
+g = rdflib.graph.ConjunctiveGraph()
 app = SparqlEndpoint(
     graph=g,
+    # Register the functions:
     functions={
         'https://w3id.org/um/sparql-functions/custom_concat': custom_concat
     },
+    # CORS enabled by default
+    cors_enabled=True,
+    # Metadata used for the service description and Swagger UI:
     title="SPARQL endpoint for RDFLib graph", 
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.0.1",
     public_url='https://your-endpoint-url/sparql',
-    cors_enabled=True
+    # Example queries displayed in the Swagger UI to help users
+    example_query="""Example query:\n
+​```
+PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+SELECT ?concat ?concatLength WHERE {
+    BIND("First" AS ?first)
+    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+}
+​```"""
 )
 ```
-
-Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with docker-compose deployment. The best way to create a new SPARQL endpoint is to copy this `example` folder and start from it.
 
 ## Run the SPARQL endpoint 🦄
 

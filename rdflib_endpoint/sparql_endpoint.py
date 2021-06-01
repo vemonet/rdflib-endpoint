@@ -1,15 +1,15 @@
-from copy import Error
 import rdflib
 from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.graph import ConjunctiveGraph
+from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
 from rdflib.plugins.sparql.evalutils import _eval
-from rdflib.plugins.sparql.parser import Query as QueryParser
 from rdflib.plugins.sparql.processor import translateQuery as translateQuery
-# from rdflib.plugins.sparql import parser
-# from rdflib.plugins.sparql.algebra import algebraTranslateQuery, pprintAlgebra
-# from rdflib.namespace import Namespace
+# from rdflib.plugins.sparql.algebra import pprintAlgebra
+## Import json-ld
+# from rdflib import Graph, plugin
+# from rdflib.serializer import Serializer
 
 from fastapi import FastAPI, Request, Response, Query
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -54,6 +54,10 @@ SELECT ?concat ?concatLength WHERE {
 
         # Instantiate FastAPI
         super().__init__(title=title, description=description, version=version)
+
+        # Save custom function in custom evaluation dictionary
+        # Handle multiple functions directly in the evalCustomFunctions function
+        rdflib.plugins.sparql.CUSTOM_EVALS['evalCustomFunctions'] = self.evalCustomFunctions
         
         if cors_enabled:
             self.add_middleware(
@@ -69,10 +73,10 @@ SELECT ?concat ?concatLength WHERE {
                 "description": "SPARQL query results",
                 "content": {
                     "application/sparql-results+json": {
-                        "example": {"id": "bar", "value": "The bar tenders"}
+                        "results": {"bindings": []}, 'head': {'vars': []}
                     },
                     "application/json": {
-                        "example": {"id": "bar", "value": "The bar tenders"}
+                        "results": {"bindings": []}, 'head': {'vars': []}
                     },
                     "text/csv": {
                         "example": "s,p,o"
@@ -89,10 +93,16 @@ SELECT ?concat ?concatLength WHERE {
                     "application/xml": {
                         "example": "<root></root>"
                     },
+                    # "application/rdf+xml": {
+                    #     "example": '<?xml version="1.0" encoding="UTF-8"?> <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"></rdf:RDF>'
+                    # },
                 },
             },
-            501:{
-                "description": " Not Implemented",
+            400:{
+                "description": "Bad Request",
+            }, 
+            422:{
+                "description": "Unprocessable Entity",
             }, 
         }
 
@@ -113,7 +123,6 @@ SELECT ?concat ?concatLength WHERE {
             :param request: The HTTP GET request
             :param query: SPARQL query input.
             """
-            # request = await request
             if not query:
                 # Return the SPARQL endpoint service description
                 service_graph = Graph()
@@ -132,48 +141,51 @@ SELECT ?concat ?concatLength WHERE {
                 else:
                     return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
 
-            # Parse the query and retrieve the type of operation (e.g. SELECT)
-            # try:
-            #     parsed_query = translateQuery(QueryParser.parseString(query, parseAll=True))
-            #     query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
-            #     if query_operation != "Select Query":
-            #         return JSONResponse(status_code=501, content={"message": str(query_operation) + " not implemented"})
-            # except Exception as e:
-            #     print("Error parsing the SPARQL query: " + str(e))
-                # return JSONResponse(status_code=501, content={"message": "Error parsing the SPARQL query: " + str(e)})
-                # raise SPARQLError 
-            
             # Pretty print the query object 
             # parsed_query = parser.parseQuery(query)
             # tq = algebraTranslateQuery(parsed_query)
             # pprintAlgebra(tq)
 
-            # Save custom function in custom evaluation dictionary
-            # Handle multiple functions directly in the SPARQL_custom_functions function
-            rdflib.plugins.sparql.CUSTOM_EVALS['SPARQL_custom_functions'] = SPARQL_custom_functions
-
-            # Query an empty graph with the custom functions loaded
             try:
-                query_results = self.graph.query(query)
+                # Query an empty graph with the custom functions loaded
+                parsed_query = prepareQuery(query)
+                query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
+
+                query_results = self.graph.query(parsed_query)
             except Exception as e:
                 print("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
-                return JSONResponse(status_code=501, content={"message": "Error parsing the SPARQL query: " + str(e)})
+                return JSONResponse(status_code=400, content={"message": "Error parsing the SPARQL query: " + str(e)})
 
             # Format and return results depending on Accept mime type in request header
             output_mime_type = request.headers['accept']
             if not output_mime_type:
                 output_mime_type = 'application/xml'
+            
+            print(query_operation)
+            if query_operation == "Construct Query" and (output_mime_type == 'application/json' or output_mime_type == 'text/csv'):
+                output_mime_type = 'text/turtle'
+                # TODO: support JSON-LD for construct query?
+                # g.serialize(format='json-ld', indent=4)
+            if query_operation == "Construct Query" and output_mime_type == 'application/xml':
+                output_mime_type = 'application/rdf+xml'
 
             # print(output_mime_type)
-            if output_mime_type == 'text/csv' or output_mime_type == 'application/sparql-results+csv':
-                return Response(query_results.serialize(format = 'csv'), media_type=output_mime_type)
-            elif output_mime_type == 'application/json' or output_mime_type == 'application/sparql-results+json':
-                return Response(query_results.serialize(format = 'json'), media_type=output_mime_type)
-            elif output_mime_type == 'application/xml' or output_mime_type == 'application/sparql-results+xml':
-                return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
-            else:
-                ## By default (for federated queries)
-                return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
+            try:
+                if output_mime_type == 'text/csv' or output_mime_type == 'application/sparql-results+csv':
+                    return Response(query_results.serialize(format = 'csv'), media_type=output_mime_type)
+                elif output_mime_type == 'application/json' or output_mime_type == 'application/sparql-results+json':
+                    return Response(query_results.serialize(format = 'json'), media_type=output_mime_type)
+                elif output_mime_type == 'application/xml' or output_mime_type == 'application/sparql-results+xml':
+                    return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
+                elif output_mime_type == 'text/turtle' or output_mime_type == 'application/sparql-results+xml':
+                    # .serialize(format='turtle').decode("utf-8")
+                    return Response(query_results.serialize(format = 'turtle'), media_type=output_mime_type)
+                else:
+                    ## XML by default for federated queries
+                    return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
+            except Exception as e:
+                print("Error serializing the SPARQL query results with RDFLib: " + str(e))
+                return JSONResponse(status_code=422, content={"message": "Error serializing the SPARQL query results: " + str(e)})
 
         @self.post(
             "/sparql",
@@ -201,46 +213,6 @@ SELECT ?concat ?concatLength WHERE {
                     if params[0] == 'query':
                         query = params[1]
             return await sparql_endpoint(request, query)
-
-
-        def SPARQL_custom_functions(ctx:object, part:object) -> object:
-            """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
-            The results are then stored in Literal objects and added to the query results.
-
-            :param ctx:     <class 'rdflib.plugins.sparql.sparql.QueryContext'>
-            :param part:    <class 'rdflib.plugins.sparql.parserutils.CompValue'>
-            :return:        <class 'rdflib.plugins.sparql.processor.SPARQLResult'>
-            """
-
-            # This part holds basic implementation for adding new functions
-            if part.name == 'Extend':
-                query_results = []
-
-                # Information is retrieved and stored and passed through a generator
-                for eval_part in evalPart(ctx, part.p):
-                    # Checks if the function is a URI (custom function)
-                    if hasattr(part.expr, 'iri'):
-
-                        # Iterate through the custom functions passed in the constructor
-                        for function_uri, custom_function in self.functions.items():
-                            # Check if URI correspond to a registered custom function
-                            if part.expr.iri == URIRef(function_uri):
-                                # Execute each function
-                                query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
-
-
-                    else:
-                        # For built-in SPARQL functions (that are not URIs)
-                        evaluation = [_eval(part.expr, eval_part.forget(ctx, _except=part._vars))]
-                        if isinstance(evaluation[0], SPARQLError):
-                            raise evaluation[0]
-                        # Append results for built-in SPARQL functions
-                        for result in evaluation:
-                            query_results.append(eval_part.merge({part.var: Literal(result)}))
-                            
-                # print(query_results)
-                return query_results
-            raise NotImplementedError()
 
 
         @self.get("/", include_in_schema=False)
@@ -275,3 +247,41 @@ SELECT ?concat ?concatLength WHERE {
                     a sd:Graph ;
                 ] 
             ] .""".format(public_url=self.public_url, title=self.title, description=self.description.replace("\n", ""))
+
+    def evalCustomFunctions(self, ctx:object, part:object) -> object:
+        """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
+        The results are then stored in Literal objects and added to the query results.
+
+        :param ctx:     <class 'rdflib.plugins.sparql.sparql.QueryContext'>
+        :param part:    <class 'rdflib.plugins.sparql.parserutils.CompValue'>
+        :return:        <class 'rdflib.plugins.sparql.processor.SPARQLResult'>
+        """
+
+        # This part holds basic implementation for adding new functions
+        if part.name == 'Extend':
+            query_results = []
+
+            # Information is retrieved and stored and passed through a generator
+            for eval_part in evalPart(ctx, part.p):
+                # Checks if the function is a URI (custom function)
+                if hasattr(part.expr, 'iri'):
+
+                    # Iterate through the custom functions passed in the constructor
+                    for function_uri, custom_function in self.functions.items():
+                        # Check if URI correspond to a registered custom function
+                        if part.expr.iri == URIRef(function_uri):
+                            # Execute each function
+                            query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
+
+
+                else:
+                    # For built-in SPARQL functions (that are not URIs)
+                    evaluation = [_eval(part.expr, eval_part.forget(ctx, _except=part._vars))]
+                    if isinstance(evaluation[0], SPARQLError):
+                        raise evaluation[0]
+                    # Append results for built-in SPARQL functions
+                    for result in evaluation:
+                        query_results.append(eval_part.merge({part.var: Literal(result)}))
+                        
+            return query_results
+        raise NotImplementedError()
