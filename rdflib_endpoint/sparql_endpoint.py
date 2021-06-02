@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
 import re
+import os
 from urllib import parse
 
 class SparqlEndpoint(FastAPI):
@@ -30,6 +31,7 @@ class SparqlEndpoint(FastAPI):
             version="0.0.1",
             graph=ConjunctiveGraph(), 
             functions={},
+            enable_update=False,
             cors_enabled=True,
             public_url='https://sparql.openpredict.semanticscience.org/sparql',
             example_query="""Example query:\n
@@ -51,6 +53,7 @@ SELECT ?concat ?concatLength WHERE {
         self.version=version
         self.public_url=public_url
         self.example_query=example_query
+        self.enable_update=enable_update
 
         # Instantiate FastAPI
         super().__init__(title=title, description=description, version=version)
@@ -100,10 +103,13 @@ SELECT ?concat ?concatLength WHERE {
             },
             400:{
                 "description": "Bad Request",
+            },
+            403:{
+                "description": "Forbidden",
             }, 
             422:{
                 "description": "Unprocessable Entity",
-            }, 
+            },
         }
 
         @self.get(
@@ -113,6 +119,7 @@ SELECT ?concat ?concatLength WHERE {
             responses=api_responses
         )
         async def sparql_endpoint(request: Request,
+            apikey: Optional[str],
             query: Optional[str] = Query(
                 None,
                 # description=self.example_query,
@@ -155,6 +162,15 @@ SELECT ?concat ?concatLength WHERE {
             except Exception as e:
                 print("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(status_code=400, content={"message": "Error parsing the SPARQL query: " + str(e)})
+
+            if not self.enable_update:
+                # TODO: also check for INSERT DATA and DELETE DATA
+                if query_operation == "Insert Query" or query_operation == "Delete Query":
+                    return JSONResponse(status_code=403, content={"message": "INSERT and DELETE queries are not allowed."})
+
+            if os.getenv('RDFLIB_APIKEY') and (query_operation == "Insert Query" or query_operation == "Delete Query"):
+                if apikey != os.getenv('RDFLIB_APIKEY'):
+                    return JSONResponse(status_code=403, content={"message": "Wrong APIKEY."})
 
             # Format and return results depending on Accept mime type in request header
             output_mime_type = request.headers['accept']

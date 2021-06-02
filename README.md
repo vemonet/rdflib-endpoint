@@ -99,7 +99,7 @@ SELECT ?concat ?concatLength WHERE {
 
 ## Run the SPARQL endpoint 🦄
 
-Run the FastAPI server from the root folder with `uvicorn` on http://localhost:8000 
+Run the FastAPI server from the `example` folder with `uvicorn` on http://localhost:8000 
 
 ```bash
 cd example
@@ -114,7 +114,7 @@ Install additional dependencies:
 pip install pytest requests
 ```
 
-Run the tests locally:
+Run the tests locally (from the root folder):
 
 ```bash
 pytest -s
@@ -122,7 +122,7 @@ pytest -s
 
 ## Projects using rdflib-endpoint 📂
 
-Some projects using rdflib-endpoint to deploy custom SPARQL endpoints with python:
+Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 
 * https://github.com/MaastrichtU-IDS/openpredict-sparql-service
   * Serve predicted biomedical entities associations (e.g. disease treated by drug) using the OpenPredict classifier
