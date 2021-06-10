@@ -119,7 +119,7 @@ SELECT ?concat ?concatLength WHERE {
             responses=api_responses
         )
         async def sparql_endpoint(request: Request,
-            apikey: Optional[str],
+            apikey: Optional[str] = None,
             query: Optional[str] = Query(
                 None,
                 # description=self.example_query,
@@ -211,6 +211,7 @@ SELECT ?concat ?concatLength WHERE {
         )
         async def post_sparql_endpoint(
             request: Request,
+            apikey: Optional[str] = None,
             query: Optional[str] = Query(
                 None,
                 # description=self.example_query,
