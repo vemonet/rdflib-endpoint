@@ -57,7 +57,8 @@ jobs:
       env:
         # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=vemonet  -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.projectKey=vemonet_rdflib-endpoint -Dsonar.python.coverage.reportPaths=coverage.xml
+      # Change the SonarCloud tests analysis config here
+      run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=vemonet  -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.projectKey=vemonet_rdflib-endpoint -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.sources=rdflib_endpoint
 
 
     # - name: SonarCloud Scan
