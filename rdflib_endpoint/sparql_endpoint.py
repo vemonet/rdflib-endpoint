@@ -229,7 +229,7 @@ SELECT ?concat ?concatLength WHERE {
                 for params in parsed_query:
                     if params[0] == 'query':
                         query = params[1]
-            return await sparql_endpoint(request, query)
+            return await sparql_endpoint(request, apikey, query)
 
 
         @self.get("/", include_in_schema=False)
