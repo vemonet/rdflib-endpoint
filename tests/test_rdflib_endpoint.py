@@ -16,6 +16,11 @@ def test_service_description():
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
+    # Check for application/xml
+    response = endpoint.post('/sparql', 
+        headers={'accept': 'application/xml'})
+    assert response.status_code == 200
+
 
 def test_custom_concat():
     endpoint = TestClient(app)
@@ -30,6 +35,17 @@ def test_custom_concat():
         headers={'accept': 'application/json'})
     assert response.status_code == 200
     assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+
+def test_bad_request():
+    endpoint = TestClient(app)
+    response = endpoint.get('/sparql?query=figarofigarofigaro', 
+        headers={'accept': 'application/json'})
+    assert response.status_code == 400
+
+def test_redirect():
+    endpoint = TestClient(app)
+    response = endpoint.get('/')
+    assert response.status_code == 200
 
 
 custom_concat_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
