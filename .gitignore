@@ -2,6 +2,7 @@ __pycache__
 .eggs
 *.egg-info
 .pytest_cache
+.venv
 
 # OpenPredict folder
 data/

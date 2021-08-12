@@ -105,3 +105,8 @@ app = SparqlEndpoint(
     cors_enabled=True,
     example_query=example_query
 )
+
+## Uncomment to run it directly with python app/main.py
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)

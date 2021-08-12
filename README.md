@@ -30,6 +30,15 @@ cd rdflib-endpoint
 pip install -e .
 ```
 
+You can use a virtual environment to avoid version conflicts:
+
+```bash
+# Create the virtual environment folder in your workspace
+python3 -m venv .venv
+# Activate it using a script in the created folder
+source .venv/bin/activate
+```
+
 ## Define custom SPARQL functions 🐍 
 
 Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with a docker deployment. The best way to create a new SPARQL endpoint is to copy this `example` folder and start from it.
@@ -42,15 +51,7 @@ import rdflib
 from rdflib.plugins.sparql.evalutils import _eval
 
 def custom_concat(query_results, ctx, part, eval_part):
-    """
-    Concat 2 strings in the 2 senses and return the length as additional Length variable
-
-    Query:
-    PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
-    SELECT ?concat ?concatLength WHERE {
-        BIND("First" AS ?first)
-        BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-    }
+    """Concat 2 strings in the 2 senses and return the length as additional Length variable
     """
     argument1 = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
     argument2 = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
