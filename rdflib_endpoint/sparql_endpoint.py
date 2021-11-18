@@ -1,6 +1,6 @@
 import rdflib
 from rdflib import Graph, Literal, RDF, URIRef
-from rdflib.graph import ConjunctiveGraph
+# from rdflib.graph import ConjunctiveGraph
 from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
@@ -25,11 +25,13 @@ class SparqlEndpoint(FastAPI):
     Class to deploy a SPARQL endpoint using a RDFLib Graph
     """
 
-    def __init__(self, 
-            title: str = "SPARQL endpoint for RDFLib graph", 
-            description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-            version="0.0.1",
-            graph=ConjunctiveGraph(), 
+    def __init__(self,
+            *args,
+            # title: str = "SPARQL endpoint for RDFLib graph", 
+            # description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
+            # version="0.0.1",
+            # graph=ConjunctiveGraph(), 
+            graph=Graph(),
             functions={},
             enable_update=False,
             cors_enabled=True,
@@ -41,22 +43,26 @@ SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }
-```""") -> None:
+```""", 
+            **kwargs) -> None:
         """
         Constructor of the SPARQL endpoint, everything happens here.
         FastAPI calls are defined in this constructor
         """
         self.graph=graph
         self.functions=functions
-        self.title=title
-        self.description=description
-        self.version=version
+        # self.title=title
+        # self.description=description
+        # self.version=version
         self.public_url=public_url
         self.example_query=example_query
         self.enable_update=enable_update
 
         # Instantiate FastAPI
-        super().__init__(title=title, description=description, version=version)
+        super().__init__(
+            *args, 
+            # title=title, description=description, version=version, 
+            **kwargs)
 
         # Save custom function in custom evaluation dictionary
         # Handle multiple functions directly in the evalCustomFunctions function
@@ -177,7 +183,7 @@ SELECT ?concat ?concatLength WHERE {
             if not output_mime_type:
                 output_mime_type = 'application/xml'
             
-            print(query_operation)
+            # print(query_operation)
             if query_operation == "Construct Query" and (output_mime_type == 'application/json' or output_mime_type == 'text/csv'):
                 output_mime_type = 'text/turtle'
                 # TODO: support JSON-LD for construct query?
