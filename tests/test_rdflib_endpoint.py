@@ -41,6 +41,7 @@ def test_custom_concat_json():
     assert response.status_code == 200
     assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
+
 def test_custom_concat_xml():
     response = endpoint.post('/sparql', 
         data='query=' + custom_concat_query, 
@@ -48,12 +49,21 @@ def test_custom_concat_xml():
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
-def test_custom_concat_turtle():
+def test_fail_select_turtle():
     response = endpoint.post('/sparql', 
         data='query=' + custom_concat_query, 
         headers={'accept': 'text/turtle'})
+    assert response.status_code == 422
+    # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+
+
+def test_concat_construct_turtle():
+    response = endpoint.post('/sparql', 
+        data='query=' + custom_concat_construct, 
+        headers={'accept': 'text/turtle'})
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+
 
 def test_bad_request():
     response = endpoint.get('/sparql?query=figarofigarofigaro', 
@@ -67,6 +77,14 @@ def test_redirect():
 
 custom_concat_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
+    BIND("First" AS ?first)
+    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+}"""
+
+custom_concat_construct = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+CONSTRUCT { 
+    <http://test> <http://concat> ?concat, ?concatLength .
+} WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }"""
