@@ -1,45 +1,28 @@
-# SPARQL endpoint for RDFLib custom functions
+# ✨ SPARQL endpoint for RDFLib custom functions
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved in a query to another SPARQL endpoint.
+`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. 
+
+It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved in a query to another SPARQL endpoint.
 
 The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is deployed based on the FastAPI framework. 
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled.
 
-Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.7, 3.8 and 3.9
+Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
 
 Please create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented
 
-## Install the package 📥
+## 📥 Install the package
 
-Simply install directly from GitHub:
-
-```bash
-pip install rdflib-endpoint@git+https://github.com/vemonet/rdflib-endpoint@main
-```
-
-> Let us know in the [issues](/issues) if you would be interested for this package to be published to PyPI.
-
-Or clone and install locally for development:
+Install Pipu Simply install directly from GitHub:
 
 ```bash
-git clone https://github.com/vemonet/rdflib-endpoint
-cd rdflib-endpoint
-pip install -e .
+pip install rdflib-endpoint
 ```
 
-You can use a virtual environment to avoid version conflicts:
-
-```bash
-# Create the virtual environment folder in your workspace
-python3 -m venv .venv
-# Activate it using a script in the created folder
-source .venv/bin/activate
-```
-
-## Define custom SPARQL functions 🐍 
+## 🐍  Define custom SPARQL functions
 
 Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with a docker deployment. The best way to create a new SPARQL endpoint is to copy this `example` folder and start from it.
 
@@ -98,7 +81,7 @@ SELECT ?concat ?concatLength WHERE {
 )
 ```
 
-## Run the SPARQL endpoint 🦄
+## 🦄 Run the SPARQL endpoint
 
 To quickly get started you can run the FastAPI server from the `example` folder with `uvicorn` on http://localhost:8000 
 
@@ -107,7 +90,34 @@ cd example
 uvicorn main:app --reload --app-dir app
 ```
 
-## Run the tests ✅️
+## 🧑‍💻 Development
+
+### 📥 Install for development
+
+Simply install directly from GitHub:
+
+```bash
+pip install rdflib-endpoint@git+https://github.com/vemonet/rdflib-endpoint@main
+```
+
+Or clone and install locally for development:
+
+```bash
+git clone https://github.com/vemonet/rdflib-endpoint
+cd rdflib-endpoint
+pip install -e .
+```
+
+You can use a virtual environment to avoid version conflicts:
+
+```bash
+# Create the virtual environment folder in your workspace
+python3 -m venv .venv
+# Activate it using a script in the created folder
+source .venv/bin/activate
+```
+
+### ✅️ Run the tests
 
 Install additional dependencies:
 
@@ -121,7 +131,7 @@ Run the tests locally (from the root folder):
 pytest -s
 ```
 
-## Projects using rdflib-endpoint 📂
+## 📂 Projects using rdflib-endpoint
 
 Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 

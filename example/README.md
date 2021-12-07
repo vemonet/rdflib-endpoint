@@ -81,6 +81,16 @@ WHERE {
 }
 ```
 
+### Insert data
+
+Insert data in the in-memory rdflib graph:
+
+```SPARQL
+INSERT DATA {
+    <http://subject> <http://predicate> <http://object> .
+}
+```
+
 ## Install and run ✨️
 
 1. Install dependencies

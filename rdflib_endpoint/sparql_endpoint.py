@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
+import logging
 import re
 import os
 from urllib import parse
@@ -125,7 +126,7 @@ SELECT ?concat ?concatLength WHERE {
             responses=api_responses
         )
         async def sparql_endpoint(request: Request,
-            apikey: Optional[str] = None,
+            # apikey: Optional[str] = None,
             query: Optional[str] = Query(
                 None,
                 # description=self.example_query,
@@ -140,7 +141,6 @@ SELECT ?concat ?concatLength WHERE {
                 # Return the SPARQL endpoint service description
                 service_graph = Graph()
                 # service_graph.parse('app/service-description.ttl', format="ttl")
-                print(service_description_ttl)
                 service_graph.parse(data=service_description_ttl, format="ttl")
 
                 # Add custom functions URI to the service description
@@ -160,30 +160,32 @@ SELECT ?concat ?concatLength WHERE {
             # pprintAlgebra(tq)
 
             try:
-                # Query an empty graph with the custom functions loaded
+                # Query the graph with the custom functions loaded
                 parsed_query = prepareQuery(query)
                 query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
-
-                query_results = self.graph.query(parsed_query)
             except Exception as e:
-                print("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
+                logging.error("Error parsing the SPARQL query: " + str(e))
                 return JSONResponse(status_code=400, content={"message": "Error parsing the SPARQL query: " + str(e)})
 
-            if not self.enable_update:
-                # TODO: also check for INSERT DATA and DELETE DATA
-                if query_operation == "Insert Query" or query_operation == "Delete Query":
-                    return JSONResponse(status_code=403, content={"message": "INSERT and DELETE queries are not allowed."})
+            # Useless: RDFLib dont support SPARQL insert (Expected {SelectQuery | ConstructQuery | DescribeQuery | AskQuery}, found 'INSERT')
+            # if not self.enable_update:
+            #     if query_operation == "Insert Query" or query_operation == "Delete Query":
+            #         return JSONResponse(status_code=403, content={"message": "INSERT and DELETE queries are not allowed."})
+            # if os.getenv('RDFLIB_APIKEY') and (query_operation == "Insert Query" or query_operation == "Delete Query"):
+            #     if apikey != os.getenv('RDFLIB_APIKEY'):
+            #         return JSONResponse(status_code=403, content={"message": "Wrong API KEY."})
 
-            if os.getenv('RDFLIB_APIKEY') and (query_operation == "Insert Query" or query_operation == "Delete Query"):
-                if apikey != os.getenv('RDFLIB_APIKEY'):
-                    return JSONResponse(status_code=403, content={"message": "Wrong APIKEY."})
+            try:
+                query_results = self.graph.query(parsed_query)
+            except Exception as e:
+                logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
+                return JSONResponse(status_code=400, content={"message": "Error executing the SPARQL query on the RDFLib Graph: " + str(e)})
 
             # Format and return results depending on Accept mime type in request header
             output_mime_type = request.headers['accept']
             if not output_mime_type:
                 output_mime_type = 'application/xml'
             
-            # print(query_operation)
             if query_operation == "Construct Query" and (output_mime_type == 'application/json' or output_mime_type == 'text/csv'):
                 output_mime_type = 'text/turtle'
                 # TODO: support JSON-LD for construct query?
@@ -191,7 +193,6 @@ SELECT ?concat ?concatLength WHERE {
             if query_operation == "Construct Query" and output_mime_type == 'application/xml':
                 output_mime_type = 'application/rdf+xml'
 
-            # print(output_mime_type)
             try:
                 if output_mime_type == 'text/csv' or output_mime_type == 'application/sparql-results+csv':
                     return Response(query_results.serialize(format = 'csv'), media_type=output_mime_type)
@@ -206,7 +207,7 @@ SELECT ?concat ?concatLength WHERE {
                     ## XML by default for federated queries
                     return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
             except Exception as e:
-                print("Error serializing the SPARQL query results with RDFLib: " + str(e))
+                logging.error("Error serializing the SPARQL query results with RDFLib: " + str(e))
                 return JSONResponse(status_code=422, content={"message": "Error serializing the SPARQL query results: " + str(e)})
 
         @self.post(
@@ -217,7 +218,7 @@ SELECT ?concat ?concatLength WHERE {
         )
         async def post_sparql_endpoint(
             request: Request,
-            apikey: Optional[str] = None,
+            # apikey: Optional[str] = None,
             query: Optional[str] = Query(
                 None,
                 # description=self.example_query,
@@ -235,7 +236,7 @@ SELECT ?concat ?concatLength WHERE {
                 for params in parsed_query:
                     if params[0] == 'query':
                         query = params[1]
-            return await sparql_endpoint(request, apikey, query)
+            return await sparql_endpoint(request, query)
 
 
         @self.get("/", include_in_schema=False)
