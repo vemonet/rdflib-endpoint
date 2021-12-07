@@ -1,6 +1,6 @@
 import rdflib
 from rdflib import Graph, Literal, RDF, URIRef
-# from rdflib.graph import ConjunctiveGraph
+from rdflib.graph import ConjunctiveGraph
 from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
@@ -27,11 +27,11 @@ class SparqlEndpoint(FastAPI):
 
     def __init__(self,
             *args,
-            # title: str = "SPARQL endpoint for RDFLib graph", 
-            # description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-            # version="0.0.1",
-            # graph=ConjunctiveGraph(), 
-            graph=Graph(),
+            title: str = "SPARQL endpoint for RDFLib graph", 
+            description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
+            version="0.0.1",
+            graph=ConjunctiveGraph(), 
+            # graph=Graph(),
             functions={},
             enable_update=False,
             cors_enabled=True,
@@ -44,25 +44,25 @@ SELECT ?concat ?concatLength WHERE {
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }
 ```""", 
-            **kwargs) -> None:
+            **kwargs
+        ) -> None:
         """
         Constructor of the SPARQL endpoint, everything happens here.
         FastAPI calls are defined in this constructor
         """
         self.graph=graph
         self.functions=functions
-        # self.title=title
-        # self.description=description
-        # self.version=version
+        self.title=title
+        self.description=description
+        self.version=version
         self.public_url=public_url
         self.example_query=example_query
         self.enable_update=enable_update
 
         # Instantiate FastAPI
         super().__init__(
-            *args, 
-            # title=title, description=description, version=version, 
-            **kwargs)
+            title=title, description=description, version=version, 
+        )
 
         # Save custom function in custom evaluation dictionary
         # Handle multiple functions directly in the evalCustomFunctions function
