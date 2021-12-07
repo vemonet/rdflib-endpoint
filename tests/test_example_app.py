@@ -1,19 +1,12 @@
 from fastapi.testclient import TestClient
-from rdflib_endpoint import SparqlEndpoint
-from example.app.main import custom_concat
+from example.app.main import app
 
 # Use app defined in example folder
-app = SparqlEndpoint(
-    functions={
-        'https://w3id.org/um/sparql-functions/custom_concat': custom_concat,
-    }
-)
-
 endpoint = TestClient(app)
 
 def test_service_description():
     response = endpoint.get('/sparql', headers={'accept': 'text/turtle'})
-    print(response.text.strip())
+    # print(response.text.strip())
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
@@ -62,17 +55,20 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 
-<https://sparql.openpredict.semanticscience.org/sparql> a sd:Service ;
+<https://service.openpredict.137.120.31.102.nip.io/sparql> a sd:Service ;
     rdfs:label "SPARQL endpoint for RDFLib graph" ;
     dc:description "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. [Source code](https://github.com/vemonet/rdflib-endpoint)" ;
     sd:defaultDataset [ a sd:Dataset ;
             sd:defaultGraph [ a sd:Graph ] ] ;
     sd:defaultEntailmentRegime ent:RDFS ;
-    sd:endpoint <https://sparql.openpredict.semanticscience.org/sparql> ;
-    sd:extensionFunction <https://w3id.org/um/sparql-functions/custom_concat> ;
+    sd:endpoint <https://service.openpredict.137.120.31.102.nip.io/sparql> ;
+    sd:extensionFunction <https://w3id.org/um/openpredict/most_similar>,
+        <https://w3id.org/um/sparql-functions/custom_concat> ;
     sd:feature sd:DereferencesURIs ;
     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
         <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
     sd:supportedLanguage sd:SPARQL11Query .
+
+<https://w3id.org/um/openpredict/most_similar> a sd:Function .
 
 <https://w3id.org/um/sparql-functions/custom_concat> a sd:Function ."""

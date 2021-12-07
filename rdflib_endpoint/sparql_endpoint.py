@@ -119,6 +119,11 @@ SELECT ?concat ?concatLength WHERE {
             },
         }
 
+        mimetypes={
+            'turtle': 'text/turtle',
+            'xml_results': 'application/sparql-results+xml'
+        }
+
         @self.get(
             "/sparql",
             name="SPARQL endpoint",
@@ -149,8 +154,8 @@ SELECT ?concat ?concatLength WHERE {
                     service_graph.add((URIRef(self.public_url), URIRef('http://www.w3.org/ns/sparql-service-description#extensionFunction'), URIRef(custom_function_uri)))
 
                 # Return the service description RDF as turtle or XML
-                if request.headers['accept'] == 'text/turtle':
-                    return Response(service_graph.serialize(format = 'turtle'), media_type='text/turtle')
+                if request.headers['accept'] == mimetypes['turtle']:
+                    return Response(service_graph.serialize(format = 'turtle'), media_type=mimetypes['turtle'])
                 else:
                     return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
 
@@ -187,7 +192,7 @@ SELECT ?concat ?concatLength WHERE {
                 output_mime_type = 'application/xml'
             
             if query_operation == "Construct Query" and (output_mime_type == 'application/json' or output_mime_type == 'text/csv'):
-                output_mime_type = 'text/turtle'
+                output_mime_type = mimetypes['turtle']
                 # TODO: support JSON-LD for construct query?
                 # g.serialize(format='json-ld', indent=4)
             if query_operation == "Construct Query" and output_mime_type == 'application/xml':
@@ -198,14 +203,14 @@ SELECT ?concat ?concatLength WHERE {
                     return Response(query_results.serialize(format = 'csv'), media_type=output_mime_type)
                 elif output_mime_type == 'application/json' or output_mime_type == 'application/sparql-results+json':
                     return Response(query_results.serialize(format = 'json'), media_type=output_mime_type)
-                elif output_mime_type == 'application/xml' or output_mime_type == 'application/sparql-results+xml':
+                elif output_mime_type == 'application/xml' or output_mime_type == mimetypes['xml_results']:
                     return Response(query_results.serialize(format = 'xml'), media_type=output_mime_type)
-                elif output_mime_type == 'text/turtle' or output_mime_type == 'application/sparql-results+xml':
+                elif output_mime_type == mimetypes['turtle'] or output_mime_type == mimetypes['xml_results']:
                     # .serialize(format='turtle').decode("utf-8")
                     return Response(query_results.serialize(format = 'turtle'), media_type=output_mime_type)
                 else:
                     ## XML by default for federated queries
-                    return Response(query_results.serialize(format = 'xml'), media_type='application/sparql-results+xml')
+                    return Response(query_results.serialize(format = 'xml'), media_type=mimetypes['xml_results'])
             except Exception as e:
                 logging.error("Error serializing the SPARQL query results with RDFLib: " + str(e))
                 return JSONResponse(status_code=422, content={"message": "Error serializing the SPARQL query results: " + str(e)})
