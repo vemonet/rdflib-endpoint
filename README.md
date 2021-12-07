@@ -100,7 +100,7 @@ SELECT ?concat ?concatLength WHERE {
 
 ## Run the SPARQL endpoint 🦄
 
-Run the FastAPI server from the `example` folder with `uvicorn` on http://localhost:8000 
+To quickly get started you can run the FastAPI server from the `example` folder with `uvicorn` on http://localhost:8000 
 
 ```bash
 cd example
