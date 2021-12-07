@@ -4,5 +4,4 @@ __pycache__
 .pytest_cache
 .venv
 
-# OpenPredict folder
 data/

@@ -8,7 +8,7 @@ The user defines and registers custom SPARQL functions using Python, and/or popu
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled.
 
-Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.6, 3.7, 3.8 and 3.9
+Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for python 3.7, 3.8 and 3.9
 
 Please create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented
 

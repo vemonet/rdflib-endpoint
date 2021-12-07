@@ -2,10 +2,9 @@ from fastapi.testclient import TestClient
 from example.app.main import app
 
 # Use app defined in example folder
-# endpoint = TestClient(app)
+endpoint = TestClient(app)
 
 def test_service_description():
-    endpoint = TestClient(app)
     response = endpoint.get('/sparql', headers={'accept': 'text/turtle'})
     # print(response.text.strip())
     assert response.status_code == 200
@@ -23,7 +22,6 @@ def test_service_description():
 
 
 def test_custom_concat():
-    endpoint = TestClient(app)
     response = endpoint.get('/sparql?query=' + custom_concat_query, 
         headers={'accept': 'application/json'})
     # print(response.json())
@@ -37,13 +35,11 @@ def test_custom_concat():
     assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 def test_bad_request():
-    endpoint = TestClient(app)
     response = endpoint.get('/sparql?query=figarofigarofigaro', 
         headers={'accept': 'application/json'})
     assert response.status_code == 400
 
 def test_redirect():
-    endpoint = TestClient(app)
     response = endpoint.get('/')
     assert response.status_code == 200
 

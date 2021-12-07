@@ -14,7 +14,7 @@ setup(
     # packages=find_packages(include=['rdflib_endpoint']),
     # package_dir={'rdflib_endpoint': 'rdflib_endpoint'},
 
-    python_requires='>=3.6.0',
+    python_requires='>=3.7.0',
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
     install_requires=open("requirements.txt", "r").readlines(),
@@ -23,7 +23,6 @@ setup(
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
