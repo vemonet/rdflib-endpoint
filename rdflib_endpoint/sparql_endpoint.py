@@ -29,7 +29,7 @@ class SparqlEndpoint(FastAPI):
             *args,
             title: str = "SPARQL endpoint for RDFLib graph", 
             description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-            version="0.0.1",
+            version="0.1.0",
             graph=ConjunctiveGraph(), 
             # graph=Graph(),
             functions={},

@@ -84,7 +84,7 @@ app = SparqlEndpoint(
     # Metadata used for the service description and Swagger UI:
     title="SPARQL endpoint for RDFLib graph", 
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-    version="0.0.1",
+    version="0.1.0",
     public_url='https://your-endpoint-url/sparql',
     # Example queries displayed in the Swagger UI to help users
     example_query="""Example query:\n
