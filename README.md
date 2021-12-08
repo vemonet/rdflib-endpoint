@@ -1,12 +1,14 @@
-# ✨ SPARQL endpoint for RDFLib custom functions
+# ✨ SPARQL endpoint for RDFLib
 
-[![Python versions](https://img.shields.io/pypi/pyversions/openpredict)](https://pypi.org/project/openpredict) [![Version](https://img.shields.io/pypi/v/openpredict)](https://pypi.org/project/openpredict)
+[![Version](https://img.shields.io/pypi/v/rdflib-endpoint)](https://pypi.org/project/rdflib-endpoint) [![Python versions](https://img.shields.io/pypi/pyversions/rdflib-endpoint)](https://pypi.org/project/rdflib-endpoint)
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via custom SPARQL functions. 
+`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
 
-It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved in a query to another SPARQL endpoint.
+It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved using a `SERVICE` query to another SPARQL endpoint.
+
+## 🧑‍🏫 How it works
 
 The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is deployed based on the FastAPI framework. 
 
@@ -18,7 +20,7 @@ Please create an [issue](/issues), or send a pull request if you are facing issu
 
 ## 📥 Install the package
 
-Install Pipu Simply install directly from GitHub:
+Install the package from [PyPI](https://pypi.org/project/rdflib-endpoint/):
 
 ```bash
 pip install rdflib-endpoint
@@ -30,7 +32,7 @@ Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/ex
 
 Create a `app/main.py` file in your project folder with your functions and endpoint parameters:
 
-```python
+````python
 from rdflib_endpoint import SparqlEndpoint
 import rdflib
 from rdflib.plugins.sparql.evalutils import _eval
@@ -42,12 +44,10 @@ def custom_concat(query_results, ctx, part, eval_part):
     argument2 = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
     evaluation = []
     scores = []
-    concat_string = argument1 + argument2
-    reverse_string = argument2 + argument1
-    evaluation.append(concat_string)
-    evaluation.append(reverse_string)
-    scores.append(len(concat_string))
-    scores.append(len(reverse_string))
+    evaluation.append(argument1 + argument2)
+    evaluation.append(argument2 + argument1)
+    scores.append(len(argument1 + argument2))
+    scores.append(len(argument2 + argument1))
     # Append the results for our custom function
     for i, result in enumerate(evaluation):
         query_results.append(eval_part.merge({
@@ -71,17 +71,17 @@ app = SparqlEndpoint(
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
     public_url='https://your-endpoint-url/sparql',
-    # Example queries displayed in the Swagger UI to help users
+    # Example queries displayed in the Swagger UI to help users try your function
     example_query="""Example query:\n
-​```
+```
 PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }
-​```"""
+```"""
 )
-```
+````
 
 ## 🦄 Run the SPARQL endpoint
 
@@ -92,11 +92,13 @@ cd example
 uvicorn main:app --reload --app-dir app
 ```
 
+> Checkout in the `example/README.md` for more details, such as deploying it with docker.
+
 ## 🧑‍💻 Development
 
 ### 📥 Install for development
 
-Simply install directly from GitHub:
+Install from the latest GitHub commit to make sure you have the latest updates:
 
 ```bash
 pip install rdflib-endpoint@git+https://github.com/vemonet/rdflib-endpoint@main
@@ -110,7 +112,7 @@ cd rdflib-endpoint
 pip install -e .
 ```
 
-You can use a virtual environment to avoid version conflicts:
+You can use a virtual environment to avoid conflicts:
 
 ```bash
 # Create the virtual environment folder in your workspace
@@ -137,7 +139,7 @@ pytest -s
 
 Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 
-* https://github.com/MaastrichtU-IDS/openpredict-sparql-service
-  * Serve predicted biomedical entities associations (e.g. disease treated by drug) using the OpenPredict classifier
+* https://github.com/MaastrichtU-IDS/rdflib-endpoint-sparql-service
+  * Serve predicted biomedical entities associations (e.g. disease treated by drug) using the rdflib-endpoint classifier
 * https://github.com/vemonet/translator-sparql-service
   * A SPARQL endpoint to serve NCATS Translator services as SPARQL custom functions.
