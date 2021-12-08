@@ -44,10 +44,17 @@ def test_custom_concat_json():
 
 def test_custom_concat_xml():
     response = endpoint.post('/sparql', 
-        data='query=' + custom_concat_query, 
-        headers={'accept': 'application/xml'})
+        data='query=' + custom_concat_query)
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+
+def test_custom_concat_csv():
+    response = endpoint.post('/sparql', 
+        data='query=' + custom_concat_query,
+        headers={'accept': 'text/csv'})
+    assert response.status_code == 200
+    # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+
 
 def test_fail_select_turtle():
     response = endpoint.post('/sparql', 
@@ -58,12 +65,19 @@ def test_fail_select_turtle():
 
 
 def test_concat_construct_turtle():
+    # expected to return turtle
     response = endpoint.post('/sparql', 
         data='query=' + custom_concat_construct, 
-        headers={'accept': 'text/turtle'})
+        headers={'accept': 'application/json'})
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
+def test_concat_construct_xml():
+    # expected to return turtle
+    response = endpoint.post('/sparql', 
+        data='query=' + custom_concat_construct, 
+        headers={'accept': 'application/xml'})
+    assert response.status_code == 200
 
 def test_bad_request():
     response = endpoint.get('/sparql?query=figarofigarofigaro', 
