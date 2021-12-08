@@ -32,7 +32,6 @@ class SparqlEndpoint(FastAPI):
             description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
             version="0.1.0",
             graph=ConjunctiveGraph(), 
-            # graph=Graph(),
             functions={},
             enable_update=False,
             cors_enabled=True,
@@ -130,12 +129,9 @@ SELECT ?concat ?concatLength WHERE {
             description=self.example_query,
             responses=api_responses
         )
-        async def sparql_endpoint(request: Request,
-            # apikey: Optional[str] = None,
-            query: Optional[str] = Query(
-                None,
-                # description=self.example_query,
-            )):
+        async def sparql_endpoint(
+            request: Request,
+            query: Optional[str] = Query(None)):
             """
             Send a SPARQL query to be executed through HTTP GET operation.
             \f
@@ -223,11 +219,7 @@ SELECT ?concat ?concatLength WHERE {
         )
         async def post_sparql_endpoint(
             request: Request,
-            # apikey: Optional[str] = None,
-            query: Optional[str] = Query(
-                None,
-                # description=self.example_query,
-            )):
+            query: Optional[str] = Query(None)):
             """Send a SPARQL query to be executed through HTTP POST operation.
             \f
             :param request: The HTTP POST request with a .body()
