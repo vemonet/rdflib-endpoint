@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/pypi/v/rdflib-endpoint)](https://pypi.org/project/rdflib-endpoint) [![Python versions](https://img.shields.io/pypi/pyversions/rdflib-endpoint)](https://pypi.org/project/rdflib-endpoint)
 
-[![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
+[![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![Publish to PyPI](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
 `rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
 
