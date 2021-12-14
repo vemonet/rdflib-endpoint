@@ -8,7 +8,8 @@ from rdflib_endpoint.__main__ import run_serve
 
 @pytest.fixture
 def server(scope="module"):
-    proc = Process(target=run_serve, args=(str(pkg_resources.resource_filename('tests', 'resources/test.nt')), '0.0.0.0', 8000), daemon=True)
+    print(pkg_resources.resource_filename('tests', 'resources/test.nq'))
+    proc = Process(target=run_serve, args=([pkg_resources.resource_filename('tests', 'resources/test.nq')], '0.0.0.0', 8000), daemon=True)
     proc.start()
     time.sleep(1)
     yield proc

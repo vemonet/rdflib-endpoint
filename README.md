@@ -104,10 +104,12 @@ You can access the YASGUI interface to easily query the SPARQL endpoint on http:
 
 ## ⚡️ Quickly serve a RDF file as SPARQL endpoint
 
-You can also use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve a RDF file as a SPARQL endpoint, with YASGUI interface available on http://0.0.0.0:8000
+You can also use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint, with YASGUI interface available on http://0.0.0.0:8000
+
+You can use wildcard and provide multiple files, for example to serve all turtle, JSON-LD and nquads files in the current folder:
 
 ```bash
-rdflib-endpoint serve your-file.nt
+rdflib-endpoint serve *.ttl *.jsonld *.nq
 ```
 
 ## 🧑‍💻 Development

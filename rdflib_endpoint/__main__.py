@@ -1,4 +1,5 @@
 import sys
+import glob
 import click
 from rdflib import ConjunctiveGraph
 from rdflib_endpoint import SparqlEndpoint
@@ -12,16 +13,20 @@ def cli():
 
 
 @cli.command(help='Serve a local RDF file as a SPARQL endpoint by default on http://0.0.0.0:8000/sparql')
-@click.argument('file', nargs=1)
+@click.argument('files', nargs=-1)
 @click.option('--host', default='0.0.0.0', help='Host of the SPARQL endpoint')
 @click.option('--port', default=8000, help='Port of the SPARQL endpoint')
-def serve(file, host, port):
-    run_serve(file, host, port)
+def serve(files, host, port):
+    run_serve(files, host, port)
 
 
-def run_serve(file, host, port):
+def run_serve(files, host, port):
     g = ConjunctiveGraph()
-    g.parse(file)
+    for glob_file in files:
+        file_list = glob.glob(glob_file)
+        for file in file_list:
+            print('📥️ Loading', file)
+            g.parse(file)
     app = SparqlEndpoint(
         graph=g
     )

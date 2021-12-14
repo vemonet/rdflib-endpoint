@@ -1,0 +1,3 @@
+@prefix ns0: <http://test2/> .
+
+<http://test2/s> ns0:p ns0:o .
