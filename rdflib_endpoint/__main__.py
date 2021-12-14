@@ -29,5 +29,4 @@ def run_serve(file, host, port):
 
 
 if __name__ == "__main__":
-    print('exxiiiit')
     sys.exit(cli())

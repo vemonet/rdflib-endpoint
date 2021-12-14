@@ -7,9 +7,6 @@ from rdflib.plugins.sparql.sparql import SPARQLError
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.processor import translateQuery as translateQuery
 # from rdflib.plugins.sparql.algebra import pprintAlgebra
-## Import json-ld
-# from rdflib import Graph, plugin
-# from rdflib.serializer import Serializer
 
 from fastapi import FastAPI, Request, Response, Query
 from fastapi.responses import JSONResponse, RedirectResponse

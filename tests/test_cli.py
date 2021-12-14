@@ -5,7 +5,7 @@ import pkg_resources
 import requests
 from multiprocessing import Process
 import time
-from rdflib_endpoint.__main__ import serve
+
 
 def run_cli():
     runner = CliRunner()
