@@ -12,13 +12,13 @@ Feel free to create an [issue](/issues), or send a pull request if you are facin
 
 ## 🧑‍🏫 How it works
 
-The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started with `uvicorn`. 
+The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`. 
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
 
 `rdflib-endpoint` can also be used directly from the terminal to quickly serve a RDF file as a SPARQL endpoint.
 
-Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
+It has been built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
 
 ## 📥 Install the package
 
