@@ -52,17 +52,11 @@ jobs:
         pip install setuptools wheel twine
 
     - name: Build
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         python setup.py sdist bdist_wheel
-        # twine upload dist/*
 
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
         password: ${{ secrets.PYPI_TOKEN }}
-        # user: ${{ secrets.PYPI_USERNAME }}
-        # password: ${{ secrets.PYPI_PASSWORD }}
