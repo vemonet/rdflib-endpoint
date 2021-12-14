@@ -4,11 +4,11 @@
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![Publish to PyPI](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-`rdflib-endpoint`  is a SPARQL endpoint based on RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
+`rdflib-endpoint` is a SPARQL endpoint based on RDFLib to easily serve machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
 
 It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved using a `SERVICE` query to another SPARQL endpoint.
 
-Feel free to create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented.
+> Feel free to create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented.
 
 ## 🧑‍🏫 How it works
 
@@ -18,7 +18,7 @@ The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL qu
 
 `rdflib-endpoint` can also be used directly from the terminal to quickly serve a RDF file as a SPARQL endpoint.
 
-It has been built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
+Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
 
 ## 📥 Install the package
 
@@ -30,11 +30,11 @@ pip install rdflib-endpoint
 
 ## 🐍 SPARQL endpoint with custom functions
 
-Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with a docker deployment. The best way to create a new SPARQL endpoint is to copy this `example` folder and start from it.
+Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, including a docker deployment. A good way to create a new SPARQL endpoint is to copy this `example` folder, and start from it.
 
 ### 📝 Define custom SPARQL functions
 
-Create a `app/main.py` file in your project folder with your functions and endpoint parameters:
+Create a `app/main.py` file in your project folder with your custom SPARQL functions, and endpoint parameters:
 
 ````python
 from rdflib_endpoint import SparqlEndpoint
@@ -44,10 +44,12 @@ from rdflib.plugins.sparql.evalutils import _eval
 def custom_concat(query_results, ctx, part, eval_part):
     """Concat 2 strings in the 2 senses and return the length as additional Length variable
     """
+    # Retrieve the 2 input arguments
     argument1 = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
     argument2 = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
     evaluation = []
     scores = []
+    # Prepare the 2 result string, 1 for eval, 1 for scores
     evaluation.append(argument1 + argument2)
     evaluation.append(argument2 + argument1)
     scores.append(len(argument1 + argument2))
@@ -55,7 +57,8 @@ def custom_concat(query_results, ctx, part, eval_part):
     # Append the results for our custom function
     for i, result in enumerate(evaluation):
         query_results.append(eval_part.merge({
-            part.var: rdflib.Literal(result), 
+            part.var: rdflib.Literal(result),
+            # With an additional custom var for the length
             rdflib.term.Variable(part.var + 'Length'): rdflib.Literal(scores[i])
         }))
     return query_results, ctx, part, eval_part
@@ -68,9 +71,8 @@ app = SparqlEndpoint(
     functions={
         'https://w3id.org/um/sparql-functions/custom_concat': custom_concat
     },
-    # CORS enabled by default
     cors_enabled=True,
-    # Metadata used for the service description and Swagger UI:
+    # Metadata used for the SPARQL service description and Swagger UI:
     title="SPARQL endpoint for RDFLib graph", 
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
@@ -89,18 +91,20 @@ SELECT ?concat ?concatLength WHERE {
 
 ### 🦄 Run the SPARQL endpoint
 
-You can then run the FastAPI server from the `example` folder with `uvicorn` on http://localhost:8000 
+You can then run the SPARQL endpoint server from the `example` folder on http://localhost:8000/sparql with `uvicorn`
 
 ```bash
 cd example
 uvicorn main:app --reload --app-dir app
 ```
 
+You can access the YASGUI interface to easily query the SPARQL endpoint on http://localhost:8000
+
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.
 
 ## ⚡️ Quickly serve a RDF file as SPARQL endpoint
 
-You can also use `rdflib-endpoint` as a Command line interface (CLI) in your terminal to quickly serve a RDF file as a SPARQL endpoint on http://0.0.0.0:8000
+You can also use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve a RDF file as a SPARQL endpoint, with YASGUI interface available on http://0.0.0.0:8000
 
 ```bash
 rdflib-endpoint serve your-file.nt
@@ -135,13 +139,13 @@ source .venv/bin/activate
 
 ### ✅️ Run the tests
 
-Install additional dependencies:
+Install additional dependencies for testing:
 
 ```bash
 pip install pytest requests
 ```
 
-Run the tests locally (from the root folder):
+Run the tests locally (from the root folder) and display prints:
 
 ```bash
 pytest -s
