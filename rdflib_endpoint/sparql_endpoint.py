@@ -9,10 +9,12 @@ from rdflib.plugins.sparql.processor import translateQuery as translateQuery
 # from rdflib.plugins.sparql.algebra import pprintAlgebra
 
 from fastapi import FastAPI, Request, Response, Query
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse 
 from typing import Optional
 
+import pkg_resources
 import logging
 import re
 import os
@@ -235,14 +237,10 @@ SELECT ?concat ?concatLength WHERE {
 
 
         @self.get("/", include_in_schema=False)
-        async def redirect_root_to_docs():
-            """
-            Redirect the route / to /docs
+        async def serve_yasgui():
+            """Serve YASGUI interface"""
+            return FileResponse(pkg_resources.resource_filename('rdflib_endpoint', 'yasgui.html'))
 
-            :return:    Redirection to /docs
-            """
-            response = RedirectResponse(url='/docs')
-            return response
 
         # Service description returned when no query provided
         service_description_ttl = """@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
@@ -291,7 +289,6 @@ SELECT ?concat ?concatLength WHERE {
                         if part.expr.iri == URIRef(function_uri):
                             # Execute each function
                             query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
-
 
                 else:
                     # For built-in SPARQL functions (that are not URIs)
