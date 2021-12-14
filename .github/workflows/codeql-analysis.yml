@@ -2,11 +2,13 @@ name: "CodeQL analysis"
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ main ]
+  release:
+    types: [published]
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   # The branches below must be a subset of the branches above
+  #   branches: [ main ]
   # schedule:
   #   - cron: '00 23 * * 6'
     # At 23:00 on Saturday
