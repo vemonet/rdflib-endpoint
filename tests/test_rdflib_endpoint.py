@@ -29,28 +29,28 @@ def test_service_description():
 
 
 def test_custom_concat_json():
-    response = endpoint.get('/sparql?query=' + custom_concat_query, 
+    response = endpoint.get('/sparql?query=' + concat_select, 
         headers={'accept': 'application/json'})
     # print(response.json())
     assert response.status_code == 200
     assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
     response = endpoint.post('/sparql', 
-        data='query=' + custom_concat_query, 
+        data='query=' + concat_select, 
         headers={'accept': 'application/json'})
     assert response.status_code == 200
     assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
-def test_custom_concat_xml():
+def test_select_noaccept_xml():
     response = endpoint.post('/sparql', 
-        data='query=' + custom_concat_query)
+        data='query=' + concat_select)
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
-def test_custom_concat_csv():
+def test_select_csv():
     response = endpoint.post('/sparql', 
-        data='query=' + custom_concat_query,
+        data='query=' + concat_select,
         headers={'accept': 'text/csv'})
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
@@ -58,7 +58,7 @@ def test_custom_concat_csv():
 
 def test_fail_select_turtle():
     response = endpoint.post('/sparql', 
-        data='query=' + custom_concat_query, 
+        data='query=' + concat_select, 
         headers={'accept': 'text/turtle'})
     assert response.status_code == 422
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
@@ -89,7 +89,7 @@ def test_redirect():
     assert response.status_code == 200
 
 
-custom_concat_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+concat_select = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)

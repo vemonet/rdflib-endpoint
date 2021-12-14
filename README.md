@@ -4,19 +4,21 @@
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![Publish to PyPI](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-`rdflib-endpoint`  is a SPARQL endpoint based on a RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
+`rdflib-endpoint`  is a SPARQL endpoint based on RDFLib Graph to easily serve machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
 
 It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved using a `SERVICE` query to another SPARQL endpoint.
 
+Feel free to create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented.
+
 ## 🧑‍🏫 How it works
 
-The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is deployed based on the FastAPI framework. 
+The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started with `uvicorn`. 
 
-The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled.
+The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
+
+`rdflib-endpoint` can also be used directly from the terminal to quickly serve a RDF file as a SPARQL endpoint.
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
-
-Please create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented
 
 ## 📥 Install the package
 
@@ -26,9 +28,11 @@ Install the package from [PyPI](https://pypi.org/project/rdflib-endpoint/):
 pip install rdflib-endpoint
 ```
 
-## 🐍  Define custom SPARQL functions
+## 🐍 SPARQL endpoint with custom functions
 
 Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, with a docker deployment. The best way to create a new SPARQL endpoint is to copy this `example` folder and start from it.
+
+### 📝 Define custom SPARQL functions
 
 Create a `app/main.py` file in your project folder with your functions and endpoint parameters:
 
@@ -83,9 +87,9 @@ SELECT ?concat ?concatLength WHERE {
 )
 ````
 
-## 🦄 Run the SPARQL endpoint
+### 🦄 Run the SPARQL endpoint
 
-To quickly get started you can run the FastAPI server from the `example` folder with `uvicorn` on http://localhost:8000 
+You can then run the FastAPI server from the `example` folder with `uvicorn` on http://localhost:8000 
 
 ```bash
 cd example
@@ -93,6 +97,14 @@ uvicorn main:app --reload --app-dir app
 ```
 
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.
+
+## ⚡️ Quickly serve a RDF file as SPARQL endpoint
+
+You can also use `rdflib-endpoint` as a Command line interface (CLI) in your terminal to quickly serve a RDF file as a SPARQL endpoint on http://0.0.0.0:8000
+
+```bash
+rdflib-endpoint serve your-file.nt
+```
 
 ## 🧑‍💻 Development
 
