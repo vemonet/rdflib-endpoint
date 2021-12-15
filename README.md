@@ -4,7 +4,7 @@
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![Publish to PyPI](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-`rdflib-endpoint` is a SPARQL endpoint based on RDFLib to easily serve machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
+`rdflib-endpoint` is a SPARQL endpoint based on RDFLib to easily serve RDF files, machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
 
 It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved using a `SERVICE` query to another SPARQL endpoint.
 
@@ -26,6 +26,16 @@ Install the package from [PyPI](https://pypi.org/project/rdflib-endpoint/):
 
 ```bash
 pip install rdflib-endpoint
+```
+
+## ⚡️ Quickly serve RDF files via a SPARQL endpoint
+
+Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint, with YASGUI interface available on http://0.0.0.0:8000
+
+You can use wildcard and provide multiple files, for example to serve all turtle, JSON-LD and nquads files in the current folder:
+
+```bash
+rdflib-endpoint serve *.ttl *.jsonld *.nq
 ```
 
 ## 🐍 SPARQL endpoint with custom functions
@@ -95,22 +105,12 @@ You can then run the SPARQL endpoint server from the `example` folder on http://
 
 ```bash
 cd example
-uvicorn main:app --reload --app-dir app
+uvicorn main:app --app-dir app --reload
 ```
 
 You can access the YASGUI interface to easily query the SPARQL endpoint on http://localhost:8000
 
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.
-
-## ⚡️ Quickly serve a RDF file as SPARQL endpoint
-
-You can also use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint, with YASGUI interface available on http://0.0.0.0:8000
-
-You can use wildcard and provide multiple files, for example to serve all turtle, JSON-LD and nquads files in the current folder:
-
-```bash
-rdflib-endpoint serve *.ttl *.jsonld *.nq
-```
 
 ## 🧑‍💻 Development
 

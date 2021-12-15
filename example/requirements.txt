@@ -1,2 +1,1 @@
 rdflib-endpoint@git+https://github.com/vemonet/rdflib-endpoint@main
-rdflib>=5.0.0

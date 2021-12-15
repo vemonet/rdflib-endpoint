@@ -6,7 +6,7 @@ setup(
     version='0.1.3',
     name='rdflib-endpoint',
     license='MIT License',
-    description='A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python, using RDFLib and FastAPI.',
+    description='A SPARQL endpoint to serve local RDF files, machine learning models, or any other logic implemented in Python, using RDFLib and FastAPI.',
     author='Vincent Emonet',
     author_email='vincent.emonet@gmail.com',
     url='https://github.com/vemonet/rdflib-endpoint',

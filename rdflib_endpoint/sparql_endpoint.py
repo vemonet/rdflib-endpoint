@@ -17,8 +17,9 @@ from typing import Optional
 import pkg_resources
 import logging
 import re
-import os
 from urllib import parse
+# import os
+
 
 class SparqlEndpoint(FastAPI):
     """
@@ -122,6 +123,7 @@ SELECT ?concat ?concatLength WHERE {
             'xml_results': 'application/sparql-results+xml'
         }
 
+
         @self.get(
             "/sparql",
             name="SPARQL endpoint",
@@ -165,7 +167,7 @@ SELECT ?concat ?concatLength WHERE {
                 query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
             except Exception as e:
                 logging.error("Error parsing the SPARQL query: " + str(e))
-                return JSONResponse(status_code=400, content={"message": "Error parsing the SPARQL query: " + str(e)})
+                return JSONResponse(status_code=400, content={"message": "Error parsing the SPARQL query"})
 
             # Useless: RDFLib dont support SPARQL insert (Expected {SelectQuery | ConstructQuery | DescribeQuery | AskQuery}, found 'INSERT')
             # if not self.enable_update:
@@ -179,7 +181,7 @@ SELECT ?concat ?concatLength WHERE {
                 query_results = self.graph.query(parsed_query)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
-                return JSONResponse(status_code=400, content={"message": "Error executing the SPARQL query on the RDFLib Graph: " + str(e)})
+                return JSONResponse(status_code=400, content={"message": "Error executing the SPARQL query on the RDFLib Graph"})
 
             # Format and return results depending on Accept mime type in request header
             output_mime_type = request.headers['accept']
@@ -209,7 +211,8 @@ SELECT ?concat ?concatLength WHERE {
                     return Response(query_results.serialize(format = 'xml'), media_type=mimetype['xml_results'])
             except Exception as e:
                 logging.error("Error serializing the SPARQL query results with RDFLib: " + str(e))
-                return JSONResponse(status_code=422, content={"message": "Error serializing the SPARQL query results: " + str(e)})
+                return JSONResponse(status_code=422, content={"message": "Error serializing the SPARQL query results"})
+
 
         @self.post(
             "/sparql",
@@ -265,6 +268,7 @@ SELECT ?concat ?concatLength WHERE {
                 ] 
             ] .""".format(public_url=self.public_url, title=self.title, description=self.description.replace("\n", ""))
 
+
     def evalCustomFunctions(self, ctx:object, part:object) -> object:
         """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
         The results are then stored in Literal objects and added to the query results.
@@ -273,7 +277,6 @@ SELECT ?concat ?concatLength WHERE {
         :param part:    <class 'rdflib.plugins.sparql.parserutils.CompValue'>
         :return:        <class 'rdflib.plugins.sparql.processor.SPARQLResult'>
         """
-
         # This part holds basic implementation for adding new functions
         if part.name == 'Extend':
             query_results = []
