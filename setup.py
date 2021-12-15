@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    version='0.1.3',
+    version='0.1.4',
     name='rdflib-endpoint',
     license='MIT License',
     description='A SPARQL endpoint to serve local RDF files, machine learning models, or any other logic implemented in Python, using RDFLib and FastAPI.',
