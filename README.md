@@ -44,6 +44,8 @@ Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/ex
 
 ### 📝 Define custom SPARQL functions
 
+This option makes it easier to define functions in your SPARQL endpoint, e.g. `BIND(myfunction:custom_concat("start", "end") AS ?concat)`
+
 Create a `app/main.py` file in your project folder with your custom SPARQL functions, and endpoint parameters:
 
 ````python
@@ -98,6 +100,39 @@ SELECT ?concat ?concatLength WHERE {
 ```"""
 )
 ````
+
+### 📝 Or directly define the custom evaluation
+
+You can also directly provide the custom evaluation function, this will override the `functions`.
+
+Refer to the [RDFLib documentation](https://rdflib.readthedocs.io/en/stable/_modules/examples/custom_eval.html) to define the custom evaluation function. Then provide it when instantiating the SPARQL endpoint:
+
+```python
+import rdflib
+from rdflib.plugins.sparql.evaluate import evalBGP
+from rdflib.namespace import FOAF, RDF, RDFS
+
+def customEval(ctx, part):
+    """Rewrite triple patterns to get super-classes"""
+    if part.name == "BGP":
+        # rewrite triples
+        triples = []
+        for t in part.triples:
+            if t[1] == RDF.type:
+                bnode = rdflib.BNode()
+                triples.append((t[0], t[1], bnode))
+                triples.append((bnode, RDFS.subClassOf, t[2]))
+            else:
+                triples.append(t)
+        # delegate to normal evalBGP
+        return evalBGP(ctx, triples)
+    raise NotImplementedError()
+
+app = SparqlEndpoint(
+    graph=g,
+    custom_eval=customEval
+)
+```
 
 ### 🦄 Run the SPARQL endpoint
 

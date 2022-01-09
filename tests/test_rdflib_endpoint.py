@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 from rdflib_endpoint import SparqlEndpoint
 from example.app.main import custom_concat
 
-# Use app defined in example folder
 app = SparqlEndpoint(
     functions={
         'https://w3id.org/um/sparql-functions/custom_concat': custom_concat,

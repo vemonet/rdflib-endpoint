@@ -1,0 +1,88 @@
+from fastapi.testclient import TestClient
+from rdflib_endpoint import SparqlEndpoint
+import rdflib
+from rdflib import URIRef
+from rdflib.plugins.sparql.evaluate import evalBGP
+from rdflib.namespace import RDF, RDFS
+
+print('IN BGGP')
+def customEval(ctx, part):
+    """Rewrite triple patterns to get super-classes"""
+    if part.name == "BGP":
+        # rewrite triples
+        triples = []
+        for t in part.triples:
+            if t[1] == RDF.type:
+                bnode = rdflib.BNode()
+                triples.append((t[0], t[1], bnode))
+                triples.append((bnode, RDFS.subClassOf, t[2]))
+            else:
+                triples.append(t)
+        # delegate to normal evalBGP
+        return evalBGP(ctx, triples)
+    raise NotImplementedError()
+
+g = rdflib.Graph()
+g.add((URIRef('http://human'), RDFS.subClassOf, URIRef('http://mammal')))
+g.add((URIRef('http://tim'), RDF.type, URIRef('http://human')))
+
+# eval_app = SparqlEndpoint(
+#     graph=g,
+#     custom_eval=customEval,
+#     functions={}
+# )
+# eval_endpoint = TestClient(eval_app)
+
+def test_custom_eval():
+    eval_app = SparqlEndpoint(
+        graph=g,
+        custom_eval=customEval,
+        functions={}
+    )
+    eval_endpoint = TestClient(eval_app)
+
+    response = eval_endpoint.get('/sparql?query=' + select_parent, 
+        headers={'accept': 'application/json'})
+    print(response.json())
+    assert response.status_code == 200
+    print(response.json()['results']['bindings'])
+    assert str(response.json()['results']['bindings'][0]['s']['value']) == "http://tim"
+
+    response = eval_endpoint.post('/sparql', 
+        data='query=' + select_parent, 
+        headers={'accept': 'application/json'})
+    assert response.status_code == 200
+    assert str(response.json()['results']['bindings'][0]['s']['value']) == "http://tim"
+
+
+# def test_service_description():
+#     response = eval_endpoint.get('/sparql', headers={'accept': 'text/turtle'})
+#     print(response.text.strip())
+#     assert response.status_code == 200
+#     # assert response.text.strip() == service_description
+
+#     response = eval_endpoint.post('/sparql', 
+#         headers={'accept': 'text/turtle'})
+#     assert response.status_code == 200
+#     # assert response.text.strip() == service_description
+
+#     # Check for application/xml
+#     response = eval_endpoint.post('/sparql', 
+#         headers={'accept': 'application/xml'})
+#     assert response.status_code == 200
+
+
+# def test_bad_request():
+#     response = eval_endpoint.get('/sparql?query=figarofigarofigaro', 
+#         headers={'accept': 'application/json'})
+#     assert response.status_code == 400
+
+
+# def test_redirect():
+#     response = eval_endpoint.get('/')
+#     assert response.status_code == 200
+
+
+select_parent = """SELECT * WHERE {
+    ?s a <http://mammal> .
+}"""

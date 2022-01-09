@@ -33,6 +33,7 @@ class SparqlEndpoint(FastAPI):
             version="0.1.0",
             graph=ConjunctiveGraph(), 
             functions={},
+            custom_eval = None,
             enable_update=False,
             cors_enabled=True,
             public_url='https://sparql.openpredict.semanticscience.org/sparql',
@@ -66,7 +67,10 @@ SELECT ?concat ?concatLength WHERE {
 
         # Save custom function in custom evaluation dictionary
         # Handle multiple functions directly in the evalCustomFunctions function
-        rdflib.plugins.sparql.CUSTOM_EVALS['evalCustomFunctions'] = self.evalCustomFunctions
+        if custom_eval:
+            rdflib.plugins.sparql.CUSTOM_EVALS['evalCustomFunctions'] = custom_eval
+        else:
+            rdflib.plugins.sparql.CUSTOM_EVALS['evalCustomFunctions'] = self.evalCustomFunctions
         
         if cors_enabled:
             self.add_middleware(
