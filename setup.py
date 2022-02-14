@@ -14,8 +14,8 @@ setup(
     # packages=find_packages(include=['rdflib_endpoint']),
     # package_dir={'rdflib_endpoint': 'rdflib_endpoint'},
     package_data={'': ['tests/resources/*'], 
-        'rdflib_endpoint': ['rdflib_endpoint/yasgui.html']},
-    include_package_data=True,
+        'rdflib_endpoint': ['*.html']},
+    # include_package_data=True,
     entry_points={
         'console_scripts': [
             'rdflib-endpoint=rdflib_endpoint.__main__:cli',
