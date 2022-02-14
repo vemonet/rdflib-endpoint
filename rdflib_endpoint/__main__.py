@@ -25,9 +25,11 @@ def run_serve(files, host, port):
     for glob_file in files:
         file_list = glob.glob(glob_file)
         for file in file_list:
-            click.echo(click.style('INFO', fg='green') 
-                + ':     📥️ Loading ' + click.style(str(file), bold=True))
             g.parse(file)
+            click.echo(click.style('INFO', fg='green') 
+                + f':     📥️ Loaded triples from ' + click.style(str(file), bold=True)
+                + f', for a total of ' + click.style(str(len(g)), bold=True))
+    
     app = SparqlEndpoint(graph=g)
     uvicorn.run(app, host=host, port=port)
 

@@ -13,7 +13,8 @@ setup(
     packages=find_packages(),
     # packages=find_packages(include=['rdflib_endpoint']),
     # package_dir={'rdflib_endpoint': 'rdflib_endpoint'},
-    package_data={'': ['tests/resources/*', 'rdflib_endpoint/yasgui.html']},
+    package_data={'': ['tests/resources/*'], 
+        'rdflib_endpoint': ['rdflib_endpoint/yasgui.html']},
     include_package_data=True,
     entry_points={
         'console_scripts': [
