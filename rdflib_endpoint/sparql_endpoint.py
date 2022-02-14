@@ -246,7 +246,6 @@ SELECT ?concat ?concatLength WHERE {
         @self.get("/", include_in_schema=False)
         async def serve_yasgui():
             """Serve YASGUI interface"""
-            print(pkg_resources.resource_filename('rdflib_endpoint', 'yasgui.html'))
             return FileResponse(pkg_resources.resource_filename('rdflib_endpoint', 'yasgui.html'))
 
 
