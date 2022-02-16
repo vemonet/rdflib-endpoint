@@ -4,19 +4,19 @@
 
 [![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![Publish to PyPI](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml) [![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
 
-`rdflib-endpoint` is a SPARQL endpoint based on RDFLib to easily serve RDF files, machine learning models, or any other logic implemented in Python via **custom SPARQL functions**. 
+`rdflib-endpoint` is a SPARQL endpoint based on RDFLib to **easily serve RDF files locally**, machine learning models, or any other logic implemented in Python via **custom SPARQL functions**.
 
 It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved using a `SERVICE` query to another SPARQL endpoint.
 
 > Feel free to create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented.
 
-## 🧑‍🏫 How it works
+## ℹ️ How it works
 
-The user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`. 
+`rdflib-endpoint` can be used directly from the terminal to quickly serve a RDF file as a SPARQL endpoint.
+
+Or to define custom SPARQL functions: the user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`. 
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
-
-`rdflib-endpoint` can also be used directly from the terminal to quickly serve a RDF file as a SPARQL endpoint.
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
 
@@ -30,13 +30,15 @@ pip install rdflib-endpoint
 
 ## ⚡️ Quickly serve RDF files via a SPARQL endpoint
 
-Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint, with YASGUI interface available on http://0.0.0.0:8000
+Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint.
 
 You can use wildcard and provide multiple files, for example to serve all turtle, JSON-LD and nquads files in the current folder:
 
 ```bash
 rdflib-endpoint serve *.ttl *.jsonld *.nq
 ```
+
+> Access the YASGUI SPARQL editor on http://localhost:8000
 
 ## 🐍 SPARQL endpoint with custom functions
 
@@ -136,7 +138,7 @@ app = SparqlEndpoint(
 
 ### 🦄 Run the SPARQL endpoint
 
-You can then run the SPARQL endpoint server from the `example` folder on http://localhost:8000/sparql with `uvicorn`
+You can then run the SPARQL endpoint server from the `example` folder on http://localhost:8000/sparql with `uvicorn` (which is installed automatically when you install the `rdflib-endpoint` package)
 
 ```bash
 cd example
@@ -165,7 +167,7 @@ cd rdflib-endpoint
 pip install -e .
 ```
 
-You can use a virtual environment to avoid conflicts:
+<details><summary>You can use a virtual environment to avoid conflicts if facing issues</summary>
 
 ```bash
 # Create the virtual environment folder in your workspace
@@ -173,14 +175,17 @@ python3 -m venv .venv
 # Activate it using a script in the created folder
 source .venv/bin/activate
 ```
+</details>
 
 ### ✅️ Run the tests
 
-Install additional dependencies for testing:
+<details><summary>Install additional dependencies for testing</summary>
 
 ```bash
 pip install pytest requests
 ```
+
+</details>
 
 Run the tests locally (from the root folder) and display prints:
 
