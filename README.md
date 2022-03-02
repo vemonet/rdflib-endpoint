@@ -12,9 +12,9 @@ It aims to enable python developers to easily deploy functions that can be queri
 
 ## ℹ️ How it works
 
-`rdflib-endpoint` can be used directly from the terminal to quickly serve a RDF file as a SPARQL endpoint.
+`rdflib-endpoint` can be used directly from the terminal to quickly serve RDF files through a SPARQL endpoint automatically deployed locally.
 
-Or to define custom SPARQL functions: the user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`. 
+It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`. 
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
 
@@ -177,7 +177,7 @@ source .venv/bin/activate
 ```
 </details>
 
-### ✅️ Run the tests
+### ☑️ Run the tests
 
 <details><summary>Install additional dependencies for testing</summary>
 
