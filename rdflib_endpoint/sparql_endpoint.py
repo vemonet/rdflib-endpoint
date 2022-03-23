@@ -6,19 +6,15 @@ from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
 from rdflib.plugins.sparql.sparql import SPARQLError
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.processor import translateQuery as translateQuery
-# from rdflib.plugins.sparql.algebra import pprintAlgebra
-
 from fastapi import FastAPI, Request, Response, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse 
 from typing import Optional
-
 import pkg_resources
 import logging
 import re
 from urllib import parse
-# import os
 
 
 class SparqlEndpoint(FastAPI):
@@ -161,6 +157,7 @@ SELECT ?concat ?concatLength WHERE {
                     return Response(service_graph.serialize(format = 'xml'), media_type='application/xml')
 
             # Pretty print the query object 
+            # from rdflib.plugins.sparql.algebra import pprintAlgebra
             # parsed_query = parser.parseQuery(query)
             # tq = algebraTranslateQuery(parsed_query)
             # pprintAlgebra(tq)
