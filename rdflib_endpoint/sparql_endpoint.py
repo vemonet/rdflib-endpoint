@@ -267,8 +267,7 @@ SELECT ?concat ?concatLength WHERE {
                 sd:defaultGraph [
                     a sd:Graph ;
                 ] 
-            ] ."""
-            .format(
+            ] .""".format(
                 public_url=self.public_url, 
                 title=self.title, 
                 description=self.description.replace("\n", "")
