@@ -267,7 +267,12 @@ SELECT ?concat ?concatLength WHERE {
                 sd:defaultGraph [
                     a sd:Graph ;
                 ] 
-            ] .""".format(public_url=self.public_url, title=self.title, description=self.description.replace("\n", ""))
+            ] ."""
+            .format(
+                public_url=self.public_url, 
+                title=self.title, 
+                description=self.description.replace("\n", "")
+            )
 
 
     def evalCustomFunctions(self, ctx:object, part:object) -> object:
