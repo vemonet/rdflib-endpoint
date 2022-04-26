@@ -19,7 +19,7 @@ from urllib import parse
 
 class SparqlEndpoint(FastAPI):
     """
-    Class to deploy a SPARQL endpoint using a RDFLib Graph
+    Class to deploy a SPARQL endpoint using a RDFLib Graph.
     """
 
     def __init__(self,
