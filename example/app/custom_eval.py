@@ -28,14 +28,14 @@ i.e. in your setup.py::
 # XML method: https://rdflib.readthedocs.io/en/stable/apidocs/rdflib.plugins.sparql.results.html#module-rdflib.plugins.sparql.results.xmlresults
 
 import rdflib
-from rdflib import Literal, Variable, URIRef, BNode
-from rdflib.plugins.sparql import parser
-from rdflib.plugins.sparql.sparql import Prologue, Query
-from rdflib.plugins.sparql.algebra import translateQuery, pprintAlgebra
-from rdflib.plugins.sparql.evaluate import evalBGP, evalPart
-from rdflib.plugins.sparql.parserutils import Expr
-from rdflib.plugins.sparql.evalutils import _eval
+from rdflib import BNode, Literal, URIRef, Variable
 from rdflib.namespace import FOAF
+from rdflib.plugins.sparql import parser
+from rdflib.plugins.sparql.algebra import pprintAlgebra, translateQuery
+from rdflib.plugins.sparql.evaluate import evalBGP, evalPart
+from rdflib.plugins.sparql.evalutils import _eval
+from rdflib.plugins.sparql.parserutils import Expr
+from rdflib.plugins.sparql.sparql import Prologue, Query
 
 inferredSubClass = rdflib.RDFS.subClassOf * "*"  # any number of rdfs.subClassOf
 biolink = URIRef("https://w3id.org/biolink/vocab/")

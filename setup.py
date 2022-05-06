@@ -1,33 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
-    version='0.1.6',
-    name='rdflib-endpoint',
-    license='MIT License',
-    description='A SPARQL endpoint to serve local RDF files, machine learning models, or any other logic implemented in Python, using RDFLib and FastAPI.',
-    author='Vincent Emonet',
-    author_email='vincent.emonet@gmail.com',
-    url='https://github.com/vemonet/rdflib-endpoint',
+    version="0.1.6",
+    name="rdflib-endpoint",
+    license="MIT License",
+    description="A SPARQL endpoint to serve local RDF files, machine learning models, or any other logic implemented in Python, using RDFLib and FastAPI.",
+    author="Vincent Emonet",
+    author_email="vincent.emonet@gmail.com",
+    url="https://github.com/vemonet/rdflib-endpoint",
     packages=find_packages(),
     # packages=find_packages(include=['rdflib_endpoint']),
     # package_dir={'rdflib_endpoint': 'rdflib_endpoint'},
-    package_data={'': ['tests/resources/*'], 
-        'rdflib_endpoint': ['*.html']},
+    package_data={"": ["tests/resources/*"], "rdflib_endpoint": ["*.html"]},
     # include_package_data=True, # Do not work, and nullify package_data
     entry_points={
-        'console_scripts': [
-            'rdflib-endpoint=rdflib_endpoint.__main__:cli',
+        "console_scripts": [
+            "rdflib-endpoint=rdflib_endpoint.__main__:cli",
         ],
     },
-
-    python_requires='>=3.7.0',
-    long_description=open('README.md').read(),
+    python_requires=">=3.7.0",
+    long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     install_requires=open("requirements.txt", "r").readlines(),
-    tests_require=['pytest==5.2.0', 'requests'],
-    setup_requires=['pytest-runner'],
+    tests_require=["pytest==5.2.0", "requests"],
+    setup_requires=["pytest-runner"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
@@ -39,6 +37,6 @@ setup(
         "Issues": "https://github.com/vemonet/rdflib-endpoint/issues",
         "Source Code": "https://github.com/vemonet/rdflib-endpoint",
         "CI": "https://github.com/vemonet/rdflib-endpoint/actions",
-        "Releases": "https://github.com/vemonet/rdflib-endpoint/releases"
+        "Releases": "https://github.com/vemonet/rdflib-endpoint/releases",
     },
 )

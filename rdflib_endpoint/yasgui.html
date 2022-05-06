@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>RDFLib endpoint</title>
@@ -7,20 +8,21 @@
     <script src="https://unpkg.com/@triply/yasgui@4/build/yasgui.min.js"></script>
     <link rel="icon" type="image/png" href="https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png">
 </head>
+
 <body>
-<div id="yasgui"></div>
-<script>
-    const url = window.location.href.endsWith('/') ? window.location.href.slice(0, -1) : window.location.href;
-    new Yasgui(document.getElementById("yasgui"), {
-        requestConfig: { endpoint: url + "/sparql" },
-        endpointCatalogueOptions: {
-            getData: function () {
-                return [
-                    { endpoint: url + "/sparql" },
-                ];
-            },
-            keys: [],
-        }
-    });
-</script>
+    <div id="yasgui"></div>
+    <script>
+        const url = window.location.href.endsWith('/') ? window.location.href.slice(0, -1) : window.location.href;
+        new Yasgui(document.getElementById("yasgui"), {
+            requestConfig: { endpoint: url + "/sparql" },
+            endpointCatalogueOptions: {
+                getData: function () {
+                    return [
+                        { endpoint: url + "/sparql" },
+                    ];
+                },
+                keys: [],
+            }
+        });
+    </script>
 </body>

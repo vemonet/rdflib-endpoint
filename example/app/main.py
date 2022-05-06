@@ -1,12 +1,10 @@
-from rdflib_endpoint import SparqlEndpoint
-
 import rdflib
-from rdflib import Graph, Literal, RDF, URIRef
+from rdflib import RDF, Graph, Literal, URIRef
 from rdflib.graph import ConjunctiveGraph
-from rdflib.plugins.sparql.evaluate import evalPart, evalBGP
-from rdflib.plugins.sparql.evalutils import _eval
-from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.namespace import Namespace
+from rdflib.plugins.sparql.evaluate import evalBGP, evalPart
+from rdflib.plugins.sparql.evalutils import _eval
+from rdflib_endpoint import SparqlEndpoint
 
 
 def custom_concat(query_results, ctx, part, eval_part):

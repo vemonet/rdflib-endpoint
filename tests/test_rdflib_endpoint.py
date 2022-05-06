@@ -1,90 +1,98 @@
+from example.app.main import custom_concat
 from fastapi.testclient import TestClient
 from rdflib_endpoint import SparqlEndpoint
-from example.app.main import custom_concat
 
 app = SparqlEndpoint(
     functions={
-        'https://w3id.org/um/sparql-functions/custom_concat': custom_concat,
+        "https://w3id.org/um/sparql-functions/custom_concat": custom_concat,
     }
 )
 
 endpoint = TestClient(app)
 
+
 def test_service_description():
-    response = endpoint.get('/sparql', headers={'accept': 'text/turtle'})
+    response = endpoint.get("/sparql", headers={"accept": "text/turtle"})
     print(response.text.strip())
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
-    response = endpoint.post('/sparql', 
-        headers={'accept': 'text/turtle'})
+    response = endpoint.post("/sparql", headers={"accept": "text/turtle"})
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
     # Check for application/xml
-    response = endpoint.post('/sparql', 
-        headers={'accept': 'application/xml'})
+    response = endpoint.post("/sparql", headers={"accept": "application/xml"})
     assert response.status_code == 200
 
 
 def test_custom_concat_json():
-    response = endpoint.get('/sparql?query=' + concat_select, 
-        headers={'accept': 'application/json'})
+    response = endpoint.get(
+        "/sparql?query=" + concat_select, headers={"accept": "application/json"}
+    )
     # print(response.json())
     assert response.status_code == 200
-    assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+    assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
-    response = endpoint.post('/sparql', 
-        data='query=' + concat_select, 
-        headers={'accept': 'application/json'})
+    response = endpoint.post(
+        "/sparql", data="query=" + concat_select, headers={"accept": "application/json"}
+    )
     assert response.status_code == 200
-    assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+    assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
 
 def test_select_noaccept_xml():
-    response = endpoint.post('/sparql', 
-        data='query=' + concat_select)
+    response = endpoint.post("/sparql", data="query=" + concat_select)
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
+
 def test_select_csv():
-    response = endpoint.post('/sparql', 
-        data='query=' + concat_select,
-        headers={'accept': 'text/csv'})
+    response = endpoint.post(
+        "/sparql", data="query=" + concat_select, headers={"accept": "text/csv"}
+    )
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_fail_select_turtle():
-    response = endpoint.post('/sparql', 
-        data='query=' + concat_select, 
-        headers={'accept': 'text/turtle'})
+    response = endpoint.post(
+        "/sparql", data="query=" + concat_select, headers={"accept": "text/turtle"}
+    )
     assert response.status_code == 422
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_concat_construct_turtle():
     # expected to return turtle
-    response = endpoint.post('/sparql', 
-        data='query=' + custom_concat_construct, 
-        headers={'accept': 'application/json'})
+    response = endpoint.post(
+        "/sparql",
+        data="query=" + custom_concat_construct,
+        headers={"accept": "application/json"},
+    )
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
+
 def test_concat_construct_xml():
     # expected to return turtle
-    response = endpoint.post('/sparql', 
-        data='query=' + custom_concat_construct, 
-        headers={'accept': 'application/xml'})
+    response = endpoint.post(
+        "/sparql",
+        data="query=" + custom_concat_construct,
+        headers={"accept": "application/xml"},
+    )
     assert response.status_code == 200
 
+
 def test_bad_request():
-    response = endpoint.get('/sparql?query=figarofigarofigaro', 
-        headers={'accept': 'application/json'})
+    response = endpoint.get(
+        "/sparql?query=figarofigarofigaro", headers={"accept": "application/json"}
+    )
     assert response.status_code == 400
 
+
 def test_redirect():
-    response = endpoint.get('/')
+    response = endpoint.get("/")
     assert response.status_code == 200
 
 
