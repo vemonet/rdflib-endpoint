@@ -21,7 +21,7 @@ setup(
         ],
     },
     python_requires=">=3.7.0",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     install_requires=open("requirements.txt", "r").readlines(),
     tests_require=["pytest==5.2.0", "requests"],
