@@ -267,11 +267,11 @@ SELECT ?concat ?concatLength WHERE {
             if not query:
                 # Handle federated query services which provide the query in the body
                 query_body = await request.body()
-                body = parse.unquote(query_body.decode("utf-8"))
+                body = query_body.decode("utf-8")
                 parsed_query = parse.parse_qsl(body)
                 for params in parsed_query:
                     if params[0] == "query":
-                        query = params[1]
+                        query = parse.unquote(params[1])
             return await sparql_endpoint(request, query)
 
         @self.get("/", include_in_schema=False)
