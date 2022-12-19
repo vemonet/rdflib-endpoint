@@ -273,10 +273,9 @@ SELECT ?concat ?concatLength WHERE {
         @self.get("/", include_in_schema=False)
         async def serve_yasgui() -> Response:
             """Serve YASGUI interface"""
-            html_str = open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html"), "r").read()
+            html_str = open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")).read()
             html_str = html_str.replace('$EXAMPLE_QUERY', self.example_query)
             return Response(content=html_str, media_type="text/html")
-
 
         # Service description returned when no query provided
         service_description_ttl = """@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
