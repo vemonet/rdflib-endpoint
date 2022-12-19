@@ -67,14 +67,11 @@ def most_similar(query_results, ctx, part, eval_part):
     return query_results, ctx, part, eval_part
 
 
-example_query = """Example query:\n
-```
-PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+example_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}
-```"""
+}"""
 
 # Use ConjunctiveGraph to support nquads and graphs in SPARQL queries
 # identifier is the default graph

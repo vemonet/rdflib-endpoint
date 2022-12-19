@@ -29,7 +29,7 @@ It can also be used to define custom SPARQL functions: the user defines and regi
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
 
-Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
+Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/).
 
 ## 📦️ Installation
 
@@ -42,7 +42,7 @@ pip install rdflib-endpoint
 If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend you can install with the optional dependency:
 
 ```bash
-pip install rdflib-endpoint[oxigraph]
+pip install "rdflib-endpoint[oxigraph]"
 ```
 
 > ⚠️ Oxigraph and oxrdflib do not support custom functions, so it can be only used to deploy graphs without custom functions.
@@ -117,14 +117,11 @@ app = SparqlEndpoint(
     version="0.1.0",
     public_url='https://your-endpoint-url/sparql',
     # Example queries displayed in the Swagger UI to help users try your function
-    example_query="""Example query:\n
-```
-PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+    example_query="""PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}
-```"""
+}"""
 )
 ````
 

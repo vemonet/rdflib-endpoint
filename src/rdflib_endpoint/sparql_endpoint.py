@@ -14,7 +14,6 @@ from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
-from starlette.responses import FileResponse
 
 
 class SparqlEndpoint(FastAPI):
@@ -34,14 +33,11 @@ class SparqlEndpoint(FastAPI):
         enable_update: bool = False,
         cors_enabled: bool = True,
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
-        example_query: str = """Example query:\n
-```
-PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+        example_query: str = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}
-```""",
+}""",
         **kwargs: Any,
     ) -> None:
         """
@@ -55,6 +51,7 @@ SELECT ?concat ?concatLength WHERE {
         self.version = version
         self.public_url = public_url
         self.example_query = example_query
+        self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
         self.enable_update = enable_update
 
         # Instantiate FastAPI
@@ -122,7 +119,7 @@ SELECT ?concat ?concatLength WHERE {
         @self.get(
             "/sparql",
             name="SPARQL endpoint",
-            description=self.example_query,
+            description=self.example_markdown,
             responses=api_responses,
         )
         async def sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
@@ -254,7 +251,7 @@ SELECT ?concat ?concatLength WHERE {
         @self.post(
             "/sparql",
             name="SPARQL endpoint",
-            description=self.example_query,
+            description=self.example_markdown,
             responses=api_responses,
         )
         async def post_sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
@@ -274,9 +271,12 @@ SELECT ?concat ?concatLength WHERE {
             return await sparql_endpoint(request, query)
 
         @self.get("/", include_in_schema=False)
-        async def serve_yasgui() -> FileResponse:
+        async def serve_yasgui() -> Response:
             """Serve YASGUI interface"""
-            return FileResponse(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html"))
+            html_str = open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html"), "r").read()
+            html_str = html_str.replace('$EXAMPLE_QUERY', self.example_query)
+            return Response(content=html_str, media_type="text/html")
+
 
         # Service description returned when no query provided
         service_description_ttl = """@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
