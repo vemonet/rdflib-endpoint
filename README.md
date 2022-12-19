@@ -22,6 +22,7 @@
         <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" />
     </a>
 </p>
+
 `rdflib-endpoint` is a SPARQL endpoint based on RDFLib to **easily serve RDF files locally**, machine learning models, or any other logic implemented in Python via **custom SPARQL functions**.
 
 It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved using a `SERVICE` query to another SPARQL endpoint.
@@ -195,7 +196,7 @@ hatch -v env create
 
 ### 🚀 Run example API
 
-The API will be automatically when the code is changed:
+The API will be automatically reloaded when the code is changed:
 
 ```bash
 hatch run dev
