@@ -28,20 +28,18 @@ i.e. in your setup.py::
 # XML method: https://rdflib.readthedocs.io/en/stable/apidocs/rdflib.plugins.sparql.results.html#module-rdflib.plugins.sparql.results.xmlresults
 
 import rdflib
-from rdflib import BNode, Literal, URIRef, Variable
-from rdflib.namespace import FOAF
+from rdflib import Literal, URIRef
 from rdflib.plugins.sparql import parser
 from rdflib.plugins.sparql.algebra import pprintAlgebra, translateQuery
-from rdflib.plugins.sparql.evaluate import evalBGP, evalPart
-from rdflib.plugins.sparql.evalutils import _eval
-from rdflib.plugins.sparql.parserutils import Expr
-from rdflib.plugins.sparql.sparql import Prologue, Query
+from rdflib.plugins.sparql.evaluate import evalBGP
 
 inferredSubClass = rdflib.RDFS.subClassOf * "*"  # any number of rdfs.subClassOf
 biolink = URIRef("https://w3id.org/biolink/vocab/")
 
+
 class Result:
-        pass
+    pass
+
 
 def addToGraph(ctx, drug, disease, score):
     bnode = rdflib.BNode()
@@ -52,6 +50,7 @@ def addToGraph(ctx, drug, disease, score):
     ctx.graph.add((bnode, biolink + 'category', biolink + 'ChemicalToDiseaseOrPhenotypicFeatureAssociation'))
     ctx.graph.add((bnode, biolink + 'has_confidence_level', score))
 
+
 def getTriples(disease):
     drug = URIRef("http://bio2rdf.org/drugbank:DB00001")
     score = Literal("1.0")
@@ -60,23 +59,22 @@ def getTriples(disease):
     r.drug = drug
     r.disease = disease
     r.score = score
-    
+
     results = []
     results.append(r)
     return results
 
-#def parseRelationalExpr(expr):
+
+# def parseRelationalExpr(expr):
 
 
 def customEval(ctx, part):
-    """
-    
-    """
-    #print (part.name)
+    """ """
+    # print (part.name)
 
     if part.name == "Project":
         ctx.myvars = []
-    
+
     # search extend for variable binding
     if part.name == 'Extend':
         if hasattr(part, "expr"):
@@ -85,15 +83,15 @@ def customEval(ctx, part):
 
     # search for filter
     if part.name == "Filter":
-        if hasattr(part,"expr"):
+        if hasattr(part, "expr"):
             if hasattr(part.expr, "expr"):
                 if part.expr.expr['op'] == '=':
-                    e = part.expr.expr['expr']
+                    part.expr.expr['expr']
                     d = part.expr.expr['other']
                     ctx.myvars.append(d)
             else:
                 if part.expr['op'] == '=':
-                    e = part.expr['expr']
+                    part.expr['expr']
                     d = part.expr['other']
                     ctx.myvars.append(d)
 
@@ -104,15 +102,15 @@ def customEval(ctx, part):
             if t[1] == rdflib.RDF.object:
                 disease = t[2]
                 # check first if the disease term is specified in the bgp triple
-                if(isinstance(disease, rdflib.term.URIRef)):
+                if isinstance(disease, rdflib.term.URIRef):
                     ctx.myvars.append(disease)
-                
+
                 # fetch instances
                 for d in ctx.myvars:
                     results = getTriples(d)
                     for r in results:
                         addToGraph(ctx, r.drug, r.disease, r.score)
-            
+
             triples.append(t)
         return evalBGP(ctx, triples)
     raise NotImplementedError()
@@ -128,7 +126,7 @@ if __name__ == "__main__":
     q = '''PREFIX openpredict: <https://w3id.org/um/openpredict/>
         PREFIX biolink: <https://w3id.org/biolink/vocab/>
         PREFIX omim: <http://bio2rdf.org/omim:>
-        SELECT ?disease ?drug ?score 
+        SELECT ?disease ?drug ?score
         {
             ?association a rdf:Statement ;
                 rdf:subject ?drug ;

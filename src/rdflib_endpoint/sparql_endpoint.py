@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Optional
+from typing import Callable, Dict, Optional, Union, List, Any
 from urllib import parse
 
 import pkg_resources
@@ -8,13 +8,13 @@ import rdflib
 from fastapi import FastAPI, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from rdflib import RDF, Graph, Literal, URIRef
-from rdflib.graph import ConjunctiveGraph
+from rdflib import RDF, ConjunctiveGraph, Dataset, Graph, Literal, URIRef
 from rdflib.plugins.sparql import prepareQuery
-from rdflib.plugins.sparql.evaluate import evalBGP, evalPart
+from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
-from rdflib.plugins.sparql.processor import translateQuery as translateQuery
-from rdflib.plugins.sparql.sparql import SPARQLError
+from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.plugins.sparql.processor import SPARQLResult
+from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 from starlette.responses import FileResponse
 
 
@@ -25,17 +25,17 @@ class SparqlEndpoint(FastAPI):
 
     def __init__(
         self,
-        *args,
+        *args: Any,
         title: str = "SPARQL endpoint for RDFLib graph",
-        description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-        version="0.1.0",
-        graph=ConjunctiveGraph(),
-        functions={},
-        custom_eval=None,
-        enable_update=False,
-        cors_enabled=True,
-        public_url="https://sparql.openpredict.semanticscience.org/sparql",
-        example_query="""Example query:\n
+        description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
+        version: str = "0.1.0",
+        graph: Union[Graph, ConjunctiveGraph, Dataset] = ConjunctiveGraph(),
+        functions: Dict[str, Callable[..., Any]] = {},
+        custom_eval: Optional[Callable[..., Any]] = None,
+        enable_update: bool = False,
+        cors_enabled: bool = True,
+        public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
+        example_query: str = """Example query:\n
 ```
 PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
@@ -43,7 +43,7 @@ SELECT ?concat ?concatLength WHERE {
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }
 ```""",
-        **kwargs
+        **kwargs: Any,
     ) -> None:
         """
         Constructor of the SPARQL endpoint, everything happens here.
@@ -70,9 +70,7 @@ SELECT ?concat ?concatLength WHERE {
         if custom_eval:
             rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = custom_eval
         else:
-            rdflib.plugins.sparql.CUSTOM_EVALS[
-                "evalCustomFunctions"
-            ] = self.evalCustomFunctions
+            rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = self.evalCustomFunctions
 
         if cors_enabled:
             self.add_middleware(
@@ -83,7 +81,8 @@ SELECT ?concat ?concatLength WHERE {
                 allow_headers=["*"],
             )
 
-        api_responses = {
+        # api_responses: Dict[int, Dict] = {
+        api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
             200: {
                 "description": "SPARQL query results",
                 "content": {
@@ -127,7 +126,7 @@ SELECT ?concat ?concatLength WHERE {
             description=self.example_query,
             responses=api_responses,
         )
-        async def sparql_endpoint(request: Request, query: Optional[str] = Query(None)):
+        async def sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
             """
             Send a SPARQL query to be executed through HTTP GET operation.
             \f
@@ -146,17 +145,13 @@ SELECT ?concat ?concatLength WHERE {
                         (
                             URIRef(custom_function_uri),
                             RDF.type,
-                            URIRef(
-                                "http://www.w3.org/ns/sparql-service-description#Function"
-                            ),
+                            URIRef("http://www.w3.org/ns/sparql-service-description#Function"),
                         )
                     )
                     service_graph.add(
                         (
                             URIRef(self.public_url),
-                            URIRef(
-                                "http://www.w3.org/ns/sparql-service-description#extensionFunction"
-                            ),
+                            URIRef("http://www.w3.org/ns/sparql-service-description#extensionFunction"),
                             URIRef(custom_function_uri),
                         )
                     )
@@ -182,9 +177,7 @@ SELECT ?concat ?concatLength WHERE {
             try:
                 # Query the graph with the custom functions loaded
                 parsed_query = prepareQuery(query)
-                query_operation = re.sub(
-                    r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name
-                )
+                query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
             except Exception as e:
                 logging.error("Error parsing the SPARQL query: " + str(e))
                 return JSONResponse(
@@ -203,14 +196,10 @@ SELECT ?concat ?concatLength WHERE {
             try:
                 query_results = self.graph.query(parsed_query)
             except Exception as e:
-                logging.error(
-                    "Error executing the SPARQL query on the RDFLib Graph: " + str(e)
-                )
+                logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
                     status_code=400,
-                    content={
-                        "message": "Error executing the SPARQL query on the RDFLib Graph"
-                    },
+                    content={"message": "Error executing the SPARQL query on the RDFLib Graph"},
                 )
 
             # Format and return results depending on Accept mime type in request header
@@ -225,33 +214,21 @@ SELECT ?concat ?concatLength WHERE {
                 output_mime_type = mimetype["turtle"]
                 # TODO: support JSON-LD for construct query?
                 # g.serialize(format='json-ld', indent=4)
-            if (
-                query_operation == "Construct Query"
-                and output_mime_type == "application/xml"
-            ):
+            if query_operation == "Construct Query" and output_mime_type == "application/xml":
                 output_mime_type = "application/rdf+xml"
 
             try:
-                if (
-                    output_mime_type == "text/csv"
-                    or output_mime_type == "application/sparql-results+csv"
-                ):
+                if output_mime_type == "text/csv" or output_mime_type == "application/sparql-results+csv":
                     return Response(
                         query_results.serialize(format="csv"),
                         media_type=output_mime_type,
                     )
-                elif (
-                    output_mime_type == "application/json"
-                    or output_mime_type == "application/sparql-results+json"
-                ):
+                elif output_mime_type == "application/json" or output_mime_type == "application/sparql-results+json":
                     return Response(
                         query_results.serialize(format="json"),
                         media_type=output_mime_type,
                     )
-                elif (
-                    output_mime_type == "application/xml"
-                    or output_mime_type == mimetype["xml_results"]
-                ):
+                elif output_mime_type == "application/xml" or output_mime_type == mimetype["xml_results"]:
                     return Response(
                         query_results.serialize(format="xml"),
                         media_type=output_mime_type,
@@ -263,15 +240,13 @@ SELECT ?concat ?concatLength WHERE {
                         media_type=output_mime_type,
                     )
                 else:
-                    ## XML by default for federated queries
+                    # XML by default for federated queries
                     return Response(
                         query_results.serialize(format="xml"),
                         media_type=mimetype["xml_results"],
                     )
             except Exception as e:
-                logging.error(
-                    "Error serializing the SPARQL query results with RDFLib: " + str(e)
-                )
+                logging.error("Error serializing the SPARQL query results with RDFLib: " + str(e))
                 return JSONResponse(
                     status_code=422,
                     content={"message": "Error serializing the SPARQL query results"},
@@ -283,9 +258,7 @@ SELECT ?concat ?concatLength WHERE {
             description=self.example_query,
             responses=api_responses,
         )
-        async def post_sparql_endpoint(
-            request: Request, query: Optional[str] = Query(None)
-        ):
+        async def post_sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
             """Send a SPARQL query to be executed through HTTP POST operation.
             \f
             :param request: The HTTP POST request with a .body()
@@ -302,11 +275,9 @@ SELECT ?concat ?concatLength WHERE {
             return await sparql_endpoint(request, query)
 
         @self.get("/", include_in_schema=False)
-        async def serve_yasgui():
+        async def serve_yasgui() -> FileResponse:
             """Serve YASGUI interface"""
-            return FileResponse(
-                pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")
-            )
+            return FileResponse(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html"))
 
         # Service description returned when no query provided
         service_description_ttl = """@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
@@ -328,14 +299,14 @@ SELECT ?concat ?concatLength WHERE {
                 a sd:Dataset ;
                 sd:defaultGraph [
                     a sd:Graph ;
-                ] 
+                ]
             ] .""".format(
             public_url=self.public_url,
             title=self.title,
             description=self.description.replace("\n", ""),
         )
 
-    def evalCustomFunctions(self, ctx: object, part: object) -> object:
+    def evalCustomFunctions(self, ctx: QueryContext, part: CompValue) -> List[Any]:
         """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
         The results are then stored in Literal objects and added to the query results.
 
@@ -345,7 +316,7 @@ SELECT ?concat ?concatLength WHERE {
         """
         # This part holds basic implementation for adding new functions
         if part.name == "Extend":
-            query_results = []
+            query_results: List[Any] = []
 
             # Information is retrieved and stored and passed through a generator
             for eval_part in evalPart(ctx, part.p):
@@ -357,22 +328,16 @@ SELECT ?concat ?concatLength WHERE {
                         # Check if URI correspond to a registered custom function
                         if part.expr.iri == URIRef(function_uri):
                             # Execute each function
-                            query_results, ctx, part, eval_part = custom_function(
-                                query_results, ctx, part, eval_part
-                            )
+                            query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
 
                 else:
                     # For built-in SPARQL functions (that are not URIs)
-                    evaluation = [
-                        _eval(part.expr, eval_part.forget(ctx, _except=part._vars))
-                    ]
+                    evaluation: List[Any] = [_eval(part.expr, eval_part.forget(ctx, _except=part._vars))]
                     if isinstance(evaluation[0], SPARQLError):
                         raise evaluation[0]
                     # Append results for built-in SPARQL functions
                     for result in evaluation:
-                        query_results.append(
-                            eval_part.merge({part.var: Literal(result)})
-                        )
+                        query_results.append(eval_part.merge({part.var: Literal(result)}))
 
             return query_results
         raise NotImplementedError()

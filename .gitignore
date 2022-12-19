@@ -1,6 +1,32 @@
-__pycache__
-.eggs
-*.egg-info
-.pytest_cache
-.venv
+# Python build artefacts
 build/
+*.egg-info
+.eggs/
+dist/
+__pycache__/
+.pytest_cache/
+.coverage
+coverage.xml
+
+# Virtual envs
+.env
+.venv/
+venv/
+
+# Notebooks
+.ipynb_checkpoints
+.virtual_documents/
+.cache/
+.config/
+.ipython/
+.jupyter/
+.local/
+.npm/
+.bash_history
+__pycache__/
+
+# MacOS
+.DS_Store
+
+# IDEs
+.idea/

@@ -1,9 +1,8 @@
 import rdflib
-from rdflib import RDF, Graph, Literal, URIRef
+from rdflib import RDF, Literal, URIRef
 from rdflib.graph import ConjunctiveGraph
-from rdflib.namespace import Namespace
-from rdflib.plugins.sparql.evaluate import evalBGP, evalPart
 from rdflib.plugins.sparql.evalutils import _eval
+
 from rdflib_endpoint import SparqlEndpoint
 
 
@@ -31,17 +30,16 @@ def custom_concat(query_results, ctx, part, eval_part):
     scores.append(len(reverse_string))
     # Append our results to the query_results
     for i, result in enumerate(evaluation):
-        query_results.append(eval_part.merge({
-            part.var: Literal(result), 
-            rdflib.term.Variable(part.var + 'Length'): Literal(scores[i])
-        }))
+        query_results.append(
+            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + 'Length'): Literal(scores[i])})
+        )
     return query_results, ctx, part, eval_part
 
 
 def most_similar(query_results, ctx, part, eval_part):
     """
     Get most similar entities for a given entity
-    
+
     PREFIX openpredict: <https://w3id.org/um/openpredict/>
     SELECT ?drugOrDisease ?mostSimilar ?mostSimilarScore WHERE {
         BIND("OMIM:246300" AS ?drugOrDisease)
@@ -52,10 +50,10 @@ def most_similar(query_results, ctx, part, eval_part):
     #     argumentLimit = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
     # except:
     #     argumentLimit = None
-    
+
     # Using stub data
     similarity_results = [{'mostSimilar': 'DRUGBANK:DB00001', 'score': 0.42}]
-    
+
     evaluation = []
     scores = []
     for most_similar in similarity_results:
@@ -64,10 +62,9 @@ def most_similar(query_results, ctx, part, eval_part):
 
     # Append our results to the query_results
     for i, result in enumerate(evaluation):
-        query_results.append(eval_part.merge({
-            part.var: Literal(result), 
-            rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])
-        }))
+        query_results.append(
+            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])})
+        )
     return query_results, ctx, part, eval_part
 
 
@@ -83,7 +80,7 @@ SELECT ?concat ?concatLength WHERE {
 # Use ConjunctiveGraph to support nquads and graphs in SPARQL queries
 # identifier is the default graph
 g = ConjunctiveGraph(
-    identifier=URIRef('https://w3id.org/um/sparql-functions/graph/default'), 
+    identifier=URIRef('https://w3id.org/um/sparql-functions/graph/default'),
 )
 
 # Example to add a nquad to the exposed graph
@@ -96,12 +93,12 @@ app = SparqlEndpoint(
         'https://w3id.org/um/openpredict/most_similar': most_similar,
         'https://w3id.org/um/sparql-functions/custom_concat': custom_concat,
     },
-    title="SPARQL endpoint for RDFLib graph", 
+    title="SPARQL endpoint for RDFLib graph",
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
     public_url='https://service.openpredict.137.120.31.102.nip.io/sparql',
     cors_enabled=True,
-    example_query=example_query
+    example_query=example_query,
 )
 
 ## Uncomment to run it directly with python app/main.py

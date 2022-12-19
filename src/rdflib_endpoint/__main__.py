@@ -1,29 +1,28 @@
 import glob
 import sys
+from typing import List
 
 import click
 import uvicorn
 from rdflib import ConjunctiveGraph
+
 from rdflib_endpoint import SparqlEndpoint
 
 
 @click.group()
-def cli():
+def cli() -> None:
     """Quickly serve RDF files as SPARQL endpoint with RDFLib Endpoint"""
-    pass
 
 
-@cli.command(
-    help="Serve a local RDF file as a SPARQL endpoint by default on http://0.0.0.0:8000/sparql"
-)
+@cli.command(help="Serve a local RDF file as a SPARQL endpoint by default on http://0.0.0.0:8000/sparql")
 @click.argument("files", nargs=-1)
 @click.option("--host", default="0.0.0.0", help="Host of the SPARQL endpoint")
 @click.option("--port", default=8000, help="Port of the SPARQL endpoint")
-def serve(files, host, port):
+def serve(files: List[str], host: str, port: int) -> None:
     run_serve(files, host, port)
 
 
-def run_serve(files, host, port):
+def run_serve(files: List[str], host: str, port: int) -> None:
     g = ConjunctiveGraph()
     for glob_file in files:
         file_list = glob.glob(glob_file)
@@ -31,9 +30,9 @@ def run_serve(files, host, port):
             g.parse(file)
             click.echo(
                 click.style("INFO", fg="green")
-                + f":     📥️ Loaded triples from "
+                + ":     📥️ Loaded triples from "
                 + click.style(str(file), bold=True)
-                + f", for a total of "
+                + ", for a total of "
                 + click.style(str(len(g)), bold=True)
             )
 

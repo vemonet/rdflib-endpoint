@@ -1,11 +1,27 @@
-# ✨ SPARQL endpoint for RDFLib
+<h1 align="center">
+  ✨ SPARQL endpoint for RDFLib
+</h1>
 
-[![Version](https://img.shields.io/pypi/v/rdflib-endpoint)](https://pypi.org/project/rdflib-endpoint) [![Python versions](https://img.shields.io/pypi/pyversions/rdflib-endpoint)](https://pypi.org/project/rdflib-endpoint)
-
-[![Run tests](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/run-tests.yml) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
-
-[![CodeQL](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/codeql-analysis.yml) [![Publish to PyPI](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish-package.yml) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
+<p align="center">
+    <a href="https://pypi.org/project/rdflib-endpoint">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/rdflib-endpoint?logo=pypi&logoColor=silver" />
+    </a>
+    <a href="https://pypi.org/project/rdflib-endpoint">
+        <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/rdflib-endpoint?logo=python&logoColor=silver" />
+    </a>
+    <a href="https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml">
+        <img alt="Tests" src="https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml/badge.svg" />
+    </a>
+    <a href="https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpointl">
+        <img alt="Coverage" src="https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage" />
+    </a>
+    <a href="https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml">
+        <img alt="Publish" src="https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml/badge.svg" />
+    </a>
+    <a href="https://github.com/psf/black">
+        <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" />
+    </a>
+</p>
 `rdflib-endpoint` is a SPARQL endpoint based on RDFLib to **easily serve RDF files locally**, machine learning models, or any other logic implemented in Python via **custom SPARQL functions**.
 
 It aims to enable python developers to easily deploy functions that can be queried in a federated fashion using SPARQL. For example: using a python function to resolve labels for specific identifiers, or run a classifier given entities retrieved using a `SERVICE` query to another SPARQL endpoint.
@@ -16,17 +32,17 @@ It aims to enable python developers to easily deploy functions that can be queri
 
 `rdflib-endpoint` can be used directly from the terminal to quickly serve RDF files through a SPARQL endpoint automatically deployed locally.
 
-It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`. 
+It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`.
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/). Tested for Python 3.7, 3.8 and 3.9
 
-## 📥 Install the package
+## 📦️ Installation
 
-Install the package from [PyPI](https://pypi.org/project/rdflib-endpoint/):
+This package requires Python >=3.7, simply install it  from [PyPI](https://pypi.org/project/rdflib-endpoint/) with:
 
-```bash
+```shell
 pip install rdflib-endpoint
 ```
 
@@ -89,7 +105,7 @@ app = SparqlEndpoint(
     },
     cors_enabled=True,
     # Metadata used for the SPARQL service description and Swagger UI:
-    title="SPARQL endpoint for RDFLib graph", 
+    title="SPARQL endpoint for RDFLib graph",
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
     public_url='https://your-endpoint-url/sparql',
@@ -140,10 +156,9 @@ app = SparqlEndpoint(
 
 ### 🦄 Run the SPARQL endpoint
 
-You can then run the SPARQL endpoint server from the `example` folder on http://localhost:8000/sparql with `uvicorn` (which is installed automatically when you install the `rdflib-endpoint` package)
+You can then run the SPARQL endpoint server from the folder where your script is defined with `uvicorn` on http://localhost:8000/sparql (which is installed automatically when you install the `rdflib-endpoint` package)
 
 ```bash
-cd example
 uvicorn main:app --app-dir app --reload
 ```
 
@@ -153,47 +168,88 @@ You can access the YASGUI interface to easily query the SPARQL endpoint on http:
 
 ## 🧑‍💻 Development
 
-### 📥 Install for development
+This section is for if you want to run the package in development, and get involved by making a code contribution.
 
-Install from the latest GitHub commit to make sure you have the latest updates:
+### 📥️ Clone
 
-```bash
-pip install rdflib-endpoint@git+https://github.com/vemonet/rdflib-endpoint@main
-```
-
-Or clone and install locally for development:
+Clone the repository:
 
 ```bash
 git clone https://github.com/vemonet/rdflib-endpoint
 cd rdflib-endpoint
-pip install -e .
 ```
 
-<details><summary>You can use a virtual environment to avoid conflicts if facing issues</summary>
+### 🐣 Install dependencies
+
+Install [Hatch](https://hatch.pypa.io), this will automatically handle virtual environments and make sure all dependencies are installed when you run a script in the project:
 
 ```bash
-# Create the virtual environment folder in your workspace
-python3 -m venv .venv
-# Activate it using a script in the created folder
-source .venv/bin/activate
+pip install --upgrade hatch
 ```
-</details>
 
-### ☑️ Run the tests
-
-<details><summary>Install additional dependencies for testing</summary>
+Install the dependencies in a local virtual environment:
 
 ```bash
-pip install pytest requests
+hatch -v env create
 ```
 
-</details>
+### 🚀 Run example API
 
-Run the tests locally (from the root folder) and display prints:
+The API will be automatically when the code is changed:
 
 ```bash
-pytest -s
+hatch run dev
 ```
+
+Access the YASGUI interface at http://localhost:8000
+
+Or query directly the SPARQL endpoint at http://localhost:8000/sparql
+
+### ☑️ Run tests
+
+Make sure the existing tests still work by running ``pytest``. Note that any pull requests to the fairworkflows repository on github will automatically trigger running of the test suite;
+
+```bash
+hatch run test
+```
+
+To display all `print()`:
+
+```bash
+hatch run test -s
+```
+
+### 🧹 Code formatting
+
+The code will be automatically formatted when you commit your changes using `pre-commit`. But you can also run the script to format the code yourself:
+
+```
+hatch run fmt
+```
+
+Check the code for errors, and if it is in accordance with the PEP8 style guide, by running `flake8` and `mypy`:
+
+```
+hatch run check
+```
+
+### ♻️ Reset the environment
+
+In case you are facing issues with dependencies not updating properly you can easily reset the virtual environment with:
+
+```bash
+hatch env prune
+```
+
+### 🏷️ New release process
+
+The deployment of new releases is done automatically by a GitHub Action workflow when a new release is created on GitHub. To release a new version:
+
+1. Make sure the `PYPI_TOKEN` secret has been defined in the GitHub repository (in Settings > Secrets > Actions). You can get an API token from PyPI at [pypi.org/manage/account](https://pypi.org/manage/account).
+2. Increment the `version` number in the `pyproject.toml` file in the root folder of the repository.
+3. Create a new release on GitHub, which will automatically trigger the publish workflow, and publish the new release to PyPI.
+
+You can also manually trigger the workflow from the Actions tab in your GitHub repository webpage.
 
 ## 📂 Projects using rdflib-endpoint
 

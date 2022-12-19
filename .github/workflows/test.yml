@@ -1,0 +1,65 @@
+name: Test package
+on: [push, pull_request, workflow_call, workflow_dispatch]
+
+jobs:
+
+  CodeQL-Analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # required for all workflows
+      # only required for workflows in private repositories:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+
+      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, or Java).
+      # If this step fails, then you should remove it and run the build manually
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Setup SonarCloud
+      uses: warchant/setup-sonar-scanner@v3
+
+    - name: Install dependencies
+      run: |
+        pip install hatch
+
+    - name: Check with flake8
+      run: |
+        hatch run check
+
+    - name: Test with coverage
+      run: |
+        hatch run cov --cov-report xml:coverage.xml
+
+    - name: Upload coverage to SonarCloud
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=maastrichtu-ids  -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.projectKey=MaastrichtU-IDS_translator-openpredict -Dsonar.python.coverage.reportPaths=coverage.xml

@@ -1,5 +1,6 @@
-from example.app.main import custom_concat
 from fastapi.testclient import TestClient
+
+from example.app.main import custom_concat
 from rdflib_endpoint import SparqlEndpoint
 
 app = SparqlEndpoint(
@@ -27,16 +28,12 @@ def test_service_description():
 
 
 def test_custom_concat_json():
-    response = endpoint.get(
-        "/sparql?query=" + concat_select, headers={"accept": "application/json"}
-    )
+    response = endpoint.get("/sparql?query=" + concat_select, headers={"accept": "application/json"})
     # print(response.json())
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
-    response = endpoint.post(
-        "/sparql", data="query=" + concat_select, headers={"accept": "application/json"}
-    )
+    response = endpoint.post("/sparql", data="query=" + concat_select, headers={"accept": "application/json"})
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
@@ -48,17 +45,13 @@ def test_select_noaccept_xml():
 
 
 def test_select_csv():
-    response = endpoint.post(
-        "/sparql", data="query=" + concat_select, headers={"accept": "text/csv"}
-    )
+    response = endpoint.post("/sparql", data="query=" + concat_select, headers={"accept": "text/csv"})
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_fail_select_turtle():
-    response = endpoint.post(
-        "/sparql", data="query=" + concat_select, headers={"accept": "text/turtle"}
-    )
+    response = endpoint.post("/sparql", data="query=" + concat_select, headers={"accept": "text/turtle"})
     assert response.status_code == 422
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
@@ -85,9 +78,7 @@ def test_concat_construct_xml():
 
 
 def test_bad_request():
-    response = endpoint.get(
-        "/sparql?query=figarofigarofigaro", headers={"accept": "application/json"}
-    )
+    response = endpoint.get("/sparql?query=figarofigarofigaro", headers={"accept": "application/json"})
     assert response.status_code == 400
 
 
@@ -103,7 +94,7 @@ SELECT ?concat ?concatLength WHERE {
 }"""
 
 custom_concat_construct = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
-CONSTRUCT { 
+CONSTRUCT {
     <http://test> <http://concat> ?concat, ?concatLength .
 } WHERE {
     BIND("First" AS ?first)

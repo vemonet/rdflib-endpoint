@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - orcid: https://orcid.org/0000-0002-1501-1082
+    email: vincent.emonet@gmail.com
+    given-names: Vincent Emonet
+title: "RDFLib endpoint"
+repository-code: https://github.com/vemonet/rdflib-endpoint
+date-released: 2022-12-18
+url: https://pypi.org/project/rdflib-endpoint
+# doi: 10.48550/arXiv.2206.13787

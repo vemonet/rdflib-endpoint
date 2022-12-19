@@ -5,6 +5,7 @@ import pkg_resources
 import pytest
 import requests
 from click.testing import CliRunner
+
 from rdflib_endpoint.__main__ import cli
 
 

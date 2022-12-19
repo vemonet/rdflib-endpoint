@@ -124,4 +124,3 @@ Run on http://localhost:8080
 ```bash
 docker run -p 8080:80 rdflib-endpoint
 ```
-
