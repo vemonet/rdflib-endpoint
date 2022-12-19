@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Callable, Dict, Optional, Union, List, Any
+from typing import Any, Callable, Dict, List, Optional, Union
 from urllib import parse
 
 import pkg_resources
@@ -13,7 +13,6 @@ from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
-from rdflib.plugins.sparql.processor import SPARQLResult
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 from starlette.responses import FileResponse
 
