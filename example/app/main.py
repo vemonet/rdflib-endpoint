@@ -1,6 +1,5 @@
 import rdflib
-from rdflib import RDF, Literal, URIRef
-from rdflib.graph import ConjunctiveGraph
+from rdflib import ConjunctiveGraph, RDF, Literal, URIRef, RDFS
 from rdflib.plugins.sparql.evalutils import _eval
 
 from rdflib_endpoint import SparqlEndpoint
@@ -80,11 +79,13 @@ SELECT ?concat ?concatLength WHERE {
 # Use ConjunctiveGraph to support nquads and graphs in SPARQL queries
 # identifier is the default graph
 g = ConjunctiveGraph(
+    # store="Oxigraph",
     identifier=URIRef('https://w3id.org/um/sparql-functions/graph/default'),
 )
 
 # Example to add a nquad to the exposed graph
 g.add((URIRef('http://subject'), RDF.type, URIRef('http://object'), URIRef('http://graph')))
+g.add((URIRef('http://subject'), RDFS.label, Literal('foo'), URIRef('http://graph')))
 
 # Start the SPARQL endpoint based on the RDFLib Graph
 app = SparqlEndpoint(

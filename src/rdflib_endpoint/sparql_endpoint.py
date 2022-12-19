@@ -193,7 +193,7 @@ SELECT ?concat ?concatLength WHERE {
             #         return JSONResponse(status_code=403, content={"message": "Wrong API KEY."})
 
             try:
-                query_results = self.graph.query(parsed_query)
+                query_results = self.graph.query(query)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(

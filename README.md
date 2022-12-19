@@ -39,6 +39,14 @@ This package requires Python >=3.7, simply install it  from [PyPI](https://pypi.
 pip install rdflib-endpoint
 ```
 
+If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend you can install with the optional dependency:
+
+```bash
+pip install rdflib-endpoint[oxigraph]
+```
+
+> ⚠️ Oxigraph and oxrdflib do not support custom functions, so it can be only used to deploy graphs without custom functions.
+
 ## ⚡️ Quickly serve RDF files via a SPARQL endpoint
 
 Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint.
@@ -50,6 +58,12 @@ rdflib-endpoint serve *.ttl *.jsonld *.nq
 ```
 
 > Access the YASGUI SPARQL editor on http://localhost:8000
+
+If you installed oxigraph you can use it as backend triplestore, it is faster and supports some functions that are not supported by the RDFLib query engine (such as `COALESCE()`):
+
+```bash
+rdflib-endpoint serve --store Oxigraph "*.ttl" "*.jsonld" "*.nq"
+```
 
 ## 🐍 SPARQL endpoint with custom functions
 

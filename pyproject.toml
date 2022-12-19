@@ -40,6 +40,9 @@ rdflib-endpoint = "rdflib_endpoint.__main__:cli"
 
 
 [project.optional-dependencies]
+oxigraph =[
+    "oxrdflib",
+]
 test = [
     "pytest >=7.1.3",
     "pytest-cov >=3.0.0",
@@ -75,6 +78,7 @@ Source = "https://github.com/vemonet/rdflib-endpoint"
 # command = ["/bin/sleep", "infinity"]
 # start-on-creation = false
 features = [
+    "oxigraph",
     "test",
     "dev",
 ]
