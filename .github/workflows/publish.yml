@@ -8,6 +8,8 @@ jobs:
 
   tests:
     uses: vemonet/rdflib-endpoint/.github/workflows/test.yml@main
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   publish:
     needs: tests
