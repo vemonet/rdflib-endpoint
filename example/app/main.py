@@ -1,5 +1,5 @@
 import rdflib
-from rdflib import ConjunctiveGraph, RDF, Literal, URIRef, RDFS
+from rdflib import RDF, RDFS, ConjunctiveGraph, Literal, URIRef
 from rdflib.plugins.sparql.evalutils import _eval
 
 from rdflib_endpoint import SparqlEndpoint

@@ -1,8 +1,8 @@
-from fastapi.testclient import TestClient
-from rdflib import Graph, RDF, Literal, URIRef, RDFS
 import urllib.parse
 
-from example.app.main import custom_concat
+from fastapi.testclient import TestClient
+from rdflib import RDF, RDFS, Graph, Literal, URIRef
+
 from rdflib_endpoint import SparqlEndpoint
 
 g = Graph(store="Oxigraph")
@@ -10,9 +10,7 @@ g.add((URIRef('http://subject'), RDF.type, URIRef('http://object')))
 g.add((URIRef('http://subject'), RDFS.label, Literal('test value')))
 
 
-app = SparqlEndpoint(
-    graph=g
-)
+app = SparqlEndpoint(graph=g)
 
 endpoint = TestClient(app)
 
@@ -41,7 +39,6 @@ def test_custom_concat_json():
     response = endpoint.post("/sparql", data="query=" + label_select, headers={"accept": "application/json"})
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["label"]["value"] == "test value"
-
 
 
 def test_select_noaccept_xml():
@@ -97,7 +94,6 @@ label_select = """PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT ?label WHERE {
     ?s rdfs:label ?label .
 }"""
-
 
 
 label_construct = """PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
