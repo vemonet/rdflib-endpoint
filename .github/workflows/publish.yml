@@ -10,11 +10,12 @@ jobs:
     uses: vemonet/rdflib-endpoint/.github/workflows/test.yml@main
 
   publish:
-    needs: test
+    needs: tests
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
