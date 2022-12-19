@@ -1,27 +1,14 @@
-<h1 align="center">
-  ✨ SPARQL endpoint for RDFLib
-</h1>
+<div align="center">
 
-<p align="center">
-    <a href="https://pypi.org/project/rdflib-endpoint">
-        <img alt="PyPI" src="https://img.shields.io/pypi/v/rdflib-endpoint?logo=pypi&logoColor=silver" />
-    </a>
-    <a href="https://pypi.org/project/rdflib-endpoint">
-        <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/rdflib-endpoint?logo=python&logoColor=silver" />
-    </a>
-    <a href="https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml">
-        <img alt="Tests" src="https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml/badge.svg" />
-    </a>
-    <a href="https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpointl">
-        <img alt="Coverage" src="https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage" />
-    </a>
-    <a href="https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml">
-        <img alt="Publish" src="https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml/badge.svg" />
-    </a>
-    <a href="https://github.com/psf/black">
-        <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" />
-    </a>
-</p>
+# ✨ SPARQL endpoint for RDFLib
+
+[![PyPI - Version](https://img.shields.io/pypi/v/rdflib-endpoint.svg?logo=pypi&label=PyPI&logoColor=silver)](https://pypi.org/project/rdflib-endpoint/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/rdflib-endpoint.svg?logo=python&label=Python&logoColor=silver)](https://pypi.org/project/rdflib-endpoint/)
+
+[![Test package](https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml) [![Publish package](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml) [![Test coverage](https://sonarcloud.io/api/project_badges/measure?project=vemonet_rdflib-endpoint&metric=coverage)](https://sonarcloud.io/dashboard?id=vemonet_rdflib-endpoint)
+
+[![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch) [![code style - black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![types - Mypy](https://img.shields.io/badge/types-mypy-blue.svg)](https://github.com/python/mypy) [![license](https://img.shields.io/pypi/l/rdflib-endpoint.svg)](https://github.com/vemonet/rdflib-endpoint/blob/main/LICENSE.txt) 
+
+</div>
 
 `rdflib-endpoint` is a SPARQL endpoint based on RDFLib to **easily serve RDF files locally**, machine learning models, or any other logic implemented in Python via **custom SPARQL functions**.
 
