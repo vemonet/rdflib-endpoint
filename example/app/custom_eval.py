@@ -33,7 +33,7 @@ from rdflib.plugins.sparql import parser
 from rdflib.plugins.sparql.algebra import pprintAlgebra, translateQuery
 from rdflib.plugins.sparql.evaluate import evalBGP
 
-inferredSubClass = rdflib.RDFS.subClassOf * "*"  # any number of rdfs.subClassOf
+# inferredSubClass = rdflib.RDFS.subClassOf * "*"  # any number of rdfs.subClassOf
 biolink = URIRef("https://w3id.org/biolink/vocab/")
 
 
@@ -41,17 +41,17 @@ class Result:
     pass
 
 
-def addToGraph(ctx, drug, disease, score):
+def add_to_graph(ctx, drug, disease, score):
     bnode = rdflib.BNode()
     ctx.graph.add((bnode, rdflib.RDF.type, rdflib.RDF.Statement))
     ctx.graph.add((bnode, rdflib.RDF.subject, drug))
-    ctx.graph.add((bnode, rdflib.RDF.predicate, biolink + 'treats'))
+    ctx.graph.add((bnode, rdflib.RDF.predicate, biolink + "treats"))
     ctx.graph.add((bnode, rdflib.RDF.object, disease))
-    ctx.graph.add((bnode, biolink + 'category', biolink + 'ChemicalToDiseaseOrPhenotypicFeatureAssociation'))
-    ctx.graph.add((bnode, biolink + 'has_confidence_level', score))
+    ctx.graph.add((bnode, biolink + "category", biolink + "ChemicalToDiseaseOrPhenotypicFeatureAssociation"))
+    ctx.graph.add((bnode, biolink + "has_confidence_level", score))
 
 
-def getTriples(disease):
+def get_triples(disease):
     drug = URIRef("http://bio2rdf.org/drugbank:DB00001")
     score = Literal("1.0")
 
@@ -68,7 +68,7 @@ def getTriples(disease):
 # def parseRelationalExpr(expr):
 
 
-def customEval(ctx, part):
+def custom_eval(ctx, part):
     """ """
     # print (part.name)
 
@@ -76,7 +76,7 @@ def customEval(ctx, part):
         ctx.myvars = []
 
     # search extend for variable binding
-    if part.name == 'Extend':
+    if part.name == "Extend":
         if hasattr(part, "expr"):
             if not isinstance(part.expr, list):
                 ctx.myvars.append(part.expr)
@@ -85,14 +85,14 @@ def customEval(ctx, part):
     if part.name == "Filter":
         if hasattr(part, "expr"):
             if hasattr(part.expr, "expr"):
-                if part.expr.expr['op'] == '=':
-                    part.expr.expr['expr']
-                    d = part.expr.expr['other']
+                if part.expr.expr["op"] == "=":
+                    part.expr.expr["expr"]
+                    d = part.expr.expr["other"]
                     ctx.myvars.append(d)
             else:
-                if part.expr['op'] == '=':
-                    part.expr['expr']
-                    d = part.expr['other']
+                if part.expr["op"] == "=":
+                    part.expr["expr"]
+                    d = part.expr["other"]
                     ctx.myvars.append(d)
 
     # search the BGP for the variable of interest
@@ -107,9 +107,9 @@ def customEval(ctx, part):
 
                 # fetch instances
                 for d in ctx.myvars:
-                    results = getTriples(d)
+                    results = get_triples(d)
                     for r in results:
-                        addToGraph(ctx, r.drug, r.disease, r.score)
+                        add_to_graph(ctx, r.drug, r.disease, r.score)
 
             triples.append(t)
         return evalBGP(ctx, triples)
@@ -119,11 +119,11 @@ def customEval(ctx, part):
 if __name__ == "__main__":
 
     # add function directly, normally we would use setuptools and entry_points
-    rdflib.plugins.sparql.CUSTOM_EVALS["exampleEval"] = customEval
+    rdflib.plugins.sparql.CUSTOM_EVALS["exampleEval"] = custom_eval
 
     g = rdflib.Graph()
 
-    q = '''PREFIX openpredict: <https://w3id.org/um/openpredict/>
+    q = """PREFIX openpredict: <https://w3id.org/um/openpredict/>
         PREFIX biolink: <https://w3id.org/biolink/vocab/>
         PREFIX omim: <http://bio2rdf.org/omim:>
         SELECT ?disease ?drug ?score
@@ -139,7 +139,7 @@ if __name__ == "__main__":
             BIND(omim:1 AS ?disease)
             #FILTER(?disease = omim:2 || ?disease = omim:3)
             #VALUES ?disease { omim:5 omim:6 omim:7 }
-        }'''
+        }"""
 
     pq = parser.parseQuery(q)
     tq = translateQuery(pq)

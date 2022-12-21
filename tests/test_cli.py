@@ -33,7 +33,7 @@ def server(scope="module"):
 
 def test_query_cli(server):
     resp = requests.get(
-        "http://0.0.0.0:8000/sparql?query=" + select_all_query,
+        "http://localhost:8000/sparql?query=" + select_all_query,
         headers={"accept": "application/json"},
     )
     assert len(resp.json()["results"]["bindings"]) > 2

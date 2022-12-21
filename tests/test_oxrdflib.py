@@ -6,8 +6,8 @@ from rdflib import RDF, RDFS, Graph, Literal, URIRef
 from rdflib_endpoint import SparqlEndpoint
 
 g = Graph(store="Oxigraph")
-g.add((URIRef('http://subject'), RDF.type, URIRef('http://object')))
-g.add((URIRef('http://subject'), RDFS.label, Literal('test value')))
+g.add((URIRef("http://subject"), RDF.type, URIRef("http://object")))
+g.add((URIRef("http://subject"), RDFS.label, Literal("test value")))
 
 
 app = SparqlEndpoint(graph=g)

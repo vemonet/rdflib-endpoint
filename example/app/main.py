@@ -30,7 +30,7 @@ def custom_concat(query_results, ctx, part, eval_part):
     # Append our results to the query_results
     for i, result in enumerate(evaluation):
         query_results.append(
-            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + 'Length'): Literal(scores[i])})
+            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + "Length"): Literal(scores[i])})
         )
     return query_results, ctx, part, eval_part
 
@@ -51,18 +51,18 @@ def most_similar(query_results, ctx, part, eval_part):
     #     argumentLimit = None
 
     # Using stub data
-    similarity_results = [{'mostSimilar': 'DRUGBANK:DB00001', 'score': 0.42}]
+    similarity_results = [{"mostSimilar": "DRUGBANK:DB00001", "score": 0.42}]
 
     evaluation = []
     scores = []
     for most_similar in similarity_results:
-        evaluation.append(most_similar['mostSimilar'])
-        scores.append(most_similar['score'])
+        evaluation.append(most_similar["mostSimilar"])
+        scores.append(most_similar["score"])
 
     # Append our results to the query_results
     for i, result in enumerate(evaluation):
         query_results.append(
-            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + 'Score'): Literal(scores[i])})
+            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + "Score"): Literal(scores[i])})
         )
     return query_results, ctx, part, eval_part
 
@@ -77,24 +77,24 @@ SELECT ?concat ?concatLength WHERE {
 # identifier is the default graph
 g = ConjunctiveGraph(
     # store="Oxigraph",
-    identifier=URIRef('https://w3id.org/um/sparql-functions/graph/default'),
+    identifier=URIRef("https://w3id.org/um/sparql-functions/graph/default"),
 )
 
 # Example to add a nquad to the exposed graph
-g.add((URIRef('http://subject'), RDF.type, URIRef('http://object'), URIRef('http://graph')))
-g.add((URIRef('http://subject'), RDFS.label, Literal('foo'), URIRef('http://graph')))
+g.add((URIRef("http://subject"), RDF.type, URIRef("http://object"), URIRef("http://graph")))
+g.add((URIRef("http://subject"), RDFS.label, Literal("foo"), URIRef("http://graph")))
 
 # Start the SPARQL endpoint based on the RDFLib Graph
 app = SparqlEndpoint(
     graph=g,
     functions={
-        'https://w3id.org/um/openpredict/most_similar': most_similar,
-        'https://w3id.org/um/sparql-functions/custom_concat': custom_concat,
+        "https://w3id.org/um/openpredict/most_similar": most_similar,
+        "https://w3id.org/um/sparql-functions/custom_concat": custom_concat,
     },
     title="SPARQL endpoint for RDFLib graph",
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
-    public_url='https://service.openpredict.137.120.31.102.nip.io/sparql',
+    public_url="https://service.openpredict.137.120.31.102.nip.io/sparql",
     cors_enabled=True,
     example_query=example_query,
 )
