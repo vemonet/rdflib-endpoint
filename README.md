@@ -136,7 +136,7 @@ import rdflib
 from rdflib.plugins.sparql.evaluate import evalBGP
 from rdflib.namespace import FOAF, RDF, RDFS
 
-def custom_eval(ctx, part):
+def customEval(ctx, part):
     """Rewrite triple patterns to get super-classes"""
     if part.name == "BGP":
         # rewrite triples
@@ -154,7 +154,7 @@ def custom_eval(ctx, part):
 
 app = SparqlEndpoint(
     graph=g,
-    custom_eval=custom_eval
+    custom_eval=customEval
 )
 ```
 

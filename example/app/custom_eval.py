@@ -68,7 +68,7 @@ def getTriples(disease):
 # def parseRelationalExpr(expr):
 
 
-def custom_eval(ctx, part):
+def customEval(ctx, part):
     """ """
     # print (part.name)
 

@@ -1,7 +1,3 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 requires-python = ">=3.7"
 name = "rdflib-endpoint"
@@ -51,9 +47,10 @@ test = [
     "pytest >=7.1.3",
     "pytest-cov >=3.0.0",
     "coveralls >=3.3.0",
-    "ruff >=0.0.189",
     "mypy >=0.991",
     "isort >=5.11.0",
+    "flake8 >=5.0.0",
+    "Flake8-pyproject >=1.2.2",
     "black >=22.8.0",
     "httpx",
     "types-PyYAML",
@@ -62,6 +59,7 @@ test = [
 ]
 dev = [
     "pre-commit >=2.17.0",
+    "autoflake >=1.0.0",
 ]
 
 
@@ -94,15 +92,15 @@ cov = "test --cov src {args}"
 dev = "uvicorn example.app.main:app --reload {args}"
 fmt = [
     "isort src tests",
+    "autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place src tests --exclude=__init__.py",
+    "pre-commit run --all-files || true",
     "black src tests",
-    "ruff src tests --fix",
-    # "pre-commit run --all-files || true",
 ]
 check = [
     "isort --check-only --diff src",
-    "ruff src tests",
-    "black src tests --check",
+    "flake8 src",
     "mypy src",
+    "black src tests --check",
 ]
 all = [
     "format",
@@ -117,7 +115,7 @@ path = "src/rdflib_endpoint/__init__.py"
 
 [tool.isort]
 line_length = 120
-skip = ["__init__.py"]
+skip = ["src/rdflib_endpoint/__init__.py"]
 profile = "black"
 
 
@@ -127,6 +125,20 @@ branch = true
 
 [tool.coverage.report]
 omit = ["tests/*"]
+
+
+[tool.flake8]
+max-complexity = 26
+max-line-length = 120
+per-file-ignores = [
+    "__init__.py:F401",
+]
+ignore = [
+    "E501", # line too long
+    "E303", # too many blank lines
+    "E301", # expected 1 blank lines found 0
+    "W503", # line break before binary operator
+]
 
 
 [tool.mypy]
@@ -153,63 +165,10 @@ filterwarnings = [
 [tool.black]
 color = true
 line-length = 120
-target-version = ['py37']
-# skip-string-normalization = true
+target-version = ['py310']
+skip-string-normalization = true
 
 
-[tool.ruff]
-target-version = "py37"
-line-length = 120
-select = [
-    "A",
-    "B",  # flake8-bugbear
-    "C",  # flake8-comprehensions
-    "E",  # pycodestyle errors
-    "F",  # pyflakes
-    "FBT",
-    # "I",  # isort
-    "ICN",
-    "N",
-    "PLC",
-    "PLE",
-    "PLR",
-    "PLW",
-    "Q",
-    "RUF",
-    "S",
-    "SIM",
-    "T",
-    "TID",
-    "UP",
-    "W",  # pycodestyle warnings
-    "YTT",
-]
-
-ignore = [
-    "E501", # line too long
-    "B008", # do not perform function calls in argument defaults
-    "B006", # do not use mutable data structures for argument defaults
-    "C901", # too complex
-    "S101", # Use of `assert` detected
-]
-
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]
-
-# [tool.ruff.isort]
-# known-third-party = ["rdflib_endpoint"]
-
-
-
-# [tool.flake8]
-# max-complexity = 26
-# max-line-length = 120
-# per-file-ignores = [
-#     "__init__.py:F401",
-# ]
-# ignore = [
-#     "E501", # line too long
-#     "E303", # too many blank lines
-#     "E301", # expected 1 blank lines found 0
-#     "W503", # line break before binary operator
-# ]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -14,6 +14,7 @@ endpoint = TestClient(app)
 
 def test_service_description():
     response = endpoint.get("/sparql", headers={"accept": "text/turtle"})
+    print(response.text.strip())
     assert response.status_code == 200
     assert response.text.strip() == service_description
 

@@ -6,8 +6,8 @@ from rdflib import RDF, RDFS, Graph, Literal, URIRef
 from rdflib_endpoint import SparqlEndpoint
 
 g = Graph(store="Oxigraph")
-g.add((URIRef("http://subject"), RDF.type, URIRef("http://object")))
-g.add((URIRef("http://subject"), RDFS.label, Literal("test value")))
+g.add((URIRef('http://subject'), RDF.type, URIRef('http://object')))
+g.add((URIRef('http://subject'), RDFS.label, Literal('test value')))
 
 
 app = SparqlEndpoint(graph=g)
@@ -17,6 +17,7 @@ endpoint = TestClient(app)
 
 def test_service_description():
     response = endpoint.get("/sparql", headers={"accept": "text/turtle"})
+    print(response.text.strip())
     assert response.status_code == 200
     # assert response.text.strip() == service_description
 
