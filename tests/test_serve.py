@@ -10,12 +10,11 @@ from rdflib_endpoint.__main__ import run_serve
 
 @pytest.fixture
 def server(scope="module"):
-    print(pkg_resources.resource_filename("tests", "resources/test.nq"))
     proc = Process(
         target=run_serve,
         args=(
             [pkg_resources.resource_filename("tests", "resources/test.nq")],
-            "0.0.0.0",
+            "localhost",
             8000,
         ),
         daemon=True,
@@ -28,7 +27,7 @@ def server(scope="module"):
 
 def test_query_serve(server):
     resp = requests.get(
-        "http://0.0.0.0:8000/sparql?query=" + select_all_query,
+        "http://localhost:8000/sparql?query=" + select_all_query,
         headers={"accept": "application/json"},
     )
     assert len(resp.json()["results"]["bindings"]) > 0

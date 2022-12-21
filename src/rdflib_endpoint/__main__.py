@@ -16,15 +16,15 @@ def cli() -> None:
 
 @cli.command(help="Serve a local RDF file as a SPARQL endpoint by default on http://0.0.0.0:8000/sparql")
 @click.argument("files", nargs=-1)
-@click.option("--host", default="0.0.0.0", help="Host of the SPARQL endpoint")
+@click.option("--host", default="localhost", help="Host of the SPARQL endpoint")
 @click.option("--port", default=8000, help="Port of the SPARQL endpoint")
 @click.option("--store", default="default", help="Store used by RDFLib: default or Oxigraph")
-def serve(files: List[str], host: str, port: int, store: str) -> None:
+def serve(files: list[str], host: str, port: int, store: str) -> None:
     run_serve(files, host, port, store)
 
 
-def run_serve(files: List[str], host: str, port: int, store: str = 'default') -> None:
-    if store == 'oxigraph':
+def run_serve(files: List[str], host: str, port: int, store: str = "default") -> None:
+    if store == "oxigraph":
         store = store.capitalize()
     g = ConjunctiveGraph(store=store)
     for glob_file in files:

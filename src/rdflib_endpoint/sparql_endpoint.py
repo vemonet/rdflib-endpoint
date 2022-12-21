@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 from urllib import parse
 
 import pkg_resources
@@ -66,7 +66,7 @@ SELECT ?concat ?concatLength WHERE {
         if custom_eval:
             rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = custom_eval
         else:
-            rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = self.evalCustomFunctions
+            rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = self.eval_custom_functions
 
         if cors_enabled:
             self.add_middleware(
@@ -136,7 +136,7 @@ SELECT ?concat ?concatLength WHERE {
                 service_graph.parse(data=service_description_ttl, format="ttl")
 
                 # Add custom functions URI to the service description
-                for custom_function_uri in self.functions.keys():
+                for custom_function_uri in self.functions:
                     service_graph.add(
                         (
                             URIRef(custom_function_uri),
@@ -274,7 +274,7 @@ SELECT ?concat ?concatLength WHERE {
         async def serve_yasgui() -> Response:
             """Serve YASGUI interface"""
             html_str = open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")).read()
-            html_str = html_str.replace('$EXAMPLE_QUERY', self.example_query)
+            html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
             return Response(content=html_str, media_type="text/html")
 
         # Service description returned when no query provided
@@ -304,7 +304,7 @@ SELECT ?concat ?concatLength WHERE {
             description=self.description.replace("\n", ""),
         )
 
-    def evalCustomFunctions(self, ctx: QueryContext, part: CompValue) -> List[Any]:
+    def eval_custom_functions(self, ctx: QueryContext, part: CompValue) -> list[Any]:
         """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
         The results are then stored in Literal objects and added to the query results.
 
@@ -314,7 +314,7 @@ SELECT ?concat ?concatLength WHERE {
         """
         # This part holds basic implementation for adding new functions
         if part.name == "Extend":
-            query_results: List[Any] = []
+            query_results: list[Any] = []
 
             # Information is retrieved and stored and passed through a generator
             for eval_part in evalPart(ctx, part.p):
@@ -330,7 +330,7 @@ SELECT ?concat ?concatLength WHERE {
 
                 else:
                     # For built-in SPARQL functions (that are not URIs)
-                    evaluation: List[Any] = [_eval(part.expr, eval_part.forget(ctx, _except=part._vars))]
+                    evaluation: list[Any] = [_eval(part.expr, eval_part.forget(ctx, _except=part._vars))]
                     if isinstance(evaluation[0], SPARQLError):
                         raise evaluation[0]
                     # Append results for built-in SPARQL functions
