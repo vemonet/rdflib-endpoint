@@ -76,24 +76,21 @@ def custom_eval(ctx, part):
         ctx.myvars = []
 
     # search extend for variable binding
-    if part.name == "Extend":
-        if hasattr(part, "expr"):
-            if not isinstance(part.expr, list):
-                ctx.myvars.append(part.expr)
+    if part.name == "Extend" and hasattr(part, "expr") and not isinstance(part.expr, list):
+        ctx.myvars.append(part.expr)
 
     # search for filter
-    if part.name == "Filter":
-        if hasattr(part, "expr"):
-            if hasattr(part.expr, "expr"):
-                if part.expr.expr["op"] == "=":
-                    part.expr.expr["expr"]
-                    d = part.expr.expr["other"]
-                    ctx.myvars.append(d)
-            else:
-                if part.expr["op"] == "=":
-                    part.expr["expr"]
-                    d = part.expr["other"]
-                    ctx.myvars.append(d)
+    if part.name == "Filter" and hasattr(part, "expr"):
+        if hasattr(part.expr, "expr"):
+            if part.expr.expr["op"] == "=":
+                part.expr.expr["expr"]
+                d = part.expr.expr["other"]
+                ctx.myvars.append(d)
+        else:
+            if part.expr["op"] == "=":
+                part.expr["expr"]
+                d = part.expr["other"]
+                ctx.myvars.append(d)
 
     # search the BGP for the variable of interest
     if part.name == "BGP":

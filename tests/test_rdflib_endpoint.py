@@ -1,6 +1,6 @@
+from example.app.main import custom_concat
 from fastapi.testclient import TestClient
 
-from example.app.main import custom_concat
 from rdflib_endpoint import SparqlEndpoint
 
 app = SparqlEndpoint(

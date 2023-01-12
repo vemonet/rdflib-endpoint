@@ -30,6 +30,7 @@ def test_query_serve(server):
     resp = requests.get(
         "http://localhost:8000/sparql?query=" + select_all_query,
         headers={"accept": "application/json"},
+        timeout=600,
     )
     assert len(resp.json()["results"]["bindings"]) > 0
 

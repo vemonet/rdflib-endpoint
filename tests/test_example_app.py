@@ -1,6 +1,5 @@
-from fastapi.testclient import TestClient
-
 from example.app.main import app
+from fastapi.testclient import TestClient
 
 # Use app defined in example folder
 endpoint = TestClient(app)

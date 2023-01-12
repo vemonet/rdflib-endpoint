@@ -56,9 +56,11 @@ SELECT ?concat ?concatLength WHERE {
 
         # Instantiate FastAPI
         super().__init__(
+            *args,
             title=title,
             description=description,
             version=version,
+            **kwargs,
         )
 
         # Save custom function in custom evaluation dictionary
@@ -273,7 +275,8 @@ SELECT ?concat ?concatLength WHERE {
         @self.get("/", include_in_schema=False)
         async def serve_yasgui() -> Response:
             """Serve YASGUI interface"""
-            html_str = open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")).read()
+            with open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")) as f:
+                html_str = f.read()
             html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
             return Response(content=html_str, media_type="text/html")
 
