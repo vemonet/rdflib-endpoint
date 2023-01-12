@@ -4,6 +4,7 @@ on: [push, pull_request, workflow_call, workflow_dispatch]
 jobs:
 
   CodeQL-Analysis:
+    name: CodeQL analysis
     runs-on: ubuntu-latest
     permissions:
       security-events: write # required for all workflows
@@ -30,6 +31,7 @@ jobs:
 
 
   tests:
+    name: Run tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -45,7 +47,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Setup SonarCloud
-      uses: warchant/setup-sonar-scanner@v3
+      uses: warchant/setup-sonar-scanner@v4
 
     - name: Install dependencies
       run: |

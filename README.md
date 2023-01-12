@@ -263,3 +263,5 @@ Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints
   * Serve predicted biomedical entities associations (e.g. disease treated by drug) using the rdflib-endpoint classifier
 * https://github.com/vemonet/translator-sparql-service
   * A SPARQL endpoint to serve NCATS Translator services as SPARQL custom functions.
+* https://github.com/proycon/codemeta-server
+  * Server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user
