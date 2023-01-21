@@ -192,7 +192,10 @@ SELECT ?concat ?concatLength WHERE {
             #         return JSONResponse(status_code=403, content={"message": "Wrong API KEY."})
 
             try:
-                query_results = self.graph.query(query)
+                query_ns = {}
+                for prefix, ns_uri in self.graph.namespaces():
+                    query_ns[prefix] = ns_uri
+                query_results = self.graph.query(query, initNs=query_ns)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
