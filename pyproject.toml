@@ -53,6 +53,7 @@ test = [
     "ruff >=0.0.219",
     "mypy >=0.991",
     "black >=22.8.0",
+    "requests",
     "httpx",
     "types-PyYAML",
     "types-setuptools",
