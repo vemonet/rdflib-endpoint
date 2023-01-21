@@ -165,7 +165,7 @@ select = [
     "N",
     "PLC",
     "PLE",
-    "PLR",
+    # "PLR", # Magic value used in comparison, consider replacing 400 with a constant variable
     "PLW",
     "Q",
     "RUF",
