@@ -172,9 +172,13 @@ SELECT ?concat ?concatLength WHERE {
             # tq = algebraTranslateQuery(parsed_query)
             # pprintAlgebra(tq)
 
+            graph_ns = {}
+            for prefix, ns_uri in self.graph.namespaces():
+                graph_ns[prefix] = ns_uri
+
             try:
                 # Query the graph with the custom functions loaded
-                parsed_query = prepareQuery(query)
+                parsed_query = prepareQuery(query, initNs=graph_ns)
                 query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
             except Exception as e:
                 logging.error("Error parsing the SPARQL query: " + str(e))
@@ -192,10 +196,7 @@ SELECT ?concat ?concatLength WHERE {
             #         return JSONResponse(status_code=403, content={"message": "Wrong API KEY."})
 
             try:
-                query_ns = {}
-                for prefix, ns_uri in self.graph.namespaces():
-                    query_ns[prefix] = ns_uri
-                query_results = self.graph.query(query, initNs=query_ns)
+                query_results = self.graph.query(query, initNs=graph_ns)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
