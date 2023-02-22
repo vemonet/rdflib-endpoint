@@ -25,7 +25,7 @@ It aims to enable python developers to easily deploy functions that can be queri
 
 `rdflib-endpoint` can be used directly from the terminal to quickly serve RDF files through a SPARQL endpoint automatically deployed locally.
 
-It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions using Python, and/or populate the RDFLib Graph, then the endpoint is started using `uvicorn`.
+It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions, and/or populate the RDFLib Graph using Python, then the endpoint is started using `uvicorn`/`gunicorn`.
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
 
@@ -39,27 +39,27 @@ This package requires Python >=3.7, simply install it  from [PyPI](https://pypi.
 pip install rdflib-endpoint
 ```
 
-If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend you can install with the optional dependency:
+If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend triplestore you can install with the optional dependency:
 
 ```bash
 pip install "rdflib-endpoint[oxigraph]"
 ```
 
-> ⚠️ Oxigraph and oxrdflib do not support custom functions, so it can be only used to deploy graphs without custom functions.
+> ⚠️ Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
 
 ## ⚡️ Quickly serve RDF files via a SPARQL endpoint
 
 Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint.
 
-You can use wildcard and provide multiple files, for example to serve all turtle, JSON-LD and nquads files in the current folder:
+You can use wildcard and provide multiple files, for example to serve all turtle, JSON-LD and nquads files in the current folder you could run:
 
 ```bash
 rdflib-endpoint serve *.ttl *.jsonld *.nq
 ```
 
-> Access the YASGUI SPARQL editor on http://localhost:8000
+> Then access the YASGUI SPARQL editor on http://localhost:8000
 
-If you installed oxigraph you can use it as backend triplestore, it is faster and supports some functions that are not supported by the RDFLib query engine (such as `COALESCE()`):
+If you installed with the Oxigraph optional dependency you can use it as backend triplestore, it is faster and supports some functions that are not supported by the RDFLib query engine (such as `COALESCE()`):
 
 ```bash
 rdflib-endpoint serve --store Oxigraph "*.ttl" "*.jsonld" "*.nq"
@@ -191,7 +191,7 @@ Install [Hatch](https://hatch.pypa.io), this will automatically handle virtual e
 pip install --upgrade hatch
 ```
 
-Install the dependencies in a local virtual environment:
+Install the dependencies in a local virtual environment (running this command is optional as `hatch` will automatically install and synchronize dependencies each time you run a script with `hatch run`):
 
 ```bash
 hatch -v env create
@@ -231,7 +231,7 @@ The code will be automatically formatted when you commit your changes using `pre
 hatch run fmt
 ```
 
-Check the code for errors, and if it is in accordance with the PEP8 style guide, by running `flake8` and `mypy`:
+Check the code for errors, and if it is in accordance with the PEP8 style guide, by running `ruff` and `mypy`:
 
 ```
 hatch run check
@@ -253,15 +253,15 @@ The deployment of new releases is done automatically by a GitHub Action workflow
 2. Increment the `version` number in the `pyproject.toml` file in the root folder of the repository.
 3. Create a new release on GitHub, which will automatically trigger the publish workflow, and publish the new release to PyPI.
 
-You can also manually trigger the workflow from the Actions tab in your GitHub repository webpage.
+You can also manually trigger the workflow from the Actions tab in your GitHub repository webpage if needed.
 
 ## 📂 Projects using rdflib-endpoint
 
 Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 
-* https://github.com/MaastrichtU-IDS/rdflib-endpoint-sparql-service
+* [MaastrichtU-IDS/rdflib-endpoint-sparql-service](https://github.com/MaastrichtU-IDS/rdflib-endpoint-sparql-service)
   * Serve predicted biomedical entities associations (e.g. disease treated by drug) using the rdflib-endpoint classifier
-* https://github.com/vemonet/translator-sparql-service
+* [vemonet/translator-sparql-service](https://github.com/vemonet/translator-sparql-service)
   * A SPARQL endpoint to serve NCATS Translator services as SPARQL custom functions.
-* https://github.com/proycon/codemeta-server
+* [proycon/codemeta-server](https://github.com/proycon/codemeta-server)
   * Server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user

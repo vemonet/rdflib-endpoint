@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from typing import Any, Callable, Dict, List, Optional, Union
 from urllib import parse
 
@@ -118,6 +119,14 @@ SELECT ?concat ?concatLength WHERE {
             "xml_results": "application/sparql-results+xml",
         }
 
+        @self.middleware("http")
+        async def add_process_time_header(request: Request, call_next):
+            start_time = time.time()
+            response = await call_next(request)
+            process_time = time.time() - start_time
+            response.headers["X-Process-Time"] = str(process_time)
+            return response
+
         @self.get(
             "/sparql",
             name="SPARQL endpoint",
@@ -196,7 +205,8 @@ SELECT ?concat ?concatLength WHERE {
             #         return JSONResponse(status_code=403, content={"message": "Wrong API KEY."})
 
             try:
-                query_results = self.graph.query(query, initNs=graph_ns)
+                # query_results = self.graph.query(query, initNs=graph_ns)
+                query_results = self.graph.query(query)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
