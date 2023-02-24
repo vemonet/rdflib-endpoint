@@ -337,13 +337,12 @@ SELECT ?concat ?concatLength WHERE {
             for eval_part in evalPart(ctx, part.p):
                 # Checks if the function is a URI (custom function)
                 if hasattr(part.expr, "iri"):
-
                     # Iterate through the custom functions passed in the constructor
                     for function_uri, custom_function in self.functions.items():
                         # Check if URI correspond to a registered custom function
                         if part.expr.iri == URIRef(function_uri):
                             # Execute each function
-                            query_results, ctx, part, eval_part = custom_function(query_results, ctx, part, eval_part)
+                            query_results, ctx, part, _ = custom_function(query_results, ctx, part, eval_part)
 
                 else:
                     # For built-in SPARQL functions (that are not URIs)

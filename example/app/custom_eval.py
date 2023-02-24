@@ -114,7 +114,6 @@ def custom_eval(ctx, part):
 
 
 if __name__ == "__main__":
-
     # add function directly, normally we would use setuptools and entry_points
     rdflib.plugins.sparql.CUSTOM_EVALS["exampleEval"] = custom_eval
 
