@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✨ SPARQL endpoint for RDFLib
+# 💫 SPARQL endpoint for RDFLib
 
 [![PyPI - Version](https://img.shields.io/pypi/v/rdflib-endpoint.svg?logo=pypi&label=PyPI&logoColor=silver)](https://pypi.org/project/rdflib-endpoint/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/rdflib-endpoint.svg?logo=python&label=Python&logoColor=silver)](https://pypi.org/project/rdflib-endpoint/)
