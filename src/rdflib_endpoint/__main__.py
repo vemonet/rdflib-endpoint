@@ -52,5 +52,40 @@ SELECT * WHERE {
     uvicorn.run(app, host=host, port=port)
 
 
+@cli.command(help="Merge and convert local RDF files to another format easily")
+@click.argument("files", nargs=-1)
+@click.option("--output", default="localhost", help="Host of the SPARQL endpoint")
+@click.option("--store", default="default", help="Store used by RDFLib: default or Oxigraph")
+def convert(files: List[str], output: str, store: str) -> None:
+    run_convert(files, output, store)
+
+
+def run_convert(files: List[str], output: str, store: str = "default") -> None:
+    if store == "oxigraph":
+        store = store.capitalize()
+    g = ConjunctiveGraph(store=store)
+    for glob_file in files:
+        file_list = glob.glob(glob_file)
+        for file in file_list:
+            g.parse(file)
+            click.echo(
+                click.style("INFO", fg="green")
+                + ":     📥️ Loaded triples from "
+                + click.style(str(file), bold=True)
+                + ", for a total of "
+                + click.style(str(len(g)), bold=True)
+            )
+
+    out_format = "ttl"
+    if output.endswith(".nt"):
+        out_format = "nt"
+    elif output.endswith(".xml") or output.endswith(".rdf"):
+        out_format = "xml"
+    elif output.endswith(".json") or output.endswith(".jsonld"):
+        out_format = "json-ld"
+
+    g.serialize(output, format=out_format)
+
+
 if __name__ == "__main__":
     sys.exit(cli())
