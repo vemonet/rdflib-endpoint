@@ -16,6 +16,44 @@ from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 
+__all__ = [
+    "SparqlEndpoint",
+]
+
+
+EXAMPLE_SPARQL = """\
+PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+
+SELECT ?concat ?concatLength WHERE {
+    BIND("First" AS ?first)
+    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+}
+""".rstrip()
+
+SERVICE_DESCRIPTION_TTL_FMT = """\
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix ent: <http://www.w3.org/ns/entailment/> .
+@prefix prof: <http://www.w3.org/ns/owl-profile/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<{public_url}> a sd:Service ;
+    rdfs:label "{title}" ;
+    dc:description "{description}" ;
+    sd:endpoint <{public_url}> ;
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
+    sd:feature sd:DereferencesURIs ;
+    sd:defaultEntailmentRegime ent:RDFS ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+        ]
+    ] .
+""".rstrip()
+
 
 class SparqlEndpoint(FastAPI):
     """
@@ -28,25 +66,20 @@ class SparqlEndpoint(FastAPI):
         title: str = "SPARQL endpoint for RDFLib graph",
         description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
         version: str = "0.1.0",
-        graph: Union[Graph, ConjunctiveGraph, Dataset] = ConjunctiveGraph(),
-        functions: Dict[str, Callable[..., Any]] = {},
+        graph: Union[None, Graph, ConjunctiveGraph, Dataset] = None,
+        functions: Optional[Dict[str, Callable[..., Any]]] = None,
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
-        public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
-        example_query: str = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
-SELECT ?concat ?concatLength WHERE {
-    BIND("First" AS ?first)
-    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}""",
+        public_url: str = EXAMPLE_SPARQL,
         **kwargs: Any,
     ) -> None:
         """
         Constructor of the SPARQL endpoint, everything happens here.
         FastAPI calls are defined in this constructor
         """
-        self.graph = graph
-        self.functions = functions
+        self.graph = graph if graph is not None else ConjunctiveGraph()
+        self.functions = functions if functions is not None else {}
         self.title = title
         self.description = description
         self.version = version
@@ -136,7 +169,7 @@ SELECT ?concat ?concatLength WHERE {
         async def sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
             """
             Send a SPARQL query to be executed through HTTP GET operation.
-            \f
+
             :param request: The HTTP GET request
             :param query: SPARQL query input.
             """
@@ -181,9 +214,7 @@ SELECT ?concat ?concatLength WHERE {
             # tq = algebraTranslateQuery(parsed_query)
             # pprintAlgebra(tq)
 
-            graph_ns = {}
-            for prefix, ns_uri in self.graph.namespaces():
-                graph_ns[prefix] = ns_uri
+            graph_ns = dict(self.graph.namespaces())
 
             try:
                 # Query the graph with the custom functions loaded
@@ -196,7 +227,7 @@ SELECT ?concat ?concatLength WHERE {
                     content={"message": "Error parsing the SPARQL query"},
                 )
 
-            # Useless: RDFLib dont support SPARQL insert (Expected {SelectQuery | ConstructQuery | DescribeQuery | AskQuery}, found 'INSERT')
+            # Useless: RDFLib doesn't support SPARQL insert (Expected {SelectQuery | ConstructQuery | DescribeQuery | AskQuery}, found 'INSERT')
             # if not self.enable_update:
             #     if query_operation == "Insert Query" or query_operation == "Delete Query":
             #         return JSONResponse(status_code=403, content={"message": "INSERT and DELETE queries are not allowed."})
@@ -272,7 +303,7 @@ SELECT ?concat ?concatLength WHERE {
         )
         async def post_sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
             """Send a SPARQL query to be executed through HTTP POST operation.
-            \f
+
             :param request: The HTTP POST request with a .body()
             :param query: SPARQL query input.
             """
@@ -295,27 +326,7 @@ SELECT ?concat ?concatLength WHERE {
             return Response(content=html_str, media_type="text/html")
 
         # Service description returned when no query provided
-        service_description_ttl = """@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
-        @prefix ent: <http://www.w3.org/ns/entailment/> .
-        @prefix prof: <http://www.w3.org/ns/owl-profile/> .
-        @prefix void: <http://rdfs.org/ns/void#> .
-        @prefix dc: <http://purl.org/dc/elements/1.1/> .
-        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
-        <{public_url}> a sd:Service ;
-            rdfs:label "{title}" ;
-            dc:description "{description}" ;
-            sd:endpoint <{public_url}> ;
-            sd:supportedLanguage sd:SPARQL11Query ;
-            sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
-            sd:feature sd:DereferencesURIs ;
-            sd:defaultEntailmentRegime ent:RDFS ;
-            sd:defaultDataset [
-                a sd:Dataset ;
-                sd:defaultGraph [
-                    a sd:Graph ;
-                ]
-            ] .""".format(
+        service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
             public_url=self.public_url,
             title=self.title,
             description=self.description.replace("\n", ""),
