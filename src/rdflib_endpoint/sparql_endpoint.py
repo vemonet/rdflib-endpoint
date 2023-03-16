@@ -30,7 +30,7 @@ class SparqlEndpoint(FastAPI):
         description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
         version: str = "0.1.0",
         graph: Union[Graph, ConjunctiveGraph, Dataset] = ConjunctiveGraph(),
-        processor: Union[str, Processor] = "sparql",,
+        processor: Union[str, Processor] = "sparql",
         functions: Dict[str, Callable[..., Any]] = {},
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
