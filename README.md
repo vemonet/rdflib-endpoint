@@ -47,7 +47,11 @@ pip install "rdflib-endpoint[oxigraph]"
 
 > ⚠️ Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
 
-## ⚡️ Quickly serve RDF files via a SPARQL endpoint
+## ⌨️ Use the CLI
+
+`rdflib-endpoint` can be used from the command line interface to perform basic utility tasks, such as serving or converting RDF files locally.
+
+### ⚡️ Quickly serve RDF files via a SPARQL endpoint
 
 Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint.
 
@@ -65,7 +69,15 @@ If you installed with the Oxigraph optional dependency you can use it as backend
 rdflib-endpoint serve --store Oxigraph "*.ttl" "*.jsonld" "*.nq"
 ```
 
-## 🐍 SPARQL endpoint with custom functions
+### 🔄 Convert RDF files to another format
+
+`rdflib-endpoint` can also be used to quickly merge and convert files from multiple formats to a specific format:
+
+```bash
+rdflib-endpoint convert "*.ttl" "*.jsonld" "*.nq" --output "merged.trig"
+```
+
+## 🐍 Define SPARQL endpoints with custom functions
 
 Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, including a docker deployment. A good way to create a new SPARQL endpoint is to copy this `example` folder, and start from it.
 
