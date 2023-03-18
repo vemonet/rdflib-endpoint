@@ -147,7 +147,7 @@ SELECT ?concat ?concatLength WHERE {
             """
             if not query:
                 if str(request.headers["accept"]).startswith("text/html"):
-                    self.serve_yasgui()
+                    return self.serve_yasgui()
                 # If not asking HTML returns the SPARQL endpoint service description
                 service_graph = Graph()
                 # service_graph.parse('app/service-description.ttl', format="ttl")
@@ -360,5 +360,4 @@ SELECT ?concat ?concatLength WHERE {
         with open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")) as f:
             html_str = f.read()
         html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
-        html_str = html_str.replace("$SPARQL_PATH", self.path)
         return Response(content=html_str, media_type="text/html")
