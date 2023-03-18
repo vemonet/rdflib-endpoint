@@ -83,6 +83,8 @@ def run_convert(files: List[str], output: str, store: str = "default") -> None:
         out_format = "xml"
     elif output.endswith(".json") or output.endswith(".jsonld"):
         out_format = "json-ld"
+    elif output.endswith(".trig"):
+        out_format = "trig"
 
     g.serialize(output, format=out_format)
 

@@ -71,6 +71,8 @@ class SparqlEndpoint(FastAPI):
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
+        processor: Any = None,
+        path: str = "/",
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
         example_query: str = EXAMPLE_SPARQL,
         **kwargs: Any,
@@ -84,6 +86,7 @@ class SparqlEndpoint(FastAPI):
         self.title = title
         self.description = description
         self.version = version
+        self.path = path
         self.public_url = public_url
         self.example_query = example_query
         self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
@@ -113,6 +116,9 @@ class SparqlEndpoint(FastAPI):
                 allow_methods=["*"],
                 allow_headers=["*"],
             )
+
+        if self.path != "/":
+            logging.info(f"SPARQL endpoint running on \033[1mhttp://localhost:8000{self.path}\033[0m")
 
         # api_responses: Dict[int, Dict] = {
         api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
@@ -162,7 +168,7 @@ class SparqlEndpoint(FastAPI):
             return response
 
         @self.get(
-            "/sparql",
+            self.path,
             name="SPARQL endpoint",
             description=self.example_markdown,
             responses=api_responses,
@@ -175,7 +181,9 @@ class SparqlEndpoint(FastAPI):
             :param query: SPARQL query input.
             """
             if not query:
-                # Return the SPARQL endpoint service description
+                if str(request.headers["accept"]).startswith("text/html"):
+                    return self.serve_yasgui()
+                # If not asking HTML returns the SPARQL endpoint service description
                 service_graph = Graph()
                 # service_graph.parse('app/service-description.ttl', format="ttl")
                 service_graph.parse(data=service_description_ttl, format="ttl")
@@ -238,7 +246,7 @@ class SparqlEndpoint(FastAPI):
 
             try:
                 # query_results = self.graph.query(query, initNs=graph_ns)
-                query_results = self.graph.query(query)
+                query_results = self.graph.query(query, processor=processor) if processor else self.graph.query(query)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
@@ -297,7 +305,7 @@ class SparqlEndpoint(FastAPI):
                 )
 
         @self.post(
-            "/sparql",
+            path,
             name="SPARQL endpoint",
             description=self.example_markdown,
             responses=api_responses,
@@ -317,14 +325,6 @@ class SparqlEndpoint(FastAPI):
                     if params[0] == "query":
                         query = parse.unquote(params[1])
             return await sparql_endpoint(request, query)
-
-        @self.get("/", include_in_schema=False)
-        async def serve_yasgui() -> Response:
-            """Serve YASGUI interface"""
-            with open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")) as f:
-                html_str = f.read()
-            html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
-            return Response(content=html_str, media_type="text/html")
 
         # Service description returned when no query provided
         service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
@@ -367,3 +367,10 @@ class SparqlEndpoint(FastAPI):
 
             return query_results
         raise NotImplementedError()
+
+    def serve_yasgui(self) -> Response:
+        """Serve YASGUI interface"""
+        with open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")) as f:
+            html_str = f.read()
+        html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
+        return Response(content=html_str, media_type="text/html")

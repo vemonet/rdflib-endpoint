@@ -47,7 +47,11 @@ pip install "rdflib-endpoint[oxigraph]"
 
 > ⚠️ Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
 
-## ⚡️ Quickly serve RDF files via a SPARQL endpoint
+## ⌨️ Use the CLI
+
+`rdflib-endpoint` can be used from the command line interface to perform basic utility tasks, such as serving or converting RDF files locally.
+
+### ⚡️ Quickly serve RDF files via a SPARQL endpoint
 
 Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint.
 
@@ -65,7 +69,15 @@ If you installed with the Oxigraph optional dependency you can use it as backend
 rdflib-endpoint serve --store Oxigraph "*.ttl" "*.jsonld" "*.nq"
 ```
 
-## 🐍 SPARQL endpoint with custom functions
+### 🔄 Convert RDF files to another format
+
+`rdflib-endpoint` can also be used to quickly merge and convert files from multiple formats to a specific format:
+
+```bash
+rdflib-endpoint convert "*.ttl" "*.jsonld" "*.nq" --output "merged.trig"
+```
+
+## 🐍 Define SPARQL endpoints with custom functions
 
 Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, including a docker deployment. A good way to create a new SPARQL endpoint is to copy this `example` folder, and start from it.
 
@@ -115,7 +127,8 @@ app = SparqlEndpoint(
     title="SPARQL endpoint for RDFLib graph",
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
-    public_url='https://your-endpoint-url/sparql',
+    path="/",
+    public_url='https://your-endpoint-url/',
     # Example queries displayed in the Swagger UI to help users try your function
     example_query="""PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
@@ -250,7 +263,13 @@ hatch env prune
 The deployment of new releases is done automatically by a GitHub Action workflow when a new release is created on GitHub. To release a new version:
 
 1. Make sure the `PYPI_TOKEN` secret has been defined in the GitHub repository (in Settings > Secrets > Actions). You can get an API token from PyPI at [pypi.org/manage/account](https://pypi.org/manage/account).
-2. Increment the `version` number in the `pyproject.toml` file in the root folder of the repository.
+
+2. Increment the `version` number following semantic versioning, select between `fix`, `minor`, or `major`:
+
+   ```bash
+   hatch version fix
+   ```
+
 3. Create a new release on GitHub, which will automatically trigger the publish workflow, and publish the new release to PyPI.
 
 You can also manually trigger the workflow from the Actions tab in your GitHub repository webpage if needed.

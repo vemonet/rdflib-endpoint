@@ -15,11 +15,11 @@
         Yasqe.defaults.value = `$EXAMPLE_QUERY`
         const url = window.location.href.endsWith('/') ? window.location.href.slice(0, -1) : window.location.href;
         const yasgui = new Yasgui(document.getElementById("yasgui"), {
-            requestConfig: { endpoint: url + "/sparql" },
+            requestConfig: { endpoint: url },
             endpointCatalogueOptions: {
                 getData: function () {
                     return [
-                        { endpoint: url + "/sparql" },
+                        { endpoint: url },
                     ];
                 },
                 keys: [],
