@@ -33,6 +33,7 @@ class SparqlEndpoint(FastAPI):
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
+        processor: Any = None,
         path: str = "/",
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
         example_query: str = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
@@ -213,7 +214,7 @@ SELECT ?concat ?concatLength WHERE {
 
             try:
                 # query_results = self.graph.query(query, initNs=graph_ns)
-                query_results = self.graph.query(query)
+                query_results = self.graph.query(query, processor=processor) if processor else self.graph.query(query)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
