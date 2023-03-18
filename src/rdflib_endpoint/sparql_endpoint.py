@@ -71,7 +71,8 @@ class SparqlEndpoint(FastAPI):
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
-        public_url: str = EXAMPLE_SPARQL,
+        public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
+        example_query: str = EXAMPLE_SPARQL,
         **kwargs: Any,
     ) -> None:
         """
