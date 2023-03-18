@@ -6,28 +6,28 @@ endpoint = TestClient(app)
 
 
 def test_service_description():
-    response = endpoint.get("/sparql", headers={"accept": "text/turtle"})
+    response = endpoint.get("/", headers={"accept": "text/turtle"})
     # print(response.text.strip())
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
-    response = endpoint.post("/sparql", headers={"accept": "text/turtle"})
+    response = endpoint.post("/", headers={"accept": "text/turtle"})
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
     # Check for application/xml
-    response = endpoint.post("/sparql", headers={"accept": "application/xml"})
+    response = endpoint.post("/", headers={"accept": "application/xml"})
     assert response.status_code == 200
 
 
 def test_custom_concat():
-    response = endpoint.get("/sparql?query=" + custom_concat_query, headers={"accept": "application/json"})
+    response = endpoint.get("/?query=" + custom_concat_query, headers={"accept": "application/json"})
     # print(response.json())
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
     response = endpoint.post(
-        "/sparql",
+        "/",
         data="query=" + custom_concat_query,
         headers={"accept": "application/json"},
     )
@@ -36,13 +36,8 @@ def test_custom_concat():
 
 
 def test_bad_request():
-    response = endpoint.get("/sparql?query=figarofigarofigaro", headers={"accept": "application/json"})
+    response = endpoint.get("/?query=figarofigarofigaro", headers={"accept": "application/json"})
     assert response.status_code == 400
-
-
-def test_redirect():
-    response = endpoint.get("/")
-    assert response.status_code == 200
 
 
 custom_concat_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
@@ -56,20 +51,20 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 
-<https://service.openpredict.137.120.31.102.nip.io/sparql> a sd:Service ;
+<https://w3id.org/um/openpredict/most_similar> a sd:Function .
+
+<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function .
+
+<https://your-website-url/> a sd:Service ;
     rdfs:label "SPARQL endpoint for RDFLib graph" ;
     dc:description "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. [Source code](https://github.com/vemonet/rdflib-endpoint)" ;
     sd:defaultDataset [ a sd:Dataset ;
             sd:defaultGraph [ a sd:Graph ] ] ;
     sd:defaultEntailmentRegime ent:RDFS ;
-    sd:endpoint <https://service.openpredict.137.120.31.102.nip.io/sparql> ;
+    sd:endpoint <https://your-website-url/> ;
     sd:extensionFunction <https://w3id.org/um/openpredict/most_similar>,
         <https://w3id.org/um/sparql-functions/custom_concat> ;
     sd:feature sd:DereferencesURIs ;
     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
         <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
-    sd:supportedLanguage sd:SPARQL11Query .
-
-<https://w3id.org/um/openpredict/most_similar> a sd:Function .
-
-<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function ."""
+    sd:supportedLanguage sd:SPARQL11Query ."""
