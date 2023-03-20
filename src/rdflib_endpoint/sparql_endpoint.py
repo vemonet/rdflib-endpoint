@@ -186,23 +186,6 @@ class SparqlEndpoint(FastAPI):
                 # If not asking HTML returns the SPARQL endpoint service description
                 service_graph = self.get_service_graph()
 
-                # Add custom functions URI to the service description
-                for custom_function_uri in self.functions:
-                    service_graph.add(
-                        (
-                            URIRef(custom_function_uri),
-                            RDF.type,
-                            URIRef("http://www.w3.org/ns/sparql-service-description#Function"),
-                        )
-                    )
-                    service_graph.add(
-                        (
-                            URIRef(self.public_url),
-                            URIRef("http://www.w3.org/ns/sparql-service-description#extensionFunction"),
-                            URIRef(custom_function_uri),
-                        )
-                    )
-
                 # Return the service description RDF as turtle or XML
                 if request.headers["accept"] == mimetype["turtle"]:
                     return Response(
@@ -376,4 +359,22 @@ class SparqlEndpoint(FastAPI):
         graph = Graph()
         graph.parse(data=service_description_ttl, format="ttl")
         # service_graph.parse('app/service-description.ttl', format="ttl")
+
+        # Add custom functions URI to the service description
+        for custom_function_uri in self.functions:
+            graph.add(
+                (
+                    URIRef(custom_function_uri),
+                    RDF.type,
+                    URIRef("http://www.w3.org/ns/sparql-service-description#Function"),
+                )
+            )
+            graph.add(
+                (
+                    URIRef(self.public_url),
+                    URIRef("http://www.w3.org/ns/sparql-service-description#extensionFunction"),
+                    URIRef(custom_function_uri),
+                )
+            )
+
         return graph
