@@ -54,6 +54,45 @@ SERVICE_DESCRIPTION_TTL_FMT = """\
     ] .
 """.rstrip()
 
+# api_responses: Dict[int, Dict] = {
+api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
+    200: {
+        "description": "SPARQL query results",
+        "content": {
+            "application/sparql-results+json": {
+                "results": {"bindings": []},
+                "head": {"vars": []},
+            },
+            "application/json": {
+                "results": {"bindings": []},
+                "head": {"vars": []},
+            },
+            "text/csv": {"example": "s,p,o"},
+            "application/sparql-results+csv": {"example": "s,p,o"},
+            "text/turtle": {"example": "service description"},
+            "application/sparql-results+xml": {"example": "<root></root>"},
+            "application/xml": {"example": "<root></root>"},
+            # "application/rdf+xml": {
+            #     "example": '<?xml version="1.0" encoding="UTF-8"?> <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"></rdf:RDF>'
+            # },
+        },
+    },
+    400: {
+        "description": "Bad Request",
+    },
+    403: {
+        "description": "Forbidden",
+    },
+    422: {
+        "description": "Unprocessable Entity",
+    },
+}
+
+mimetype = {
+    "turtle": "text/turtle",
+    "xml_results": "application/sparql-results+xml",
+}
+
 
 class SparqlEndpoint(FastAPI):
     """
@@ -120,45 +159,6 @@ class SparqlEndpoint(FastAPI):
         if self.path != "/":
             logging.info(f"SPARQL endpoint running on \033[1mhttp://localhost:8000{self.path}\033[0m")
 
-        # api_responses: Dict[int, Dict] = {
-        api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
-            200: {
-                "description": "SPARQL query results",
-                "content": {
-                    "application/sparql-results+json": {
-                        "results": {"bindings": []},
-                        "head": {"vars": []},
-                    },
-                    "application/json": {
-                        "results": {"bindings": []},
-                        "head": {"vars": []},
-                    },
-                    "text/csv": {"example": "s,p,o"},
-                    "application/sparql-results+csv": {"example": "s,p,o"},
-                    "text/turtle": {"example": "service description"},
-                    "application/sparql-results+xml": {"example": "<root></root>"},
-                    "application/xml": {"example": "<root></root>"},
-                    # "application/rdf+xml": {
-                    #     "example": '<?xml version="1.0" encoding="UTF-8"?> <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"></rdf:RDF>'
-                    # },
-                },
-            },
-            400: {
-                "description": "Bad Request",
-            },
-            403: {
-                "description": "Forbidden",
-            },
-            422: {
-                "description": "Unprocessable Entity",
-            },
-        }
-
-        mimetype = {
-            "turtle": "text/turtle",
-            "xml_results": "application/sparql-results+xml",
-        }
-
         @self.middleware("http")
         async def add_process_time_header(request: Request, call_next: Any) -> Response:
             start_time = time.time()
@@ -184,9 +184,7 @@ class SparqlEndpoint(FastAPI):
                 if str(request.headers["accept"]).startswith("text/html"):
                     return self.serve_yasgui()
                 # If not asking HTML returns the SPARQL endpoint service description
-                service_graph = Graph()
-                # service_graph.parse('app/service-description.ttl', format="ttl")
-                service_graph.parse(data=service_description_ttl, format="ttl")
+                service_graph = self.get_service_graph()
 
                 # Add custom functions URI to the service description
                 for custom_function_uri in self.functions:
@@ -326,13 +324,6 @@ class SparqlEndpoint(FastAPI):
                         query = parse.unquote(params[1])
             return await sparql_endpoint(request, query)
 
-        # Service description returned when no query provided
-        service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
-            public_url=self.public_url,
-            title=self.title,
-            description=self.description.replace("\n", ""),
-        )
-
     def eval_custom_functions(self, ctx: QueryContext, part: CompValue) -> List[Any]:
         """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
         The results are then stored in Literal objects and added to the query results.
@@ -374,3 +365,15 @@ class SparqlEndpoint(FastAPI):
             html_str = f.read()
         html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
         return Response(content=html_str, media_type="text/html")
+
+    def get_service_graph(self) -> rdflib.Graph:
+        # Service description returned when no query provided
+        service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
+            public_url=self.public_url,
+            title=self.title,
+            description=self.description.replace("\n", ""),
+        )
+        graph = Graph()
+        graph.parse(data=service_description_ttl, format="ttl")
+        # service_graph.parse('app/service-description.ttl', format="ttl")
+        return graph
