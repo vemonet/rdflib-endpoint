@@ -42,13 +42,13 @@ def test_custom_eval():
     # )
     # eval_endpoint = TestClient(eval_app)
 
-    response = eval_endpoint.get("/sparql?query=" + select_parent, headers={"accept": "application/json"})
+    response = eval_endpoint.get("/?query=" + select_parent, headers={"accept": "application/json"})
     print(response.json())
     assert response.status_code == 200
     print(response.json()["results"]["bindings"])
     assert str(response.json()["results"]["bindings"][0]["s"]["value"]) == "http://alice"
 
-    response = eval_endpoint.post("/sparql", data="query=" + select_parent, headers={"accept": "application/json"})
+    response = eval_endpoint.post("/", data="query=" + select_parent, headers={"accept": "application/json"})
     assert response.status_code == 200
     assert str(response.json()["results"]["bindings"][0]["s"]["value"]) == "http://alice"
 

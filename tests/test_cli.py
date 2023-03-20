@@ -1,3 +1,6 @@
+import glob
+import os
+import tempfile
 import time
 from multiprocessing import Process
 
@@ -33,7 +36,7 @@ def server(scope="module"):
 
 def test_query_cli(server):
     resp = requests.get(
-        "http://localhost:8000/sparql?query=" + select_all_query,
+        "http://localhost:8000/?query=" + select_all_query,
         headers={"accept": "application/json"},
         timeout=600,
     )
@@ -43,3 +46,20 @@ def test_query_cli(server):
 select_all_query = """SELECT * WHERE {
     ?s ?p ?o .
 }"""
+
+
+def test_convert():
+    with tempfile.NamedTemporaryFile(delete=True) as tmp_file:
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            ["convert", pkg_resources.resource_filename("tests", "resources/test2.ttl"), "--output", str(tmp_file)],
+        )
+        assert result.exit_code == 0
+        with open(str(tmp_file)) as file:
+            content = file.read()
+            assert "ns0:s" in content
+
+    # Fix issue with python creating unnecessary temp files on disk
+    for f in glob.glob("<tempfile._TemporaryFileWrapper*"):
+        os.remove(f)

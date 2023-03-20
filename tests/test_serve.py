@@ -28,7 +28,7 @@ def server(scope="module"):
 
 def test_query_serve(server):
     resp = requests.get(
-        "http://localhost:8000/sparql?query=" + select_all_query,
+        "http://localhost:8000/?query=" + select_all_query,
         headers={"accept": "application/json"},
         timeout=600,
     )
