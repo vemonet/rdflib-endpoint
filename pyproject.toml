@@ -30,11 +30,10 @@ classifiers = [
 dynamic = ["version"]
 
 dependencies = [
+    "rdflib >=6.0.0",
     "fastapi >=0.51.0",
     "uvicorn[standard] >=0.12.0",
-    "rdflib >=6.0.0",
     "click",
-    # "aiofiles",
     # "typer >=0.6.0",
 ]
 
@@ -180,9 +179,8 @@ select = [
 ]
 
 ignore = [
-    "E501", # line too long
     "B008", # do not perform function calls in argument defaults
-    "B006", # do not use mutable data structures for argument defaults
+    "E501", # line too long
     "C901", # too complex
     "S101", # Use of `assert` detected
     "T201", "T203", # remove print and pprint

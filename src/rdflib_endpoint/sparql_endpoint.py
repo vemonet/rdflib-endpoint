@@ -14,8 +14,8 @@ from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
-from rdflib.plugins.sparql.query import Processor
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
+from rdflib.query import Processor
 
 __all__ = [
     "SparqlEndpoint",
@@ -219,7 +219,8 @@ class SparqlEndpoint(FastAPI):
                     content={"message": "Error parsing the SPARQL query"},
                 )
 
-            # Useless: RDFLib doesn't support SPARQL insert (Expected {SelectQuery | ConstructQuery | DescribeQuery | AskQuery}, found 'INSERT')
+            # TODO: RDFLib doesn't support SPARQL insert (Expected {SelectQuery | ConstructQuery | DescribeQuery | AskQuery}, found 'INSERT')
+            # But we could implement it by doing a CONSTRUCT, and adding the resulting triples to the graph
             # if not self.enable_update:
             #     if query_operation == "Insert Query" or query_operation == "Delete Query":
             #         return JSONResponse(status_code=403, content={"message": "INSERT and DELETE queries are not allowed."})
@@ -228,7 +229,6 @@ class SparqlEndpoint(FastAPI):
             #         return JSONResponse(status_code=403, content={"message": "Wrong API KEY."})
 
             try:
-                # query_results = self.graph.query(query, initNs=graph_ns)
                 query_results = self.graph.query(query, processor=self.processor)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
