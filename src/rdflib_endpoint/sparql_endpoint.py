@@ -14,6 +14,7 @@ from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.plugins.sparql.query import Processor
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 
 __all__ = [
@@ -107,10 +108,10 @@ class SparqlEndpoint(FastAPI):
         version: str = "0.1.0",
         graph: Union[None, Graph, ConjunctiveGraph, Dataset] = None,
         functions: Optional[Dict[str, Callable[..., Any]]] = None,
+        processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
-        processor: Any = None,
         path: str = "/",
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
         example_query: str = EXAMPLE_SPARQL,
@@ -122,6 +123,7 @@ class SparqlEndpoint(FastAPI):
         """
         self.graph = graph if graph is not None else ConjunctiveGraph()
         self.functions = functions if functions is not None else {}
+        self.processor = processor
         self.title = title
         self.description = description
         self.version = version
@@ -227,7 +229,7 @@ class SparqlEndpoint(FastAPI):
 
             try:
                 # query_results = self.graph.query(query, initNs=graph_ns)
-                query_results = self.graph.query(query, processor=processor) if processor else self.graph.query(query)
+                query_results = self.graph.query(query, processor=self.processor)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
