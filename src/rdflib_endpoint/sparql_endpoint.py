@@ -14,6 +14,7 @@ from rdflib.plugins.sparql import prepareQuery
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.plugins.sparql.query import Processor
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 
 
@@ -29,11 +30,11 @@ class SparqlEndpoint(FastAPI):
         description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
         version: str = "0.1.0",
         graph: Union[Graph, ConjunctiveGraph, Dataset] = ConjunctiveGraph(),
+        processor: Union[str, Processor] = "sparql",
         functions: Dict[str, Callable[..., Any]] = {},
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
-        processor: Any = None,
         path: str = "/",
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
         example_query: str = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
@@ -48,6 +49,7 @@ SELECT ?concat ?concatLength WHERE {
         FastAPI calls are defined in this constructor
         """
         self.graph = graph
+        self.processor = processor
         self.functions = functions
         self.title = title
         self.description = description
@@ -214,7 +216,7 @@ SELECT ?concat ?concatLength WHERE {
 
             try:
                 # query_results = self.graph.query(query, initNs=graph_ns)
-                query_results = self.graph.query(query, processor=processor) if processor else self.graph.query(query)
+                query_results = self.graph.query(query, processor=self.processor)
             except Exception as e:
                 logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
                 return JSONResponse(
