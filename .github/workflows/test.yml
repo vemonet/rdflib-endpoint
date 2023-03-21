@@ -59,7 +59,11 @@ jobs:
 
     - name: Test with coverage
       run: |
+        coverage erase
         hatch run cov --cov-report xml:coverage.xml
+        coverage combine --append || true
+        coverage report
+        coverage xml
 
     - name: Upload coverage to SonarCloud
       env:

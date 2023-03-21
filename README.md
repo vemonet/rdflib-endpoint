@@ -27,7 +27,7 @@ It aims to enable python developers to easily deploy functions that can be queri
 
 It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions, and/or populate the RDFLib Graph using Python, then the endpoint is started using `uvicorn`/`gunicorn`.
 
-The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (rdf4j based). The endpoint is CORS enabled by default.
+The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (RDF4J based). The endpoint is CORS enabled by default to enable querying it from client JavaScript (can be turned off).
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/).
 
@@ -54,7 +54,7 @@ pip install "rdflib-endpoint[cli]"
 If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend triplestore you can install with the optional dependency `oxigraph`:
 
 ```bash
-pip install "rdflib-endpoint[oxigraph]"
+pip install "rdflib-endpoint[oxigraph,cli]"
 ```
 
 > ⚠️ Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
