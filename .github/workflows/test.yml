@@ -46,9 +46,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # - name: Setup SonarCloud
-    #   uses: warchant/setup-sonar-scanner@v4
-
     - name: Install dependencies
       run: |
         pip install hatch
@@ -64,14 +61,9 @@ jobs:
 
     - name: ☂️ Upload coverage to Codecov
       uses: codecov/codecov-action@v3
-      # with:
-      #   token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-      #   files: ./coverage1.xml,./coverage2.xml # optional
-      #   flags: unittests # optional
-      #   name: codecov-umbrella # optional
-      #   fail_ci_if_error: true # optional (default = false)
-      #   verbose: true # optional (default = false)
 
+    - name: ☂️ Coveralls
+      uses: coverallsapp/github-action@v2
 
     - name: Analyze with SonarCloud
       uses: sonarsource/sonarcloud-github-action@master
@@ -86,12 +78,3 @@ jobs:
           -Dsonar.sources=src/
           -Dsonar.tests=tests/
           -Dsonar.verbose=true
-
-    # - name: Upload coverage to SonarCloud
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=vemonet  -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.projectKey=vemonet_rdflib-endpoint -Dsonar.python.coverage.reportPaths=coverage.xml
-
-
-    # - name: ☂️ Coveralls
-    #   uses: coverallsapp/github-action@v2
