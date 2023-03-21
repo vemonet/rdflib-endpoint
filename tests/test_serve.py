@@ -38,3 +38,19 @@ def test_query_serve(server):
 select_all_query = """SELECT * WHERE {
     ?s ?p ?o .
 }"""
+
+
+def test_run_serve():
+    proc = Process(
+        target=run_serve,
+        args=(
+            [pkg_resources.resource_filename("tests", "resources/test.nq")],
+            "localhost",
+            8000,
+        ),
+        daemon=True,
+    )
+    proc.start()
+    time.sleep(1)
+    assert proc.is_alive()
+    proc.kill()
