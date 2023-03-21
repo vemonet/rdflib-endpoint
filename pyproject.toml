@@ -79,10 +79,6 @@ Source = "https://github.com/vemonet/rdflib-endpoint"
 
 # ENVIRONMENTS AND SCRIPTS
 [tool.hatch.envs.default]
-# type = "container"
-# image = "python:3.7"
-# command = ["/bin/sleep", "infinity"]
-# start-on-creation = false
 features = [
     "cli",
     "web",
@@ -102,7 +98,6 @@ dev = "uvicorn example.app.main:app --reload {args}"
 fmt = [
     "black src tests example",
     "ruff src tests example --fix",
-    # "pre-commit run --all-files || true",
 ]
 check = [
     "ruff src tests",
@@ -122,8 +117,11 @@ path = "src/rdflib_endpoint/__init__.py"
 
 [tool.coverage.run]
 source = ["src"]
-# [tool.coverage.report]
-# omit = ["tests/*"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:httpx.*:"
+]
 
 
 [tool.mypy]
@@ -139,12 +137,6 @@ warn_redundant_casts = true
 disallow_untyped_defs = true
 disallow_any_generics = true
 disallow_untyped_calls = false # needed due to _eval() not being typed in rdflib
-
-
-[tool.pytest.ini_options]
-filterwarnings = [
-    "ignore::DeprecationWarning:httpx.*:"
-]
 
 
 [tool.black]
