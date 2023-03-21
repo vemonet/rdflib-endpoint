@@ -59,7 +59,7 @@ jobs:
 
     - name: Test with coverage
       run: |
-        hatch run cov --cov-report xml:coverage.xml
+        hatch run cov --cov-report xml
 
     - name: Analyze with SonarCloud
       uses: sonarsource/sonarcloud-github-action@master
