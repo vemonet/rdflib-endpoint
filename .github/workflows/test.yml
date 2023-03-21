@@ -71,6 +71,8 @@ jobs:
           -Dsonar.organization=vemonet
           -Dsonar.projectKey=vemonet_rdflib-endpoint
           -Dsonar.python.coverage.reportPaths=coverage.xml
+          -Dsonar.sources=src/
+          -Dsonar.tests=tests/
           -Dsonar.verbose=true
 
     # - name: Upload coverage to SonarCloud
