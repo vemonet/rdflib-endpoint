@@ -68,10 +68,17 @@ def most_similar(query_results, ctx, part, eval_part):
 
 
 example_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+SELECT DISTINCT * WHERE {
+    ?s ?p ?o .
+} LIMIT 100"""
+
+example_queries = {
+    "Custom function": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}"""
+}""",
+}
 
 # Use ConjunctiveGraph to support nquads and graphs in SPARQL queries
 # identifier is the default graph
@@ -98,6 +105,7 @@ app = SparqlEndpoint(
     public_url="https://your-website-url/",
     cors_enabled=True,
     example_query=example_query,
+    example_queries=example_queries,
 )
 
 ## Uncomment to run it directly with python app/main.py

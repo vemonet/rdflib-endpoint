@@ -111,6 +111,7 @@ class SparqlRouter(APIRouter):
         enable_update: bool = False,
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
         example_query: Optional[str] = None,
+        example_queries: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -126,6 +127,7 @@ class SparqlRouter(APIRouter):
         self.path = path
         self.public_url = public_url
         self.example_query = example_query if example_query is not None else EXAMPLE_SPARQL
+        self.example_queries = example_queries
         self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
         self.enable_update = enable_update
 
@@ -321,9 +323,14 @@ class SparqlRouter(APIRouter):
 
     def serve_yasgui(self) -> Response:
         """Serve YASGUI interface"""
+        import json
+
         with open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")) as f:
             html_str = f.read()
+        html_str = html_str.replace("$TITLE", self.title)
+        html_str = html_str.replace("$DESCRIPTION", self.description)
         html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
+        html_str = html_str.replace("$EXAMPLE_QUERIES", json.dumps(self.example_queries))
         return Response(content=html_str, media_type="text/html")
 
     def get_service_graph(self) -> rdflib.Graph:

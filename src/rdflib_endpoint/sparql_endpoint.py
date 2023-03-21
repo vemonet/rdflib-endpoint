@@ -33,23 +33,16 @@ class SparqlEndpoint(FastAPI):
         path: str = "/",
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
         example_query: Optional[str] = None,
+        example_queries: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> None:
         """
         Constructor of the SPARQL endpoint, everything happens here.
         FastAPI calls are defined in this constructor
         """
-        self.graph = graph if graph is not None else ConjunctiveGraph()
-        self.functions = functions if functions is not None else {}
-        self.processor = processor
         self.title = title
         self.description = description
         self.version = version
-        self.path = path
-        self.public_url = public_url
-        self.example_query = example_query
-        self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
-        self.enable_update = enable_update
 
         # Instantiate FastAPI
         super().__init__(
@@ -72,6 +65,7 @@ class SparqlEndpoint(FastAPI):
             enable_update=enable_update,
             public_url=public_url,
             example_query=example_query,
+            example_queries=example_queries,
         )
         self.include_router(sparql_router)
 
@@ -83,9 +77,6 @@ class SparqlEndpoint(FastAPI):
                 allow_methods=["*"],
                 allow_headers=["*"],
             )
-
-        # if self.path != "/":
-        #     logging.info(f"SPARQL endpoint running on \033[1mhttp://localhost:8000{self.path}\033[0m")
 
         @self.middleware("http")
         async def add_process_time_header(request: Request, call_next: Any) -> Response:

@@ -122,12 +122,20 @@ app = SparqlEndpoint(
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
     public_url='https://your-endpoint-url/',
-    # Example queries displayed in the Swagger UI to help users try your function
+    # Example query displayed in YASGUI default tab
     example_query="""PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}"""
+}""",
+    # Additional example queries displayed in additional YASGUI tabs
+    example_queries = {
+    "Custom function": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+SELECT ?concat ?concatLength WHERE {
+    BIND("First" AS ?first)
+    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+}""",
+	}
 )
 ```
 
