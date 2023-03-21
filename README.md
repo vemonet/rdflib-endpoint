@@ -51,7 +51,7 @@ pip install "rdflib-endpoint[oxigraph]"
 
 `rdflib-endpoint` can be used from the command line interface to perform basic utility tasks, such as serving or converting RDF files locally.
 
-### ⚡️ Quickly serve RDF files via a SPARQL endpoint
+### ⚡️ Quickly serve RDF files through a SPARQL endpoint
 
 Use `rdflib-endpoint` as a command line interface (CLI) in your terminal to quickly serve one or multiple RDF files as a SPARQL endpoint.
 
@@ -77,20 +77,80 @@ rdflib-endpoint serve --store Oxigraph "*.ttl" "*.jsonld" "*.nq"
 rdflib-endpoint convert "*.ttl" "*.jsonld" "*.nq" --output "merged.trig"
 ```
 
-## 🐍 Define SPARQL endpoints with custom functions
+## ✨ Deploy a SPARQL endpoint
+
+`rdflib-endpoint` enables you to easily define and deploy SPARQL endpoints based on RDFLib Graph, ConjunctiveGraph, and Dataset. Additionally it provides helpers to defines custom functions in the endpoint.
 
 Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, including a docker deployment. A good way to create a new SPARQL endpoint is to copy this `example` folder, and start from it.
 
+### 🚨 Deploy as a standalone API
+
+Deploy your SPARQL endpoint as a standalone API:
+
+```python
+from rdflib import ConjunctiveGraph
+from rdflib_endpoint import SparqlEndpoint
+
+# Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
+g = ConjunctiveGraph()
+# TODO: Add triples in your graph
+
+# Then use either SparqlEndpoint or SparqlRouter, they take the same arguments
+app = SparqlEndpoint(
+    graph=g,
+    path="/",
+    cors_enabled=True,
+    # Metadata used for the SPARQL service description and Swagger UI:
+    title="SPARQL endpoint for RDFLib graph",
+    description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
+    version="0.1.0",
+    public_url='https://your-endpoint-url/',
+    # Example queries displayed in the Swagger UI to help users try your function
+    example_query="""PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+SELECT ?concat ?concatLength WHERE {
+    BIND("First" AS ?first)
+    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+}"""
+)
+```
+
+Finally deploy this app using `uvicorn` (see below)
+
+### 🛣️ Deploy as a router to include in an existing API
+
+Deploy your SPARQL endpoint as an `APIRouter` to include in an existing `FastAPI` API. The `SparqlRouter` constructor takes the same arguments as the `SparqlEndpoint`.
+
+```python
+from fastapi import FastAPI
+from rdflib import ConjunctiveGraph
+from rdflib_endpoint import SparqlRouter
+
+g = ConjunctiveGraph()
+sparql_router = SparqlRouter(
+    graph=g,
+    path="/",
+    # Metadata used for the SPARQL service description and Swagger UI:
+    title="SPARQL endpoint for RDFLib graph",
+    description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
+    version="0.1.0",
+    public_url='https://your-endpoint-url/',
+)
+
+app = FastAPI()
+app.include_router(sparql_router)
+```
+
 ### 📝 Define custom SPARQL functions
 
-This option makes it easier to define functions in your SPARQL endpoint, e.g. `BIND(myfunction:custom_concat("start", "end") AS ?concat)`
+This option makes it easier to define functions in your SPARQL endpoint, e.g. `BIND(myfunction:custom_concat("start", "end") AS ?concat)`. It can be used with the `SparqlEndpoint` and `SparqlRouter` classes.
 
 Create a `app/main.py` file in your project folder with your custom SPARQL functions, and endpoint parameters:
 
 ````python
-from rdflib_endpoint import SparqlEndpoint
 import rdflib
+from rdflib import ConjunctiveGraph
 from rdflib.plugins.sparql.evalutils import _eval
+from rdflib_endpoint import SparqlEndpoint
 
 def custom_concat(query_results, ctx, part, eval_part):
     """Concat 2 strings in the 2 senses and return the length as additional Length variable
@@ -115,9 +175,11 @@ def custom_concat(query_results, ctx, part, eval_part):
     return query_results, ctx, part, eval_part
 
 # Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
-g = rdflib.graph.ConjunctiveGraph()
+g = ConjunctiveGraph()
+# Use either SparqlEndpoint or SparqlRouter, they take the same arguments
 app = SparqlEndpoint(
     graph=g,
+    path="/",
     # Register the functions:
     functions={
         'https://w3id.org/um/sparql-functions/custom_concat': custom_concat
@@ -127,7 +189,6 @@ app = SparqlEndpoint(
     title="SPARQL endpoint for RDFLib graph",
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
-    path="/",
     public_url='https://your-endpoint-url/',
     # Example queries displayed in the Swagger UI to help users try your function
     example_query="""PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
@@ -138,7 +199,7 @@ SELECT ?concat ?concatLength WHERE {
 )
 ````
 
-### 📝 Or directly define the custom evaluation
+### 🗜️ Or directly define the custom evaluation
 
 You can also directly provide the custom evaluation function, this will override the `functions`.
 
@@ -173,13 +234,11 @@ app = SparqlEndpoint(
 
 ### 🦄 Run the SPARQL endpoint
 
-You can then run the SPARQL endpoint server from the folder where your script is defined with `uvicorn` on http://localhost:8000/sparql (which is installed automatically when you install the `rdflib-endpoint` package)
+You can then run the SPARQL endpoint server from the folder where your script is defined with `uvicorn` on http://localhost:8000 (it is installed automatically when you install the `rdflib-endpoint` package)
 
 ```bash
 uvicorn main:app --app-dir app --reload
 ```
-
-You can access the YASGUI interface to easily query the SPARQL endpoint on http://localhost:8000
 
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.
 
@@ -219,8 +278,6 @@ hatch run dev
 ```
 
 Access the YASGUI interface at http://localhost:8000
-
-Or query directly the SPARQL endpoint at http://localhost:8000/sparql
 
 ### ☑️ Run tests
 
@@ -278,9 +335,5 @@ You can also manually trigger the workflow from the Actions tab in your GitHub r
 
 Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 
-* [MaastrichtU-IDS/rdflib-endpoint-sparql-service](https://github.com/MaastrichtU-IDS/rdflib-endpoint-sparql-service)
-  * Serve predicted biomedical entities associations (e.g. disease treated by drug) using the rdflib-endpoint classifier
-* [vemonet/translator-sparql-service](https://github.com/vemonet/translator-sparql-service)
-  * A SPARQL endpoint to serve NCATS Translator services as SPARQL custom functions.
 * [proycon/codemeta-server](https://github.com/proycon/codemeta-server)
   * Server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user

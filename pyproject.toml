@@ -102,7 +102,7 @@ check = [
     "mypy src",
 ]
 all = [
-    "format",
+    "fmt",
     "check",
     "cov",
 ]
