@@ -58,10 +58,6 @@ jobs:
       run: |
         hatch run cov --cov-report xml
 
-
-    - name: ☂️ Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-
     - name: ☂️ Coveralls
       uses: coverallsapp/github-action@v2
 
@@ -75,6 +71,6 @@ jobs:
           -Dsonar.organization=vemonet
           -Dsonar.projectKey=vemonet_rdflib-endpoint
           -Dsonar.python.coverage.reportPaths=coverage.xml
-          -Dsonar.sources=src/
+          -Dsonar.sources=src/rdflib_endpoint
           -Dsonar.tests=tests/
           -Dsonar.verbose=true
