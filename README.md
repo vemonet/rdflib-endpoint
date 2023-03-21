@@ -33,13 +33,25 @@ Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fast
 
 ## 📦️ Installation
 
-This package requires Python >=3.7, simply install it  from [PyPI](https://pypi.org/project/rdflib-endpoint/) with:
+This package requires Python >=3.7, install it  from [PyPI](https://pypi.org/project/rdflib-endpoint/) with:
 
 ```shell
 pip install rdflib-endpoint
 ```
 
-If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend triplestore you can install with the optional dependency:
+The `uvicorn` and `gunicorn` dependencies are not included by default, if you want to install them use the optional dependency `web`:
+
+```bash
+pip install "rdflib-endpoint[web]"
+```
+
+If you want to use `rdlib-endpoint` as a CLI you can install with the optional dependency `cli`:
+
+```bash
+pip install "rdflib-endpoint[cli]"
+```
+
+If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend triplestore you can install with the optional dependency `oxigraph`:
 
 ```bash
 pip install "rdflib-endpoint[oxigraph]"
@@ -50,6 +62,11 @@ pip install "rdflib-endpoint[oxigraph]"
 ## ⌨️ Use the CLI
 
 `rdflib-endpoint` can be used from the command line interface to perform basic utility tasks, such as serving or converting RDF files locally.
+
+Make sure you installed `rdflib-endpoint` with the `cli` optional dependencies:
+```bash
+pip install "rdflib-endpoint[cli]"
+```
 
 ### ⚡️ Quickly serve RDF files through a SPARQL endpoint
 
@@ -237,7 +254,7 @@ app = SparqlEndpoint(
 You can then run the SPARQL endpoint server from the folder where your script is defined with `uvicorn` on http://localhost:8000 (it is installed automatically when you install the `rdflib-endpoint` package)
 
 ```bash
-uvicorn main:app --app-dir app --reload
+uvicorn main:app --app-dir example/app --reload
 ```
 
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.

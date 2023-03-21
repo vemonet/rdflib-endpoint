@@ -32,9 +32,6 @@ dynamic = ["version"]
 dependencies = [
     "rdflib >=6.0.0",
     "fastapi >=0.51.0",
-    "uvicorn[standard] >=0.12.0",
-    "click",
-    # "typer >=0.6.0",
 ]
 
 
@@ -43,6 +40,14 @@ rdflib-endpoint = "rdflib_endpoint.__main__:cli"
 
 
 [project.optional-dependencies]
+cli =[
+    "uvicorn[standard] >=0.12.0",
+    "click",
+]
+web =[
+    "uvicorn[standard] >=0.12.0",
+    "gunicorn",
+]
 oxigraph =[
     "oxrdflib",
 ]
@@ -78,6 +83,8 @@ Source = "https://github.com/vemonet/rdflib-endpoint"
 # command = ["/bin/sleep", "infinity"]
 # start-on-creation = false
 features = [
+    "cli",
+    "web",
     "oxigraph",
     "test",
     "dev",
@@ -179,7 +186,7 @@ select = [
 ]
 
 ignore = [
-    "B008", # do not perform function calls in argument defaults
+    "B008", # do not perform function calls in argument defaults (required for FastAPI afaik)
     "E501", # line too long
     "C901", # too complex
     "S101", # Use of `assert` detected
