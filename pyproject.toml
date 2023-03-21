@@ -120,8 +120,8 @@ all = [
 path = "src/rdflib_endpoint/__init__.py"
 
 
-# [tool.coverage.run]
-# source = ["src/rdflib_endpoint"]
+[tool.coverage.run]
+source = ["src"]
 # [tool.coverage.report]
 # omit = ["tests/*"]
 
