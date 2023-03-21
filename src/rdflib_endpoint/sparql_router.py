@@ -109,7 +109,6 @@ class SparqlRouter(APIRouter):
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
-        # cors_enabled: bool = True,
         public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
         example_query: Optional[str] = None,
         **kwargs: Any,

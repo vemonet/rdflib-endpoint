@@ -118,7 +118,7 @@ Finally deploy this app using `uvicorn` (see below)
 
 ### 🛣️ Deploy as a router to include in an existing API
 
-Deploy your SPARQL endpoint as an `APIRouter` to include in an existing `FastAPI` API. The `SparqlRouter` constructor takes the same arguments as the `SparqlEndpoint`.
+Deploy your SPARQL endpoint as an `APIRouter` to include in an existing `FastAPI` API. The `SparqlRouter` constructor takes the same arguments as the `SparqlEndpoint`, apart from `enable_cors` which needs be enabled at the API level.
 
 ```python
 from fastapi import FastAPI
