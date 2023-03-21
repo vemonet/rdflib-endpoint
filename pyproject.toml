@@ -121,7 +121,7 @@ path = "src/rdflib_endpoint/__init__.py"
 
 
 [tool.coverage.run]
-source = ["src"]
+source = ["src/rdflib_endpoint"]
 branch = true
 
 [tool.coverage.report]
