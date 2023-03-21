@@ -77,7 +77,7 @@ rdflib-endpoint serve --store Oxigraph "*.ttl" "*.jsonld" "*.nq"
 rdflib-endpoint convert "*.ttl" "*.jsonld" "*.nq" --output "merged.trig"
 ```
 
-## ✨ Deploy a SPARQL endpoint
+## ✨ Deploy your SPARQL endpoint
 
 `rdflib-endpoint` enables you to easily define and deploy SPARQL endpoints based on RDFLib Graph, ConjunctiveGraph, and Dataset. Additionally it provides helpers to defines custom functions in the endpoint.
 
@@ -199,7 +199,7 @@ SELECT ?concat ?concatLength WHERE {
 )
 ````
 
-### 🗜️ Or directly define the custom evaluation
+### ✒️ Or directly define the custom evaluation
 
 You can also directly provide the custom evaluation function, this will override the `functions`.
 
@@ -305,6 +305,14 @@ Check the code for errors, and if it is in accordance with the PEP8 style guide,
 
 ```
 hatch run check
+```
+
+### ✅ Run all checks
+
+Run all checks (fmt, linting, tests) with:
+
+```bash
+hatch run all
 ```
 
 ### ♻️ Reset the environment
