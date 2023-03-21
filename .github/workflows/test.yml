@@ -59,11 +59,7 @@ jobs:
 
     - name: Test with coverage
       run: |
-        hatch run coverage erase
         hatch run cov --cov-report xml:coverage.xml
-        hatch run coverage combine --append || true
-        hatch run coverage report
-        hatch run coverage xml
 
     - name: Analyze with SonarCloud
       uses: sonarsource/sonarcloud-github-action@master
@@ -75,7 +71,6 @@ jobs:
           -Dsonar.organization=vemonet
           -Dsonar.projectKey=vemonet_rdflib-endpoint
           -Dsonar.python.coverage.reportPaths=coverage.xml
-          -Dsonar.sources=src/
           -Dsonar.tests=tests/
           -Dsonar.verbose=true
 
