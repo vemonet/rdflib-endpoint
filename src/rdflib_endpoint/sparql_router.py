@@ -91,6 +91,25 @@ mimetype = {
     "xml_results": "application/sparql-results+xml",
 }
 
+#: This is default for federated queries
+DEFAULT_CONTENT_TYPE = "application/xml"
+
+#: A mapping from content types to the keys used for serializing
+#: in :meth:`rdflib.Graph.serialize` and other serialization functions
+CONTENT_TYPE_TO_RDFLIB_FORMAT = {
+    # https://www.w3.org/TR/sparql11-results-json/
+    "application/sparql-results+json": "json",
+    "application/json": "json",
+    "text/json": "json",
+    # https://www.w3.org/TR/rdf-sparql-XMLres/
+    "application/sparql-results+xml": "xml",
+    "application/xml": "xml",  # for compatibility
+    "text/xml": "xml",  # not standard
+    # https://www.w3.org/TR/sparql11-results-csv-tsv/
+    "application/sparql-results+csv": "csv",
+    "text/csv": "csv",  # for compatibility
+}
+
 
 class SparqlRouter(APIRouter):
     """
@@ -215,14 +234,10 @@ class SparqlRouter(APIRouter):
                 )
 
             # Format and return results depending on Accept mime type in request header
-            output_mime_type = request.headers["accept"]
-            if not output_mime_type:
-                output_mime_type = "application/xml"
+            output_mime_type = request.headers.get("accept") or DEFAULT_CONTENT_TYPE
 
             # Handle mime type for construct queries
-            if query_operation == "Construct Query" and (
-                output_mime_type == "application/json" or output_mime_type == "text/csv"
-            ):
+            if query_operation == "Construct Query" and output_mime_type in {"application/json", "text/csv"}:
                 output_mime_type = mimetype["turtle"]
                 # TODO: support JSON-LD for construct query?
                 # g.serialize(format='json-ld', indent=4)
@@ -230,39 +245,19 @@ class SparqlRouter(APIRouter):
                 output_mime_type = "application/rdf+xml"
 
             try:
-                if output_mime_type == "text/csv" or output_mime_type == "application/sparql-results+csv":
-                    return Response(
-                        query_results.serialize(format="csv"),
-                        media_type=output_mime_type,
-                    )
-                elif output_mime_type == "application/json" or output_mime_type == "application/sparql-results+json":
-                    return Response(
-                        query_results.serialize(format="json"),
-                        media_type=output_mime_type,
-                    )
-                elif output_mime_type == "application/xml" or output_mime_type == mimetype["xml_results"]:
-                    return Response(
-                        query_results.serialize(format="xml"),
-                        media_type=output_mime_type,
-                    )
-                elif output_mime_type == mimetype["turtle"]:
-                    # .serialize(format='turtle').decode("utf-8")
-                    return Response(
-                        query_results.serialize(format="turtle"),
-                        media_type=output_mime_type,
-                    )
-                else:
-                    # XML by default for federated queries
-                    return Response(
-                        query_results.serialize(format="xml"),
-                        media_type=mimetype["xml_results"],
-                    )
+                rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT[output_mime_type]
+                response = Response(
+                    query_results.serialize(format=rdflib_format),
+                    media_type=output_mime_type,
+                )
             except Exception as e:
-                logging.error("Error serializing the SPARQL query results with RDFLib: " + str(e))
+                logging.error("Error serializing the SPARQL query results with RDFLib: %s", e)
                 return JSONResponse(
                     status_code=422,
                     content={"message": "Error serializing the SPARQL query results"},
                 )
+            else:
+                return response
 
         @self.post(
             path,
@@ -336,7 +331,6 @@ class SparqlRouter(APIRouter):
     def get_service_graph(self) -> rdflib.Graph:
         # Service description returned when no query provided
         service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
-            public_url=self.public_url,
             title=self.title,
             description=self.description.replace("\n", ""),
         )
