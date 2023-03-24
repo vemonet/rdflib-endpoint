@@ -328,6 +328,7 @@ class SparqlRouter(APIRouter):
     def get_service_graph(self) -> rdflib.Graph:
         # Service description returned when no query provided
         service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
+            public_url=self.public_url,
             title=self.title,
             description=self.description.replace("\n", ""),
         )
