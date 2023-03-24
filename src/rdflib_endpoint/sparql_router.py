@@ -86,11 +86,6 @@ api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
     },
 }
 
-mimetype = {
-    "turtle": "text/turtle",
-    "xml_results": "application/sparql-results+xml",
-}
-
 #: This is default for federated queries
 DEFAULT_CONTENT_TYPE = "application/xml"
 
@@ -108,6 +103,8 @@ CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     # https://www.w3.org/TR/sparql11-results-csv-tsv/
     "application/sparql-results+csv": "csv",
     "text/csv": "csv",  # for compatibility
+    # Extras
+    "text/turtle": "ttl",
 }
 
 
@@ -181,14 +178,14 @@ class SparqlRouter(APIRouter):
             if not query:
                 if str(request.headers["accept"]).startswith("text/html"):
                     return self.serve_yasgui()
-                # If not asking HTML returns the SPARQL endpoint service description
+                # If not asking HTML, return the SPARQL endpoint service description
                 service_graph = self.get_service_graph()
 
                 # Return the service description RDF as turtle or XML
-                if request.headers["accept"] == mimetype["turtle"]:
+                if request.headers["accept"] == "text/turtle":
                     return Response(
                         service_graph.serialize(format="turtle"),
-                        media_type=mimetype["turtle"],
+                        media_type="text/turtle",
                     )
                 else:
                     return Response(
@@ -238,7 +235,7 @@ class SparqlRouter(APIRouter):
 
             # Handle mime type for construct queries
             if query_operation == "Construct Query" and output_mime_type in {"application/json", "text/csv"}:
-                output_mime_type = mimetype["turtle"]
+                output_mime_type = "text/turtle"
                 # TODO: support JSON-LD for construct query?
                 # g.serialize(format='json-ld', indent=4)
             if query_operation == "Construct Query" and output_mime_type == "application/xml":
