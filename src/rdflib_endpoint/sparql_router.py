@@ -233,13 +233,21 @@ class SparqlRouter(APIRouter):
             # Format and return results depending on Accept mime type in request header
             output_mime_type = request.headers.get("accept") or DEFAULT_CONTENT_TYPE
 
+            # Handle cases that are more complicated, like it includes multiple
+            # types, extra information, etc.
+            if output_mime_type not in CONTENT_TYPE_TO_RDFLIB_FORMAT:
+                output_mime_type = DEFAULT_CONTENT_TYPE
+
             # Handle mime type for construct queries
-            if query_operation == "Construct Query" and output_mime_type in {"application/json", "text/csv"}:
-                output_mime_type = "text/turtle"
-                # TODO: support JSON-LD for construct query?
-                # g.serialize(format='json-ld', indent=4)
-            if query_operation == "Construct Query" and output_mime_type == "application/xml":
-                output_mime_type = "application/rdf+xml"
+            if query_operation == "Construct Query":
+                if output_mime_type in {"application/json", "text/csv"}:
+                    output_mime_type = "text/turtle"
+                    # TODO: support JSON-LD for construct query?
+                    # g.serialize(format='json-ld', indent=4)
+                elif output_mime_type == "application/xml":
+                    output_mime_type = "application/rdf+xml"
+                else:
+                    pass  # TODO what happens here?
 
             try:
                 rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT[output_mime_type]
