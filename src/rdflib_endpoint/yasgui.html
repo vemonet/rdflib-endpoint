@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>$TITLE</title>
         <meta name="description" content="$DESCRIPTION" />
-        <link rel="icon" type="image/png" href="https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png">
+        <link rel="icon" type="image/png" href="$FAVICON">
         <link href="https://unpkg.com/@triply/yasgui@4/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui@4/build/yasgui.min.js"></script>
     </head>
@@ -14,28 +14,35 @@
         <div id="yasgui"></div>
         <script>
             Yasqe.defaults.value = `$EXAMPLE_QUERY`
+            const queries_obj = $EXAMPLE_QUERIES
+
             const url = window.location.href.endsWith('/') ? window.location.href.slice(0, -1) : window.location.href;
+            // Make sure the endpoints list is unique
+            const endpointsList = [...new Set([url, ...Object.keys(queries_obj).map((label) => {if (queries_obj[label]["endpoint"]) return queries_obj[label]["endpoint"]})])]
+            const yasguiEndpoints = endpointsList.map((endpoint) => {return {endpoint: endpoint}})
+
             const yasgui = new Yasgui(document.getElementById("yasgui"), {
-                requestConfig: { endpoint: url },
+                requestConfig: { endpoint: url, copyEndpointOnNewTab: true, },
                 endpointCatalogueOptions: {
                     getData: function () {
-                        return [
-                            { endpoint: url },
-                        ];
+                        return yasguiEndpoints
                     },
                     keys: [],
                 },
             });
 
-            queries_obj = $EXAMPLE_QUERIES
             // Add tab to yasgui for each query
             Object.keys(queries_obj).map((label) => {
                 const tabsLabel = Object.keys(yasgui._tabs).map(tab => yasgui._tabs[tab].persistentJson.name)
                 if (!tabsLabel.includes(label)) {
                     yasgui.addTab(
                         false, // set as active tab not really working
-                        { ...Yasgui.Tab.getDefaults(), name: label,
-                        yasqe: { value: queries_obj[label] }}
+                        {
+                            ...Yasgui.Tab.getDefaults(),
+                            name: label,
+                            requestConfig: { endpoint: queries_obj[label]['endpoint'] },
+                            yasqe: { value: queries_obj[label]['query'] }
+                        }
                     );
                 }
             })

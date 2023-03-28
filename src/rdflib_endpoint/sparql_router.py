@@ -109,9 +109,10 @@ class SparqlRouter(APIRouter):
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
-        public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
+        public_url: str = "https://bioregistry.org/sparql",
+        favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png",
         example_query: Optional[str] = None,
-        example_queries: Optional[Dict[str, str]] = None,
+        example_queries: Optional[Dict[str, Dict[str, str]]] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -130,6 +131,7 @@ class SparqlRouter(APIRouter):
         self.example_queries = example_queries
         self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
         self.enable_update = enable_update
+        self.favicon = favicon
 
         # Instantiate APIRouter
         super().__init__(
@@ -329,6 +331,7 @@ class SparqlRouter(APIRouter):
             html_str = f.read()
         html_str = html_str.replace("$TITLE", self.title)
         html_str = html_str.replace("$DESCRIPTION", self.description)
+        html_str = html_str.replace("$FAVICON", self.favicon)
         html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
         html_str = html_str.replace("$EXAMPLE_QUERIES", json.dumps(self.example_queries))
         return Response(content=html_str, media_type="text/html")

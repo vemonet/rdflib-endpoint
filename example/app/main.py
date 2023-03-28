@@ -73,12 +73,21 @@ SELECT DISTINCT * WHERE {
 } LIMIT 100"""
 
 example_queries = {
-    "Custom function": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+    "Bio2RDF query": {
+        "endpoint": "https://bio2rdf.org/sparql",
+        "query": """SELECT DISTINCT * WHERE {
+    ?s a ?o .
+} LIMIT 10""",
+    },
+    "Custom function": {
+        "query": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }""",
+    },
 }
+
 
 # Use ConjunctiveGraph to support nquads and graphs in SPARQL queries
 # identifier is the default graph

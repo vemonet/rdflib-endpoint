@@ -31,9 +31,10 @@ class SparqlEndpoint(FastAPI):
         enable_update: bool = False,
         cors_enabled: bool = True,
         path: str = "/",
-        public_url: str = "https://sparql.openpredict.semanticscience.org/sparql",
+        public_url: Optional[str],
         example_query: Optional[str] = None,
         example_queries: Optional[Dict[str, str]] = None,
+        favicon: Optional[str],
         **kwargs: Any,
     ) -> None:
         """

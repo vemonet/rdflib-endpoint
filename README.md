@@ -130,11 +130,19 @@ SELECT ?concat ?concatLength WHERE {
 }""",
     # Additional example queries displayed in additional YASGUI tabs
     example_queries = {
-    "Custom function": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+    	"Bio2RDF query": {
+        	"endpoint": "https://bio2rdf.org/sparql",
+        	"query": """SELECT DISTINCT * WHERE {
+    ?s a ?o .
+} LIMIT 10""",
+    	},
+    	"Custom function": {
+        	"query": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }""",
+    	}
 	}
 )
 ```
@@ -368,5 +376,5 @@ You can also manually trigger the workflow from the Actions tab in your GitHub r
 
 Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 
-* [proycon/codemeta-server](https://github.com/proycon/codemeta-server)
-  * Server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user
+* [The Bioregistry](https://bioregistry.io/), an open source, community curated registry, meta-registry, and compact identifier resolver.
+* [proycon/codemeta-server](https://github.com/proycon/codemeta-server), server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user
