@@ -109,9 +109,9 @@ class SparqlRouter(APIRouter):
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
-        public_url: str = "https://bioregistry.org/sparql",
+        public_url: str = "https://your-endpoint/sparql",
         favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png",
-        example_query: Optional[str] = None,
+        example_query: str = EXAMPLE_SPARQL,
         example_queries: Optional[Dict[str, Dict[str, str]]] = None,
         **kwargs: Any,
     ) -> None:
@@ -127,7 +127,7 @@ class SparqlRouter(APIRouter):
         self.version = version
         self.path = path
         self.public_url = public_url
-        self.example_query = example_query if example_query is not None else EXAMPLE_SPARQL
+        self.example_query = example_query
         self.example_queries = example_queries
         self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
         self.enable_update = enable_update

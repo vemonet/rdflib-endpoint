@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from rdflib import ConjunctiveGraph, Dataset, Graph
 from rdflib.query import Processor
 
-from rdflib_endpoint import SparqlRouter
+from rdflib_endpoint.sparql_router import EXAMPLE_SPARQL, SparqlRouter
 
 __all__ = [
     "SparqlEndpoint",
@@ -21,6 +21,7 @@ class SparqlEndpoint(FastAPI):
     def __init__(
         self,
         *args: Any,
+        path: str = "/",
         title: str = "SPARQL endpoint for RDFLib graph",
         description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
         version: str = "0.1.0",
@@ -30,11 +31,10 @@ class SparqlEndpoint(FastAPI):
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
-        path: str = "/",
-        public_url: Optional[str],
-        example_query: Optional[str] = None,
-        example_queries: Optional[Dict[str, str]] = None,
-        favicon: Optional[str],
+        public_url: str = "https://your-endpoint/sparql",
+        example_query: str = EXAMPLE_SPARQL,
+        example_queries: Optional[Dict[str, Dict[str, str]]] = None,
+        favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png",
         **kwargs: Any,
     ) -> None:
         """
@@ -67,6 +67,7 @@ class SparqlEndpoint(FastAPI):
             public_url=public_url,
             example_query=example_query,
             example_queries=example_queries,
+            favicon=favicon,
         )
         self.include_router(sparql_router)
 
