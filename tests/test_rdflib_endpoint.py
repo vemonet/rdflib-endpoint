@@ -110,17 +110,17 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 
-<https://sparql.openpredict.semanticscience.org/sparql> a sd:Service ;
+<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function .
+
+<https://your-endpoint/sparql> a sd:Service ;
     rdfs:label "SPARQL endpoint for RDFLib graph" ;
     dc:description "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. [Source code](https://github.com/vemonet/rdflib-endpoint)" ;
     sd:defaultDataset [ a sd:Dataset ;
             sd:defaultGraph [ a sd:Graph ] ] ;
     sd:defaultEntailmentRegime ent:RDFS ;
-    sd:endpoint <https://sparql.openpredict.semanticscience.org/sparql> ;
+    sd:endpoint <https://your-endpoint/sparql> ;
     sd:extensionFunction <https://w3id.org/um/sparql-functions/custom_concat> ;
     sd:feature sd:DereferencesURIs ;
     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
         <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
-    sd:supportedLanguage sd:SPARQL11Query .
-
-<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function ."""
+    sd:supportedLanguage sd:SPARQL11Query ."""
