@@ -19,7 +19,6 @@ __all__ = [
     "SparqlRouter",
 ]
 
-
 EXAMPLE_SPARQL = """\
 PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 

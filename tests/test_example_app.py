@@ -21,7 +21,7 @@ def test_service_description():
 
 
 def test_custom_concat():
-    response = endpoint.get("/?query=" + custom_concat_query, headers={"accept": "application/json"})
+    response = endpoint.get("/", params={"query": custom_concat_query}, headers={"accept": "application/json"})
     # print(response.json())
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
