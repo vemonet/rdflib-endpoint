@@ -86,9 +86,25 @@ api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
     },
 }
 
-mimetype = {
-    "turtle": "text/turtle",
-    "xml_results": "application/sparql-results+xml",
+#: This is default for federated queries
+DEFAULT_CONTENT_TYPE = "application/xml"
+
+#: A mapping from content types to the keys used for serializing
+#: in :meth:`rdflib.Graph.serialize` and other serialization functions
+CONTENT_TYPE_TO_RDFLIB_FORMAT = {
+    # https://www.w3.org/TR/sparql11-results-json/
+    "application/sparql-results+json": "json",
+    "application/json": "json",
+    "text/json": "json",
+    # https://www.w3.org/TR/rdf-sparql-XMLres/
+    "application/sparql-results+xml": "xml",
+    "application/xml": "xml",  # for compatibility
+    "text/xml": "xml",  # not standard
+    # https://www.w3.org/TR/sparql11-results-csv-tsv/
+    "application/sparql-results+csv": "csv",
+    "text/csv": "csv",  # for compatibility
+    # Extras
+    "text/turtle": "ttl",
 }
 
 
@@ -164,14 +180,14 @@ class SparqlRouter(APIRouter):
             if not query:
                 if str(request.headers["accept"]).startswith("text/html"):
                     return self.serve_yasgui()
-                # If not asking HTML returns the SPARQL endpoint service description
+                # If not asking HTML, return the SPARQL endpoint service description
                 service_graph = self.get_service_graph()
 
                 # Return the service description RDF as turtle or XML
-                if request.headers["accept"] == mimetype["turtle"]:
+                if request.headers["accept"] == "text/turtle":
                     return Response(
                         service_graph.serialize(format="turtle"),
-                        media_type=mimetype["turtle"],
+                        media_type="text/turtle",
                     )
                 else:
                     return Response(
@@ -217,54 +233,38 @@ class SparqlRouter(APIRouter):
                 )
 
             # Format and return results depending on Accept mime type in request header
-            output_mime_type = request.headers["accept"]
-            if not output_mime_type:
-                output_mime_type = "application/xml"
+            output_mime_type = request.headers.get("accept") or DEFAULT_CONTENT_TYPE
+
+            # Handle cases that are more complicated, like it includes multiple
+            # types, extra information, etc.
+            if output_mime_type not in CONTENT_TYPE_TO_RDFLIB_FORMAT:
+                output_mime_type = DEFAULT_CONTENT_TYPE
 
             # Handle mime type for construct queries
-            if query_operation == "Construct Query" and (
-                output_mime_type == "application/json" or output_mime_type == "text/csv"
-            ):
-                output_mime_type = mimetype["turtle"]
-                # TODO: support JSON-LD for construct query?
-                # g.serialize(format='json-ld', indent=4)
-            if query_operation == "Construct Query" and output_mime_type == "application/xml":
-                output_mime_type = "application/rdf+xml"
+            if query_operation == "Construct Query":
+                if output_mime_type in {"application/json", "text/csv"}:
+                    output_mime_type = "text/turtle"
+                    # TODO: support JSON-LD for construct query?
+                    # g.serialize(format='json-ld', indent=4)
+                elif output_mime_type == "application/xml":
+                    output_mime_type = "application/rdf+xml"
+                else:
+                    pass  # TODO what happens here?
 
             try:
-                if output_mime_type == "text/csv" or output_mime_type == "application/sparql-results+csv":
-                    return Response(
-                        query_results.serialize(format="csv"),
-                        media_type=output_mime_type,
-                    )
-                elif output_mime_type == "application/json" or output_mime_type == "application/sparql-results+json":
-                    return Response(
-                        query_results.serialize(format="json"),
-                        media_type=output_mime_type,
-                    )
-                elif output_mime_type == "application/xml" or output_mime_type == mimetype["xml_results"]:
-                    return Response(
-                        query_results.serialize(format="xml"),
-                        media_type=output_mime_type,
-                    )
-                elif output_mime_type == mimetype["turtle"]:
-                    # .serialize(format='turtle').decode("utf-8")
-                    return Response(
-                        query_results.serialize(format="turtle"),
-                        media_type=output_mime_type,
-                    )
-                else:
-                    # XML by default for federated queries
-                    return Response(
-                        query_results.serialize(format="xml"),
-                        media_type=mimetype["xml_results"],
-                    )
+                rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT[output_mime_type]
+                response = Response(
+                    query_results.serialize(format=rdflib_format),
+                    media_type=output_mime_type,
+                )
             except Exception as e:
-                logging.error("Error serializing the SPARQL query results with RDFLib: " + str(e))
+                logging.error("Error serializing the SPARQL query results with RDFLib: %s", e)
                 return JSONResponse(
                     status_code=422,
                     content={"message": "Error serializing the SPARQL query results"},
                 )
+            else:
+                return response
 
         @self.post(
             path,
