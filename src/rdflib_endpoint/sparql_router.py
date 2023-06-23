@@ -99,6 +99,7 @@ CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     # https://www.w3.org/TR/rdf-sparql-XMLres/
     "application/sparql-results+xml": "xml",
     "application/xml": "xml",  # for compatibility
+    "application/rdf+xml": "xml",  # for compatibility
     "text/xml": "xml",  # not standard
     # https://www.w3.org/TR/sparql11-results-csv-tsv/
     "application/sparql-results+csv": "csv",
