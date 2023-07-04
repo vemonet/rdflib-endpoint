@@ -90,9 +90,6 @@ post-install-commands = [
 ]
 
 [tool.hatch.envs.default.scripts]
-test = "pytest {args}"
-cov = "test --cov src {args}"
-cov-report = "cov --cov-report html {args} && python -m http.server 3000 --directory ./htmlcov"
 dev = "uvicorn example.app.main:app --reload {args}"
 fmt = [
     "black src tests example",
@@ -103,11 +100,13 @@ check = [
     "black src tests --check",
     "mypy src",
 ]
-all = [
-    "fmt",
+test = [
+    "pytest {args}",
     "check",
-    "cov",
 ]
+cov = "test --cov src {args}"
+cov-report = "cov --cov-report html {args} && python -m http.server 3000 --directory ./htmlcov"
+
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.7", "3.8", "3.9", "3.10", "3.11"]

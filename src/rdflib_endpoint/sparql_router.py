@@ -108,10 +108,9 @@ CONTENT_TYPE_TO_RDFLIB_FORMAT = {
 }
 
 
-def parse_accept_header(accept:str) -> list:
+def parse_accept_header(accept: str) -> List[str]:
     """
-    Given an accept header string, return a list of
-    media types in order of preference.
+    Given an accept header string, return a list of media types in order of preference.
 
     :param accept: Accept header value
     :return: Ordered list of media type preferences
@@ -146,6 +145,7 @@ def parse_accept_header(accept:str) -> list:
         preferences.append((parts[0], pref))
     preferences.sort(key=lambda x: -x[1])
     return [pref[0] for pref in preferences]
+
 
 class SparqlRouter(APIRouter):
     """

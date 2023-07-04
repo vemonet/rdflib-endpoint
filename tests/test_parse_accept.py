@@ -1,4 +1,5 @@
 import pytest
+
 import rdflib_endpoint.sparql_router
 
 accept_cases = [

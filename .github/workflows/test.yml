@@ -46,15 +46,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: 📥️ Install dependencies
       run: |
         pipx install hatch
 
-    - name: Check with Ruff and Mypy
-      run: |
-        hatch run check
-
-    - name: Test with coverage
+    - name: ☑️ Test with coverage
       run: |
         hatch run cov --cov-report xml
 

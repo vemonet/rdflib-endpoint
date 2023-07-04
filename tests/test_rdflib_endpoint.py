@@ -41,13 +41,22 @@ def test_custom_concat_json():
 def test_select_noaccept_xml():
     response = endpoint.post("/", data="query=" + concat_select)
     assert response.status_code == 200
-    # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_select_csv():
     response = endpoint.post("/", data="query=" + concat_select, headers={"accept": "text/csv"})
     assert response.status_code == 200
-    # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+
+
+def test_multiple_accept():
+    response = endpoint.get(
+        "/",
+        params={"query": concat_select},
+        headers={"accept": "text/html;q=0.3, application/xml, application/json;q=0.9, */*;q=0.8"},
+        # Returns JSON
+    )
+    assert response.status_code == 200
+    assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
 
 def test_fail_select_turtle():

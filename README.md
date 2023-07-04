@@ -293,7 +293,7 @@ cd rdflib-endpoint
 Install [Hatch](https://hatch.pypa.io), this will automatically handle virtual environments and make sure all dependencies are installed when you run a script in the project:
 
 ```bash
-pip install --upgrade hatch
+pipx install hatch
 ```
 
 Install the dependencies in a local virtual environment (running this command is optional as `hatch` will automatically install and synchronize dependencies each time you run a script with `hatch run`):
@@ -314,7 +314,7 @@ Access the YASGUI interface at http://localhost:8000
 
 ### ☑️ Run tests
 
-Make sure the existing tests still work by running ``pytest``. Note that any pull requests to the fairworkflows repository on github will automatically trigger running of the test suite;
+Make sure the existing tests still work by running the test suite and linting checks. Note that any pull requests to the fairworkflows repository on github will automatically trigger running of the test suite:
 
 ```bash
 hatch run test
@@ -326,7 +326,7 @@ To display all `print()`:
 hatch run test -s
 ```
 
-Run tests on multiple python versions:
+You can also run the tests on multiple python versions:
 
 ```bash
 hatch run all:test
@@ -344,14 +344,6 @@ Check the code for errors, and if it is in accordance with the PEP8 style guide,
 
 ```
 hatch run check
-```
-
-### ✅ Run all checks
-
-Run all checks (format, linting, tests) with:
-
-```bash
-hatch run all
 ```
 
 ### ♻️ Reset the environment
