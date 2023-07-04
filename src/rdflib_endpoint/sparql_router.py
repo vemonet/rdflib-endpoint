@@ -280,6 +280,8 @@ class SparqlRouter(APIRouter):
             for mime_type in mime_types:
                 if mime_type in CONTENT_TYPE_TO_RDFLIB_FORMAT:
                     output_mime_type = mime_type
+                    # Use the first mime_type that matches
+                    break
 
             # Handle mime type for construct queries
             if query_operation == "Construct Query":
