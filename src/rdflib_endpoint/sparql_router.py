@@ -108,6 +108,47 @@ CONTENT_TYPE_TO_RDFLIB_FORMAT = {
 }
 
 
+def parse_accept_header(accept:str) -> list:
+    """
+    Given an accept header string, return a list of
+    media types in order of preference.
+
+    :param accept: Accept header value
+    :return: Ordered list of media type preferences
+    """
+
+    def _parse_preference(qpref: str) -> float:
+        qparts = qpref.split("=")
+        try:
+            return float(qparts[1].strip())
+        except ValueError:
+            pass
+        except IndexError:
+            pass
+        return 1.0
+
+    preferences = []
+    types = accept.split(",")
+    dpref = 2.0
+    for mtype in types:
+        parts = mtype.split(";")
+        parts = [part.strip() for part in parts]
+        pref = dpref
+        try:
+            for part in parts[1:]:
+                if part.startswith("q="):
+                    pref = _parse_preference(part)
+                    break
+        except IndexError:
+            pass
+        # preserve order of appearance in the list
+        dpref = dpref - 0.01
+        preferences.append((parts[0], pref))
+    print(preferences)
+    preferences.sort(key=lambda x: -x[1])
+    print(preferences)
+    return [pref[0] for pref in preferences]
+
 class SparqlRouter(APIRouter):
     """
     Class to deploy a SPARQL endpoint using a RDFLib Graph.
@@ -233,12 +274,14 @@ class SparqlRouter(APIRouter):
                 )
 
             # Format and return results depending on Accept mime type in request header
-            output_mime_type = request.headers.get("accept") or DEFAULT_CONTENT_TYPE
+            mime_types = parse_accept_header(request.headers.get("accept", DEFAULT_CONTENT_TYPE))
 
             # Handle cases that are more complicated, like it includes multiple
             # types, extra information, etc.
-            if output_mime_type not in CONTENT_TYPE_TO_RDFLIB_FORMAT:
-                output_mime_type = DEFAULT_CONTENT_TYPE
+            output_mime_type = DEFAULT_CONTENT_TYPE
+            for mime_type in mime_types:
+                if mime_type in CONTENT_TYPE_TO_RDFLIB_FORMAT:
+                    output_mime_type = mime_type
 
             # Handle mime type for construct queries
             if query_operation == "Construct Query":
