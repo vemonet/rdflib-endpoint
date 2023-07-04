@@ -109,6 +109,9 @@ all = [
     "cov",
 ]
 
+[[tool.hatch.envs.all.matrix]]
+python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
 # TOOLS
 [tool.hatch.version]
 path = "src/rdflib_endpoint/__init__.py"

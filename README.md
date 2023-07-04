@@ -326,6 +326,12 @@ To display all `print()`:
 hatch run test -s
 ```
 
+Run tests on multiple python versions:
+
+```bash
+hatch run all:test
+```
+
 ### 🧹 Code formatting
 
 The code will be automatically formatted when you commit your changes using `pre-commit`. But you can also run the script to format the code yourself:
