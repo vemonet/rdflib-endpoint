@@ -24,7 +24,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install build
+        pipx install build
 
     # - name: Bump version to ${{github.ref_name}}
     #   run: |

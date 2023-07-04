@@ -48,7 +48,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install hatch
+        pipx install hatch
 
     - name: Check with Ruff and Mypy
       run: |
