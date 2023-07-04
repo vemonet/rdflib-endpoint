@@ -144,9 +144,7 @@ def parse_accept_header(accept:str) -> list:
         # preserve order of appearance in the list
         dpref = dpref - 0.01
         preferences.append((parts[0], pref))
-    print(preferences)
     preferences.sort(key=lambda x: -x[1])
-    print(preferences)
     return [pref[0] for pref in preferences]
 
 class SparqlRouter(APIRouter):
