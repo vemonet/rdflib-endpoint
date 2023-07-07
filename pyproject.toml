@@ -101,11 +101,15 @@ check = [
     "mypy src",
 ]
 test = [
+    "fmt",
     "pytest {args}",
     "check",
 ]
-cov = "test --cov src {args}"
-cov-report = "cov --cov-report html {args} && python -m http.server 3000 --directory ./htmlcov"
+cov = [
+    "pytest --cov-report html {args}",
+    "python -c 'import webbrowser; webbrowser.open(\"http://0.0.0.0:3000\")'",
+    "python -m http.server 3000 --directory ./htmlcov",
+]
 
 
 [[tool.hatch.envs.all.matrix]]
@@ -120,6 +124,12 @@ path = "src/rdflib_endpoint/__init__.py"
 source = ["src"]
 
 [tool.pytest.ini_options]
+addopts = [
+    "-vvv",
+    "--cov=src",
+    "--color=yes",
+    "--cov-report=term-missing"
+]
 filterwarnings = [
     "ignore::DeprecationWarning:httpx.*:"
 ]

@@ -48,12 +48,21 @@ def test_select_csv():
     assert response.status_code == 200
 
 
-def test_multiple_accept():
+def test_multiple_accept_return_json():
     response = endpoint.get(
         "/",
         params={"query": concat_select},
         headers={"accept": "text/html;q=0.3, application/xml;q=0.9, application/json, */*;q=0.8"},
-        # Returns JSON
+    )
+    assert response.status_code == 200
+    assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
+
+
+def test_multiple_accept_return_json2():
+    response = endpoint.get(
+        "/",
+        params={"query": concat_select},
+        headers={"accept": "text/html;q=0.3, application/json, application/xml;q=0.9, */*;q=0.8"},
     )
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
