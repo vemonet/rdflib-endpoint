@@ -1,33 +1,41 @@
 # See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
     hooks:
-    -   id: check-added-large-files
-        name: 🐘 Check for added large files
-    -   id: check-toml
-        name: ✔️  Check TOML
-    -   id: check-yaml
-        name: ✔️  Check YAML
-        args:
-        -   --unsafe
-    -   id: end-of-file-fixer
-        name: 🪚 Fix end of files
-    -   id: trailing-whitespace
-        name: ✂️  Trim trailing whitespaces
--   repo: https://github.com/psf/black
-    rev: 22.8.0
+    - id: check-added-large-files
+      name: " 🐘 Check for added large files"
+    - id: check-toml
+      name: " ✔️  Check TOML"
+    - id: check-yaml
+      name: " ✔️  Check YAML"
+      args:
+      - --unsafe
+    - id: end-of-file-fixer
+      name: " 🪚 Fix end of files"
+    - id: trailing-whitespace
+      name: " ✂️  Trim trailing whitespaces"
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
     hooks:
-    -   id: black
-        name: ✒️  Formatting code with Black
--   repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.252
+      - id: black
+        name: " ✒️  Formatting code with Black"
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.277
     hooks:
-    -   id: ruff
-        name: ⚡️ Formatting code with Ruff
+      - id: ruff
+        name: " ⚡️ Formatting code with Ruff"
         args:
         - --fix
+  # Does not read the config from pyproject.toml
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.4.1
+  #   hooks:
+  #   - id: mypy
+  #     name: 🔎 Check types with mypy
+  #     args:
+  #     - --config-file=pyproject.toml
+
 ci:
-    autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
-    autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
+    autofix_commit_msg: 🎨 [pre-commit] Auto format
+    autoupdate_commit_msg: ⬆ [pre-commit] pre-commit auto update

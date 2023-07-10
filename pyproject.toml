@@ -16,6 +16,10 @@ maintainers = [
 ]
 keywords = [
     "Python",
+    "SPARQL",
+    "RDF",
+    "RDFLib",
+    "endpoint",
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -54,18 +58,14 @@ oxigraph =[
 test = [
     "pytest >=7.1.3",
     "pytest-cov >=3.0.0",
-    "ruff >=0.0.252",
-    "mypy >=0.991",
-    "black >=22.8.0",
+    "pre-commit >=3.3.0",
+    "mypy >=1.4.1",
     "requests",
     "httpx",
     "types-PyYAML",
     "types-setuptools",
     "types-ujson",
     "types-click",
-]
-dev = [
-    "pre-commit >=2.17.0",
 ]
 
 
@@ -84,7 +84,6 @@ features = [
     "web",
     "oxigraph",
     "test",
-    "dev",
 ]
 post-install-commands = [
     "pre-commit install",
@@ -93,18 +92,12 @@ post-install-commands = [
 [tool.hatch.envs.default.scripts]
 dev = "uvicorn example.app.main:app --reload {args}"
 fmt = [
-    "black src tests example",
-    "ruff src tests example --fix",
-]
-check = [
-    "ruff src tests",
-    "black src tests --check",
-    "mypy src",
+    "pre-commit run --all --all-files",
+    "mypy",
 ]
 test = [
     "fmt",
-    "pytest {args}",
-    "check",
+    "pytest --cov-fail-under=85 {args}",
 ]
 cov = [
     "pytest --cov-report html {args}",
@@ -123,13 +116,14 @@ path = "src/rdflib_endpoint/__init__.py"
 
 [tool.coverage.run]
 source = ["src"]
+branch = false
 
 [tool.pytest.ini_options]
 addopts = [
     "-vvv",
     "--cov=src",
     "--color=yes",
-    "--cov-report=term-missing"
+    "--cov-report=term-missing",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning:httpx.*:"
@@ -137,6 +131,7 @@ filterwarnings = [
 
 
 [tool.mypy]
+files = ["src/"]
 strict = true
 implicit_reexport = true
 follow_imports = "normal"
@@ -158,34 +153,34 @@ target-version = ['py37']
 skip-string-normalization = false
 
 
-# https://github.com/charliermarsh/ruff#supported-rules
+# https://beta.ruff.rs/docs/rules
 [tool.ruff]
 src = ["src", "tests"]
 target-version = "py37"
 line-length = 120
 select = [
-    "A",
-    "B",  # flake8-bugbear
-    "C",  # flake8-comprehensions
-    "E",  # pycodestyle errors
-    "F",  # pyflakes
-    # "FBT", # flake8-boolean-trap
-    "I",  # isort
-    "ICN",
-    "N",
-    "PLC",
-    "PLE",
-    # "PLR", # Magic value used in comparison, consider replacing 400 with a constant variable
-    "PLW",
-    "Q",
-    "RUF",
-    "S",
-    "SIM",
+    "I",     # isort
+    "N",     # pep8-naming
+    "S",     # bandit
+    "A",     # flake8-builtins
+    "YTT",   # flake8-2020
+    "B",     # flake8-bugbear
+    "C",     # flake8-comprehensions
+    "ICN",   # flake8-import-conventions
+    "SIM",   # flake8-simplify
+    "TID",   # flake8-tidy-imports
+    "Q",     # flake8-quotes
+    # "FBT",   # flake8-boolean-trap
+    "F",     # pyflakes
+    "UP",    # pyupgrade
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "PLC",   # pylint convention
+    "PLE",   # pylint error
+    # "PLR",   # pylint refactor Magic value used in comparison, consider replacing 400 with a constant variable
+    "PLW",   # pylint warning
+    "RUF",   # ruff specific
     "T",
-    "TID",
-    "UP",
-    "W",  # pycodestyle warnings
-    "YTT",
 ]
 
 ignore = [

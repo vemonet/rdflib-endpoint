@@ -340,12 +340,6 @@ The code will be automatically formatted when you commit your changes using `pre
 hatch run fmt
 ```
 
-Check the code for errors, and if it is in accordance with the PEP8 style guide, by running `ruff` and `mypy`:
-
-```
-hatch run check
-```
-
 ### ♻️ Reset the environment
 
 In case you are facing issues with dependencies not updating properly you can easily reset the virtual environment with:
