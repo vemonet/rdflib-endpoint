@@ -123,6 +123,16 @@ path = "src/rdflib_endpoint/__init__.py"
 source = ["src/rdflib_endpoint"]
 branch = false
 
+[tool.coverage.report]
+omit = ["tests/*"]
+exclude_lines = [
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+
+
 [tool.pytest.ini_options]
 addopts = [
     "-vvv",

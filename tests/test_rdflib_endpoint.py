@@ -14,7 +14,7 @@ endpoint = TestClient(app)
 
 def test_service_description():
     response = endpoint.get("/", headers={"accept": "text/turtle"})
-    print(response.text.strip())
+    # print(response.text.strip())
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
@@ -29,7 +29,7 @@ def test_service_description():
 
 def test_custom_concat_json():
     response = endpoint.get("/", params={"query": concat_select}, headers={"accept": "application/json"})
-    # print(response.json())
+    print(response.json())
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
