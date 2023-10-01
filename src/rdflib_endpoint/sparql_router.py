@@ -339,10 +339,11 @@ class SparqlRouter(APIRouter):
         :param part:    <class 'rdflib.plugins.sparql.parserutils.CompValue'>
         :return:        <class 'rdflib.plugins.sparql.processor.SPARQLResult'>
         """
+        if len(self.functions) < 1:
+            raise NotImplementedError()
         # This part holds basic implementation for adding new functions
         if part.name == "Extend":
             query_results: List[Any] = []
-
             # Information is retrieved and stored and passed through a generator
             for eval_part in evalPart(ctx, part.p):
                 # Checks if the function is a URI (custom function)
