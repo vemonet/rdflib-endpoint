@@ -160,9 +160,9 @@ class SparqlRouter(APIRouter):
         description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
         version: str = "0.1.0",
         graph: Union[None, Graph, ConjunctiveGraph, Dataset] = None,
-        functions: Optional[Dict[str, Callable[..., Any]]] = None,
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
+        functions: Optional[Dict[str, Callable[..., Any]]] = None,
         enable_update: bool = False,
         public_url: str = "https://your-endpoint/sparql",
         favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png",
@@ -199,7 +199,7 @@ class SparqlRouter(APIRouter):
         # Handle multiple functions directly in the evalCustomFunctions function
         if custom_eval:
             rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = custom_eval
-        else:
+        elif len(self.functions) > 0:
             rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = self.eval_custom_functions
 
         # TODO: use add_api_route? https://github.com/tiangolo/fastapi/blob/d666ccb62216e45ca78643b52c235ba0d2c53986/fastapi/routing.py#L548
@@ -339,8 +339,6 @@ class SparqlRouter(APIRouter):
         :param part:    <class 'rdflib.plugins.sparql.parserutils.CompValue'>
         :return:        <class 'rdflib.plugins.sparql.processor.SPARQLResult'>
         """
-        if len(self.functions) < 1:
-            raise NotImplementedError()
         # This part holds basic implementation for adding new functions
         if part.name == "Extend":
             query_results: List[Any] = []
