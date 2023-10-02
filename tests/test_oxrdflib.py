@@ -1,5 +1,3 @@
-import urllib.parse
-
 from fastapi.testclient import TestClient
 from rdflib import RDF, RDFS, Graph, Literal, URIRef
 
@@ -31,8 +29,7 @@ def test_service_description():
 
 
 def test_custom_concat_json():
-    response = endpoint.get("/?query=" + urllib.parse.quote(label_select), headers={"accept": "application/json"})
-    # print(response.json())
+    response = endpoint.get("/?query=", params={"query": label_select}, headers={"accept": "application/json"})
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["label"]["value"] == "test value"
 
