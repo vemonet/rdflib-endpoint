@@ -14,7 +14,7 @@
         <div id="yasgui"></div>
         <script>
             Yasqe.defaults.value = `$EXAMPLE_QUERY`
-            const queries_obj = $EXAMPLE_QUERIES
+            const queries_obj = $EXAMPLE_QUERIES || []
 
             const url = window.location.href.endsWith('/') ? window.location.href.slice(0, -1) : window.location.href;
             // Make sure the endpoints list is unique
