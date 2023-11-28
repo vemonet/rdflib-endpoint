@@ -56,14 +56,8 @@ api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
     200: {
         "description": "SPARQL query results",
         "content": {
-            "application/sparql-results+json": {
-                "results": {"bindings": []},
-                "head": {"vars": []},
-            },
-            "application/json": {
-                "results": {"bindings": []},
-                "head": {"vars": []},
-            },
+            "application/sparql-results+json": {"example": {"results": {"bindings": []}, "head": {"vars": []}}},
+            "application/json": {"example": {"results": {"bindings": []}, "head": {"vars": []}}},
             "text/csv": {"example": "s,p,o"},
             "application/sparql-results+csv": {"example": "s,p,o"},
             "text/turtle": {"example": "service description"},
@@ -187,6 +181,9 @@ class SparqlRouter(APIRouter):
         self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
         self.enable_update = enable_update
         self.favicon = favicon
+
+        # if example_query:
+        #     logging.warning("DEPRECATED: the param example_query will be soon removed from future versions. Use examples_queries instead")
 
         # Instantiate APIRouter
         super().__init__(
