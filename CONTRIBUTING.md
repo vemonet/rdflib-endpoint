@@ -83,6 +83,6 @@ The deployment of new releases is done automatically by a GitHub Action workflow
    hatch version fix
    ```
 
-3. Commit the new version, and create a new release on GitHub, which will automatically trigger the workflow to publish the new release to [PyPI](https://pypi.org/project/rdflib-endpoint/).
+3. Commit the new version, and **create a new release on GitHub**, which will automatically trigger the workflow to publish the new release to [PyPI](https://pypi.org/project/rdflib-endpoint/).
 
 You can also manually trigger the workflow from the Actions tab in your GitHub repository webpage if needed.

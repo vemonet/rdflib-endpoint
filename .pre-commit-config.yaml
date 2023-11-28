@@ -16,7 +16,7 @@ repos:
     - id: trailing-whitespace
       name: " ✂️  Trim trailing whitespaces"
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 23.9.0 # Newer versions requires py3.8
     hooks:
       - id: black
         name: " ✒️  Formatting code with Black"
