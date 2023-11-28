@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 name = "rdflib-endpoint"
 description = "A package to deploy SPARQL endpoint to serve local RDF files, machine learning models, or any other logic implemented in Python, using RDFLib and FastAPI."
 readme = "README.md"
@@ -25,7 +25,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -109,7 +108,7 @@ cov = [
 
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 
 # TOOLS
@@ -162,14 +161,14 @@ disallow_untyped_calls = false # needed due to _eval() not being typed in rdflib
 [tool.black]
 color = true
 line-length = 120
-target-version = ['py37']
+target-version = ['py38']
 skip-string-normalization = false
 
 
 # https://beta.ruff.rs/docs/rules
 [tool.ruff]
 src = ["src", "tests"]
-target-version = "py37"
+target-version = "py38"
 line-length = 120
 select = [
     "I",     # isort

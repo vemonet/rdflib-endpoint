@@ -33,7 +33,7 @@ Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fast
 
 ## 📦️ Installation
 
-This package requires Python >=3.7, install it  from [PyPI](https://pypi.org/project/rdflib-endpoint/) with:
+This package requires Python >=3.8, install it  from [PyPI](https://pypi.org/project/rdflib-endpoint/) with:
 
 ```shell
 pip install rdflib-endpoint
