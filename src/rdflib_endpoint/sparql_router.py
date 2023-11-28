@@ -182,9 +182,6 @@ class SparqlRouter(APIRouter):
         self.enable_update = enable_update
         self.favicon = favicon
 
-        # if example_query:
-        #     logging.warning("DEPRECATED: the param example_query will be soon removed from future versions. Use examples_queries instead")
-
         # Instantiate APIRouter
         super().__init__(
             *args,
