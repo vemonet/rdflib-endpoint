@@ -6,7 +6,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/rdflib-endpoint.svg?logo=python&label=Python&logoColor=silver)](https://pypi.org/project/rdflib-endpoint/)
 
 [![Test package](https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/test.yml)
-[![Publish package](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/publish.yml)
+[![Publish package](https://github.com/vemonet/rdflib-endpoint/actions/workflows/release.yml/badge.svg)](https://github.com/vemonet/rdflib-endpoint/actions/workflows/release.yml)
 [![Coverage Status](https://coveralls.io/repos/github/vemonet/rdflib-endpoint/badge.svg?branch=main)](https://coveralls.io/github/vemonet/rdflib-endpoint?branch=main)
 
 [![license](https://img.shields.io/pypi/l/rdflib-endpoint.svg?color=%2334D058)](https://github.com/vemonet/rdflib-endpoint/blob/main/LICENSE.txt)
@@ -275,98 +275,13 @@ uvicorn main:app --app-dir example/app --reload
 
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.
 
-## 🧑‍💻 Development
-
-This section is for if you want to run the package in development, and get involved by making a code contribution.
-
-### 📥️ Clone
-
-Clone the repository:
-
-```bash
-git clone https://github.com/vemonet/rdflib-endpoint
-cd rdflib-endpoint
-```
-
-### 🐣 Install dependencies
-
-Install [Hatch](https://hatch.pypa.io), this will automatically handle virtual environments and make sure all dependencies are installed when you run a script in the project:
-
-```bash
-pipx install hatch
-```
-
-Install the dependencies in a local virtual environment (running this command is optional as `hatch` will automatically install and synchronize dependencies each time you run a script with `hatch run`):
-
-```bash
-hatch -v env create
-```
-
-### 🚀 Run example API
-
-The API will be automatically reloaded when the code is changed:
-
-```bash
-hatch run dev
-```
-
-Access the YASGUI interface at http://localhost:8000
-
-### ☑️ Run tests
-
-Make sure the existing tests still work by running the test suite and linting checks. Note that any pull requests to the fairworkflows repository on github will automatically trigger running of the test suite:
-
-```bash
-hatch run test
-```
-
-To display all `print()`:
-
-```bash
-hatch run test -s
-```
-
-You can also run the tests on multiple python versions:
-
-```bash
-hatch run all:test
-```
-
-### 🧹 Code formatting
-
-The code will be automatically formatted when you commit your changes using `pre-commit`. But you can also run the script to format the code yourself:
-
-```
-hatch run fmt
-```
-
-### ♻️ Reset the environment
-
-In case you are facing issues with dependencies not updating properly you can easily reset the virtual environment with:
-
-```bash
-hatch env prune
-```
-
-### 🏷️ New release process
-
-The deployment of new releases is done automatically by a GitHub Action workflow when a new release is created on GitHub. To release a new version:
-
-1. Make sure the `PYPI_TOKEN` secret has been defined in the GitHub repository (in Settings > Secrets > Actions). You can get an API token from PyPI at [pypi.org/manage/account](https://pypi.org/manage/account).
-
-2. Increment the `version` number following semantic versioning, select between `fix`, `minor`, or `major`:
-
-   ```bash
-   hatch version fix
-   ```
-
-3. Commit the new version, and create a new release on GitHub, which will automatically trigger the workflow to publish the new release to [PyPI](https://pypi.org/project/rdflib-endpoint/).
-
-You can also manually trigger the workflow from the Actions tab in your GitHub repository webpage if needed.
-
 ## 📂 Projects using rdflib-endpoint
 
 Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 
 * [The Bioregistry](https://bioregistry.io/), an open source, community curated registry, meta-registry, and compact identifier resolver.
 * [proycon/codemeta-server](https://github.com/proycon/codemeta-server), server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user
+
+## 🛠️ Contributing
+
+To run the project in development and make a contribution checkout the [contributing page](https://github.com/vemonet/rdflib-endpoint/blob/main/CONTRIBUTING.md).
