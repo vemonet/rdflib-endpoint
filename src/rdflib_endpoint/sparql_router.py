@@ -1,9 +1,9 @@
 import logging
 import re
+from importlib import resources
 from typing import Any, Callable, Dict, List, Optional, Union
 from urllib import parse
 
-import pkg_resources
 import rdflib
 from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import JSONResponse
@@ -366,7 +366,7 @@ class SparqlRouter(APIRouter):
         """Serve YASGUI interface"""
         import json
 
-        with open(pkg_resources.resource_filename("rdflib_endpoint", "yasgui.html")) as f:
+        with resources.open_text("rdflib_endpoint", "yasgui.html") as f:
             html_str = f.read()
         html_str = html_str.replace("$TITLE", self.title)
         html_str = html_str.replace("$DESCRIPTION", self.description)

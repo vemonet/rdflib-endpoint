@@ -3,7 +3,6 @@ import os
 import tempfile
 from unittest.mock import MagicMock, patch
 
-import pkg_resources
 from click.testing import CliRunner
 
 from rdflib_endpoint.__main__ import cli
@@ -19,7 +18,7 @@ def test_convert():
             out_file = str(f"{tmp_file}.{out_format}")
             result = runner.invoke(
                 cli,
-                ["convert", pkg_resources.resource_filename("tests", "resources/test2.ttl"), "--output", out_file],
+                ["convert", "tests/resources/test2.ttl", "--output", out_file],
             )
             assert result.exit_code == 0
             with open(out_file) as file:
@@ -39,7 +38,7 @@ def test_convert_oxigraph():
                 "convert",
                 "--store",
                 "oxigraph",
-                pkg_resources.resource_filename("tests", "resources/test2.ttl"),
+                "tests/resources/test2.ttl",
                 "--output",
                 str(tmp_file),
             ],
@@ -64,9 +63,9 @@ def test_serve(mock_run: MagicMock) -> None:
         cli,
         [
             "serve",
-            pkg_resources.resource_filename("tests", "resources/test.nq"),
-            pkg_resources.resource_filename("tests", "resources/test2.ttl"),
-            pkg_resources.resource_filename("tests", "resources/another.jsonld"),
+            "tests/resources/test.nq",
+            "tests/resources/test2.ttl",
+            "tests/resources/another.jsonld",
         ],
     )
     assert result.exit_code == 0
@@ -82,9 +81,9 @@ def test_serve_oxigraph(mock_run: MagicMock) -> None:
             "serve",
             "--store",
             "oxigraph",
-            pkg_resources.resource_filename("tests", "resources/test.nq"),
-            pkg_resources.resource_filename("tests", "resources/test2.ttl"),
-            pkg_resources.resource_filename("tests", "resources/another.jsonld"),
+            "tests/resources/test.nq",
+            "tests/resources/test2.ttl",
+            "tests/resources/another.jsonld",
         ],
     )
     assert result.exit_code == 0
