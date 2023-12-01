@@ -57,13 +57,15 @@ If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend t
 pip install "rdflib-endpoint[oxigraph,cli]"
 ```
 
-> ⚠️ Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
+> [!WARNING]
+> Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
 
 ## ⌨️ Use the CLI
 
 `rdflib-endpoint` can be used from the command line interface to perform basic utility tasks, such as serving or converting RDF files locally.
 
 Make sure you installed `rdflib-endpoint` with the `cli` optional dependencies:
+
 ```bash
 pip install "rdflib-endpoint[cli]"
 ```
