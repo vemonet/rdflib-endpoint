@@ -28,7 +28,7 @@ def test_custom_concat():
 
     response = endpoint.post(
         "/",
-        data="query=" + custom_concat_query,
+        data={"query": custom_concat_query},
         headers={"accept": "application/json"},
     )
     assert response.status_code == 200
