@@ -33,25 +33,25 @@ def test_custom_concat_json():
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["label"]["value"] == "test value"
 
-    response = endpoint.post("/", data="query=" + label_select, headers={"accept": "application/json"})
+    response = endpoint.post("/", data={"query": label_select}, headers={"accept": "application/json"})
     assert response.status_code == 200
     assert response.json()["results"]["bindings"][0]["label"]["value"] == "test value"
 
 
 def test_select_noaccept_xml():
-    response = endpoint.post("/", data="query=" + label_select)
+    response = endpoint.post("/", data={"query": label_select})
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_select_csv():
-    response = endpoint.post("/", data="query=" + label_select, headers={"accept": "text/csv"})
+    response = endpoint.post("/", data={"query": label_select}, headers={"accept": "text/csv"})
     assert response.status_code == 200
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_fail_select_turtle():
-    response = endpoint.post("/", data="query=" + label_select, headers={"accept": "text/turtle"})
+    response = endpoint.post("/", data={"query": label_select}, headers={"accept": "text/turtle"})
     assert response.status_code == 422
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 

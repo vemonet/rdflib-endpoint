@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from importlib import resources
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -8,7 +9,7 @@ import rdflib
 from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import JSONResponse
 from rdflib import RDF, ConjunctiveGraph, Dataset, Graph, Literal, URIRef
-from rdflib.plugins.sparql import prepareQuery
+from rdflib.plugins.sparql import prepareQuery, prepareUpdate
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
@@ -203,14 +204,22 @@ class SparqlRouter(APIRouter):
             description=self.example_markdown,
             responses=api_responses,
         )
-        async def sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
+        async def sparql_endpoint(
+            request: Request, query: Optional[str] = Query(None), update: Optional[str] = None  # Not supported for GET
+        ) -> Response:
             """
             Send a SPARQL query to be executed through HTTP GET operation.
 
             :param request: The HTTP GET request
             :param query: SPARQL query input.
             """
-            if not query:
+            if query and update:
+                return JSONResponse(
+                    status_code=400,
+                    content={"message": "Cannot do both query and update"},
+                )
+
+            if not query and not update:
                 if str(request.headers["accept"]).startswith("text/html"):
                     return self.serve_yasgui()
                 # If not asking HTML, return the SPARQL endpoint service description
@@ -236,72 +245,79 @@ class SparqlRouter(APIRouter):
 
             graph_ns = dict(self.graph.namespaces())
 
-            try:
-                # Query the graph with the custom functions loaded
-                parsed_query = prepareQuery(query, initNs=graph_ns)
-                query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
-            except Exception as e:
-                logging.error("Error parsing the SPARQL query: " + str(e))
-                return JSONResponse(
-                    status_code=400,
-                    content={"message": "Error parsing the SPARQL query"},
-                )
+            if query:
+                try:
+                    parsed_query = prepareQuery(query, initNs=graph_ns)
+                    query_results = self.graph.query(parsed_query, processor=self.processor)
 
-            # TODO: RDFLib doesn't support SPARQL insert (Expected {SelectQuery | ConstructQuery | DescribeQuery | AskQuery}, found 'INSERT')
-            # But we could implement it by doing a CONSTRUCT, and adding the resulting triples to the graph
-            # if not self.enable_update:
-            #     if query_operation == "Insert Query" or query_operation == "Delete Query":
-            #         return JSONResponse(status_code=403, content={"message": "INSERT and DELETE queries are not allowed."})
-            # if os.getenv('RDFLIB_APIKEY') and (query_operation == "Insert Query" or query_operation == "Delete Query"):
-            #     if apikey != os.getenv('RDFLIB_APIKEY'):
-            #         return JSONResponse(status_code=403, content={"message": "Wrong API KEY."})
+                    # Format and return results depending on Accept mime type in request header
+                    mime_types = parse_accept_header(request.headers.get("accept", DEFAULT_CONTENT_TYPE))
 
-            try:
-                query_results = self.graph.query(query, processor=self.processor)
-            except Exception as e:
-                logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
-                return JSONResponse(
-                    status_code=400,
-                    content={"message": "Error executing the SPARQL query on the RDFLib Graph"},
-                )
+                    # Handle cases that are more complicated, like it includes multiple
+                    # types, extra information, etc.
+                    output_mime_type = DEFAULT_CONTENT_TYPE
+                    for mime_type in mime_types:
+                        if mime_type in CONTENT_TYPE_TO_RDFLIB_FORMAT:
+                            output_mime_type = mime_type
+                            # Use the first mime_type that matches
+                            break
 
-            # Format and return results depending on Accept mime type in request header
-            mime_types = parse_accept_header(request.headers.get("accept", DEFAULT_CONTENT_TYPE))
+                    query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
 
-            # Handle cases that are more complicated, like it includes multiple
-            # types, extra information, etc.
-            output_mime_type = DEFAULT_CONTENT_TYPE
-            for mime_type in mime_types:
-                if mime_type in CONTENT_TYPE_TO_RDFLIB_FORMAT:
-                    output_mime_type = mime_type
-                    # Use the first mime_type that matches
-                    break
+                    # Handle mime type for construct queries
+                    if query_operation == "Construct Query":
+                        if output_mime_type in {"application/json", "text/csv"}:
+                            output_mime_type = "text/turtle"
+                            # TODO: support JSON-LD for construct query?
+                            # g.serialize(format='json-ld', indent=4)
+                        elif output_mime_type == "application/xml":
+                            output_mime_type = "application/rdf+xml"
+                        else:
+                            pass  # TODO what happens here?
 
-            # Handle mime type for construct queries
-            if query_operation == "Construct Query":
-                if output_mime_type in {"application/json", "text/csv"}:
-                    output_mime_type = "text/turtle"
-                    # TODO: support JSON-LD for construct query?
-                    # g.serialize(format='json-ld', indent=4)
-                elif output_mime_type == "application/xml":
-                    output_mime_type = "application/rdf+xml"
-                else:
-                    pass  # TODO what happens here?
-
-            try:
-                rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT[output_mime_type]
-                response = Response(
-                    query_results.serialize(format=rdflib_format),
-                    media_type=output_mime_type,
-                )
-            except Exception as e:
-                logging.error("Error serializing the SPARQL query results with RDFLib: %s", e)
-                return JSONResponse(
-                    status_code=422,
-                    content={"message": "Error serializing the SPARQL query results"},
-                )
-            else:
-                return response
+                    try:
+                        rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT[output_mime_type]
+                        response = Response(
+                            query_results.serialize(format=rdflib_format),
+                            media_type=output_mime_type,
+                        )
+                    except Exception as e:
+                        logging.error("Error serializing the SPARQL query results with RDFLib: %s", e)
+                        return JSONResponse(
+                            status_code=422,
+                            content={"message": "Error serializing the SPARQL query results"},
+                        )
+                    else:
+                        return response
+                except Exception as e:
+                    logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
+                    return JSONResponse(
+                        status_code=400,
+                        content={"message": "Error executing the SPARQL query on the RDFLib Graph"},
+                    )
+            else:  # update
+                if not self.enable_update:
+                    return JSONResponse(
+                        status_code=403, content={"message": "INSERT and DELETE queries are not allowed."}
+                    )
+                if rdflib_apikey := os.environ.get("RDFLIB_APIKEY"):
+                    authorized = False
+                    if auth_header := request.headers.get("Authorization"):  # noqa: SIM102
+                        if auth_header.startswith("Bearer ") and auth_header[7:] == rdflib_apikey:
+                            authorized = True
+                    if not authorized:
+                        return JSONResponse(status_code=403, content={"message": "Invalid API KEY."})
+                try:
+                    prechecked_update: str = update  # type: ignore
+                    parsed_update = prepareUpdate(prechecked_update, initNs=graph_ns)
+                    self.graph.update(parsed_update, "sparql")
+                    return Response(status_code=204)
+                except Exception as e:
+                    logging.error("Error executing the SPARQL update on the RDFLib Graph: " + str(e))
+                    return JSONResponse(
+                        status_code=400,
+                        content={"message": "Error executing the SPARQL update on the RDFLib Graph"},
+                    )
 
         @self.post(
             path,
@@ -309,21 +325,31 @@ class SparqlRouter(APIRouter):
             description=self.example_markdown,
             responses=api_responses,
         )
-        async def post_sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
+        async def post_sparql_endpoint(request: Request) -> Response:
             """Send a SPARQL query to be executed through HTTP POST operation.
 
             :param request: The HTTP POST request with a .body()
-            :param query: SPARQL query input.
             """
-            if not query:
-                # Handle federated query services which provide the query in the body
-                query_body = await request.body()
-                body = query_body.decode("utf-8")
-                parsed_query = parse.parse_qsl(body)
-                for params in parsed_query:
-                    if params[0] == "query":
-                        query = parse.unquote(params[1])
-            return await sparql_endpoint(request, query)
+            request_body = await request.body()
+            body = request_body.decode("utf-8")
+            content_type = request.headers.get("content-type")
+            if content_type == "application/sparql-query":
+                query = body
+                update = None
+            elif content_type == "application/sparql-update":
+                query = None
+                update = body
+            elif content_type == "application/x-www-form-urlencoded":
+                request_params = parse.parse_qsl(body)
+                query_params = [kvp[1] for kvp in request_params if kvp[0] == "query"]
+                query = parse.unquote(query_params[0]) if query_params else None
+                update_params = [kvp[1] for kvp in request_params if kvp[0] == "update"]
+                update = parse.unquote(update_params[0]) if update_params else None
+            else:
+                # Response with the service description
+                query = None
+                update = None
+            return await sparql_endpoint(request, query, update)
 
     def eval_custom_functions(self, ctx: QueryContext, part: CompValue) -> List[Any]:
         """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions

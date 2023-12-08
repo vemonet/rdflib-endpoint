@@ -19,11 +19,12 @@ def cli() -> None:
 @click.option("--host", default="localhost", help="Host of the SPARQL endpoint")
 @click.option("--port", default=8000, help="Port of the SPARQL endpoint")
 @click.option("--store", default="default", help="Store used by RDFLib: default or Oxigraph")
-def serve(files: List[str], host: str, port: int, store: str) -> None:
-    run_serve(files, host, port, store)
+@click.option("--enable-update", is_flag=True, help="Enable SPARQL updates")
+def serve(files: List[str], host: str, port: int, store: str, enable_update: bool) -> None:
+    run_serve(files, host, port, store, enable_update)
 
 
-def run_serve(files: List[str], host: str, port: int, store: str = "default") -> None:
+def run_serve(files: List[str], host: str, port: int, store: str = "default", enable_update: bool = False) -> None:
     if store == "oxigraph":
         store = store.capitalize()
     g = ConjunctiveGraph(store=store)
@@ -41,6 +42,7 @@ def run_serve(files: List[str], host: str, port: int, store: str = "default") ->
 
     app = SparqlEndpoint(
         graph=g,
+        enable_update=enable_update,
         example_query="""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT * WHERE {
