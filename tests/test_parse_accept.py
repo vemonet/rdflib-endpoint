@@ -6,6 +6,7 @@ accept_cases = [
     ("text/xml", "text/xml"),
     ("text/rdf+xml, text/xml, */*", "text/rdf+xml"),
     ("text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8", "text/html"),
+    ("text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=", "text/html"),
     ("text/html;q=0.3, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8", "application/xhtml+xml"),
     (
         'text/turtle;q=0.9;profile="urn:example:profile-1", text/turtle;q=0.7;profile="urn:example:profile-2"',

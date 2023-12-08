@@ -115,6 +115,7 @@ app = SparqlEndpoint(
     cors_enabled=True,
     example_query=example_query,
     example_queries=example_queries,
+    enable_update=True,
 )
 
 ## Uncomment to run it directly with python app/main.py

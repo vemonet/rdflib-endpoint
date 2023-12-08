@@ -112,6 +112,11 @@ def test_sparql_update(api_key, key_provided, param_method, monkeypatch):
         assert (subject, RDFS.label, Literal("bar")) not in graph
 
 
+def test_sparql_query_update_fail():
+    response = endpoint.post("/", data={"update": label_patch, "query": label_patch})
+    assert response.status_code == 400
+
+
 def test_multiple_accept_return_json():
     response = endpoint.get(
         "/",

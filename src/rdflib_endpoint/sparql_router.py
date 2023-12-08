@@ -115,9 +115,7 @@ def parse_accept_header(accept: str) -> List[str]:
         qparts = qpref.split("=")
         try:
             return float(qparts[1].strip())
-        except ValueError:
-            pass
-        except IndexError:
+        except (ValueError, IndexError):
             pass
         return 1.0
 
@@ -197,22 +195,10 @@ class SparqlRouter(APIRouter):
         elif len(self.functions) > 0:
             rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = self.eval_custom_functions
 
-        # TODO: use add_api_route? https://github.com/tiangolo/fastapi/blob/d666ccb62216e45ca78643b52c235ba0d2c53986/fastapi/routing.py#L548
-        @self.get(
-            self.path,
-            name="SPARQL endpoint",
-            description=self.example_markdown,
-            responses=api_responses,
-        )
-        async def sparql_endpoint(
-            request: Request, query: Optional[str] = Query(None), update: Optional[str] = None  # Not supported for GET
+        async def handle_sparql_request(
+            request: Request, query: Optional[str] = None, update: Optional[str] = None
         ) -> Response:
-            """
-            Send a SPARQL query to be executed through HTTP GET operation.
-
-            :param request: The HTTP GET request
-            :param query: SPARQL query input.
-            """
+            """Handle SPARQL requests to the GET and POST endpoints"""
             if query and update:
                 return JSONResponse(
                     status_code=400,
@@ -295,7 +281,7 @@ class SparqlRouter(APIRouter):
                         status_code=400,
                         content={"message": "Error executing the SPARQL query on the RDFLib Graph"},
                     )
-            else:  # update
+            else:  # Update
                 if not self.enable_update:
                     return JSONResponse(
                         status_code=403, content={"message": "INSERT and DELETE queries are not allowed."}
@@ -318,6 +304,25 @@ class SparqlRouter(APIRouter):
                         status_code=400,
                         content={"message": "Error executing the SPARQL update on the RDFLib Graph"},
                     )
+
+        # TODO: use add_api_route? https://github.com/tiangolo/fastapi/blob/d666ccb62216e45ca78643b52c235ba0d2c53986/fastapi/routing.py#L548
+        @self.get(
+            self.path,
+            name="SPARQL endpoint",
+            description=self.example_markdown,
+            responses=api_responses,
+        )
+        async def get_sparql_endpoint(
+            request: Request,
+            query: Optional[str] = Query(None),
+        ) -> Response:
+            """
+            Send a SPARQL query to be executed through HTTP GET operation.
+
+            :param request: The HTTP GET request
+            :param query: SPARQL query input.
+            """
+            return await handle_sparql_request(request, query=query)
 
         @self.post(
             path,
@@ -345,11 +350,13 @@ class SparqlRouter(APIRouter):
                 query = parse.unquote(query_params[0]) if query_params else None
                 update_params = [kvp[1] for kvp in request_params if kvp[0] == "update"]
                 update = parse.unquote(update_params[0]) if update_params else None
+                # TODO: handle params `using-graph-uri` and `using-named-graph-uri`
+                # https://www.w3.org/TR/sparql11-protocol/#update-operation
             else:
                 # Response with the service description
                 query = None
                 update = None
-            return await sparql_endpoint(request, query, update)
+            return await handle_sparql_request(request, query, update)
 
     def eval_custom_functions(self, ctx: QueryContext, part: CompValue) -> List[Any]:
         """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
