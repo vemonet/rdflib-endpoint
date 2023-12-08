@@ -6,7 +6,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from rdflib import ConjunctiveGraph, Dataset, Graph
 from rdflib.query import Processor
 
-from rdflib_endpoint.sparql_router import EXAMPLE_SPARQL, SparqlRouter
+from rdflib_endpoint.sparql_router import (
+    DEFAULT_DESCRIPTION,
+    DEFAULT_EXAMPLE,
+    DEFAULT_FAVICON,
+    DEFAULT_PUBLIC_URL,
+    DEFAULT_TITLE,
+    DEFAULT_VERSION,
+    SparqlRouter,
+)
 
 __all__ = [
     "SparqlEndpoint",
@@ -22,19 +30,19 @@ class SparqlEndpoint(FastAPI):
         self,
         *args: Any,
         path: str = "/",
-        title: str = "SPARQL endpoint for RDFLib graph",
-        description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-        version: str = "0.1.0",
+        title: str = DEFAULT_TITLE,
+        description: str = DEFAULT_DESCRIPTION,
+        version: str = DEFAULT_VERSION,
         graph: Union[None, Graph, ConjunctiveGraph, Dataset] = None,
         functions: Optional[Dict[str, Callable[..., Any]]] = None,
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
-        public_url: str = "https://your-endpoint/sparql",
-        example_query: str = EXAMPLE_SPARQL,
+        public_url: str = DEFAULT_PUBLIC_URL,
+        example_query: str = DEFAULT_EXAMPLE,
         example_queries: Optional[Dict[str, Dict[str, str]]] = None,
-        favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png",
+        favicon: str = DEFAULT_FAVICON,
         **kwargs: Any,
     ) -> None:
         """
@@ -84,5 +92,5 @@ class SparqlEndpoint(FastAPI):
         async def add_process_time_header(request: Request, call_next: Any) -> Response:
             start_time = time.time()
             response: Response = await call_next(request)
-            response.headers["X-Process-Time"] = str(time.time() - start_time)
+            response.headers["Server-Timing"] = f"total;dur={time.time() - start_time}"
             return response

@@ -20,7 +20,12 @@ __all__ = [
     "SparqlRouter",
 ]
 
-EXAMPLE_SPARQL = """\
+DEFAULT_TITLE: str = "SPARQL endpoint for RDFLib graph"
+DEFAULT_DESCRIPTION: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)"
+DEFAULT_VERSION: str = "0.1.0"
+DEFAULT_PUBLIC_URL: str = "https://your-endpoint/sparql"
+DEFAULT_FAVICON: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png"
+DEFAULT_EXAMPLE = """\
 PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 
 SELECT ?concat ?concatLength WHERE {
@@ -149,17 +154,17 @@ class SparqlRouter(APIRouter):
         self,
         *args: Any,
         path: str = "/",
-        title: str = "SPARQL endpoint for RDFLib graph",
-        description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-        version: str = "0.1.0",
+        title: str = DEFAULT_TITLE,
+        description: str = DEFAULT_DESCRIPTION,
+        version: str = DEFAULT_VERSION,
         graph: Union[None, Graph, ConjunctiveGraph, Dataset] = None,
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         functions: Optional[Dict[str, Callable[..., Any]]] = None,
         enable_update: bool = False,
-        public_url: str = "https://your-endpoint/sparql",
-        favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png",
-        example_query: str = EXAMPLE_SPARQL,
+        public_url: str = DEFAULT_PUBLIC_URL,
+        favicon: str = DEFAULT_FAVICON,
+        example_query: str = DEFAULT_EXAMPLE,
         example_queries: Optional[Dict[str, Dict[str, str]]] = None,
         **kwargs: Any,
     ) -> None:
@@ -268,18 +273,18 @@ class SparqlRouter(APIRouter):
                             media_type=output_mime_type,
                         )
                     except Exception as e:
-                        logging.error("Error serializing the SPARQL query results with RDFLib: %s", e)
+                        logging.error(f"Error serializing the SPARQL query results with RDFLib: {e}")
                         return JSONResponse(
                             status_code=422,
-                            content={"message": "Error serializing the SPARQL query results"},
+                            content={"message": f"Error serializing the SPARQL query results with RDFLib: {e}"},
                         )
                     else:
                         return response
                 except Exception as e:
-                    logging.error("Error executing the SPARQL query on the RDFLib Graph: " + str(e))
+                    logging.error(f"Error executing the SPARQL query on the RDFLib Graph: {e}")
                     return JSONResponse(
                         status_code=400,
-                        content={"message": "Error executing the SPARQL query on the RDFLib Graph"},
+                        content={"message": f"Error executing the SPARQL query on the RDFLib Graph: {e}"},
                     )
             else:  # Update
                 if not self.enable_update:
@@ -299,10 +304,10 @@ class SparqlRouter(APIRouter):
                     self.graph.update(parsed_update, "sparql")
                     return Response(status_code=204)
                 except Exception as e:
-                    logging.error("Error executing the SPARQL update on the RDFLib Graph: " + str(e))
+                    logging.error(f"Error executing the SPARQL update on the RDFLib Graph: {e}")
                     return JSONResponse(
                         status_code=400,
-                        content={"message": "Error executing the SPARQL update on the RDFLib Graph"},
+                        content={"message": f"Error executing the SPARQL update on the RDFLib Graph: {e}"},
                     )
 
         # TODO: use add_api_route? https://github.com/tiangolo/fastapi/blob/d666ccb62216e45ca78643b52c235ba0d2c53986/fastapi/routing.py#L548
