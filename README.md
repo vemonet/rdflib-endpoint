@@ -175,6 +175,8 @@ app = FastAPI()
 app.include_router(sparql_router)
 ```
 
+> TODO: add docs to integrate to a Flask app
+
 ### 📝 Define custom SPARQL functions
 
 This option makes it easier to define functions in your SPARQL endpoint, e.g. `BIND(myfunction:custom_concat("start", "end") AS ?concat)`. It can be used with the `SparqlEndpoint` and `SparqlRouter` classes.
