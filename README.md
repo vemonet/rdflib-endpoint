@@ -48,13 +48,13 @@ pip install "rdflib-endpoint[web]"
 If you want to use `rdlib-endpoint` as a CLI you can install with the optional dependency `cli`:
 
 ```bash
-pip install "rdflib-endpoint[cli]"
+pip install "rdflib-endpoint[web,cli]"
 ```
 
 If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend triplestore you can install with the optional dependency `oxigraph`:
 
 ```bash
-pip install "rdflib-endpoint[oxigraph,cli]"
+pip install "rdflib-endpoint[web,cli,oxigraph]"
 ```
 
 > [!WARNING]
