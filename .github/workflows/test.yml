@@ -42,7 +42,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: 🐍 Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -58,7 +58,7 @@ jobs:
       uses: coverallsapp/github-action@v2
 
     - name: ☂️ Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
 
     - name: ☁️ Analyze with SonarCloud
       if: github.event_name != 'pull_request'
