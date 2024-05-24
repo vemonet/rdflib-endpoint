@@ -66,9 +66,25 @@ api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
             "application/json": {"example": {"results": {"bindings": []}, "head": {"vars": []}}},
             "text/csv": {"example": "s,p,o"},
             "application/sparql-results+csv": {"example": "s,p,o"},
-            "text/turtle": {"example": "service description"},
             "application/sparql-results+xml": {"example": "<root></root>"},
             "application/xml": {"example": "<root></root>"},
+            "text/turtle": {"example": "<http://subject> <http://predicate> <http://object> ."},
+            "application/n-triples": {"example": "<http://subject> <http://predicate> <http://object> ."},
+            "text/n3": {"example": "<http://subject> <http://predicate> <http://object> ."},
+            "application/n-quads": {"example": "<http://subject> <http://predicate> <http://object> <http://graph> ."},
+            "application/trig": {
+                "example": "GRAPH <http://graph> {<http://subject> <http://predicate> <http://object> .}"
+            },
+            "application/trix": {"example": "<xml></xml>"},
+            "application/ld+json": {
+                "example": [
+                    {
+                        "@id": "http://subject",
+                        "@type": ["http://object"],
+                        "http://www.w3.org/2000/01/rdf-schema#label": [{"@value": "foo"}],
+                    }
+                ]
+            },
             # "application/rdf+xml": {
             #     "example": '<?xml version="1.0" encoding="UTF-8"?> <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"></rdf:RDF>'
             # },
@@ -100,11 +116,18 @@ CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     "application/xml": "xml",  # for compatibility
     "application/rdf+xml": "xml",  # for compatibility
     "text/xml": "xml",  # not standard
+    "application/ld+json": "json-ld",
     # https://www.w3.org/TR/sparql11-results-csv-tsv/
     "application/sparql-results+csv": "csv",
     "text/csv": "csv",  # for compatibility
     # Extras
     "text/turtle": "ttl",
+    "text/n3": "n3",
+    "application/n-triples": "nt",
+    "text/plain": "nt",
+    "application/trig": "trig",
+    "application/trix": "trix",
+    "application/n-quads": "nquads",
 }
 
 
@@ -257,17 +280,17 @@ class SparqlRouter(APIRouter):
 
                     # Handle mime type for construct queries
                     if query_operation == "Construct Query":
-                        if output_mime_type in {"application/json", "text/csv"}:
+                        if output_mime_type == "text/csv":
                             output_mime_type = "text/turtle"
-                            # TODO: support JSON-LD for construct query?
-                            # g.serialize(format='json-ld', indent=4)
+                        elif output_mime_type == "application/json":
+                            output_mime_type = "application/ld+json"
                         elif output_mime_type == "application/xml":
                             output_mime_type = "application/rdf+xml"
                         else:
-                            pass  # TODO what happens here?
+                            pass
 
                     try:
-                        rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT[output_mime_type]
+                        rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT.get(output_mime_type, output_mime_type)
                         response = Response(
                             query_results.serialize(format=rdflib_format),
                             media_type=output_mime_type,

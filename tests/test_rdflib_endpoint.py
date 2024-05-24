@@ -30,7 +30,6 @@ endpoint = TestClient(app)
 
 def test_service_description():
     response = endpoint.get("/", headers={"accept": "text/turtle"})
-    # print(response.text.strip())
     assert response.status_code == 200
     assert response.text.strip() == service_description
 
@@ -63,6 +62,7 @@ def test_custom_concat_json():
 def test_select_noaccept_xml():
     response = endpoint.post("/", data={"query": concat_select})
     assert response.status_code == 200
+    assert response.text.startswith("<?xml ")
 
 
 def test_select_csv():
@@ -140,18 +140,26 @@ def test_multiple_accept_return_json2():
 def test_fail_select_turtle():
     response = endpoint.post("/", data={"query": concat_select}, headers={"accept": "text/turtle"})
     assert response.status_code == 422
-    # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_concat_construct_turtle():
-    # expected to return turtle
+    response = endpoint.post(
+        "/",
+        data={"query": custom_concat_construct},
+        headers={"accept": "text/turtle"},
+    )
+    assert response.status_code == 200
+    assert response.text.startswith("@prefix ")
+
+
+def test_concat_construct_jsonld():
     response = endpoint.post(
         "/",
         data={"query": custom_concat_construct},
         headers={"accept": "application/json"},
     )
     assert response.status_code == 200
-    # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
+    assert response.json()[0]["@id"] == "http://example.com/test"
 
 
 def test_concat_construct_xml():
@@ -162,6 +170,7 @@ def test_concat_construct_xml():
         headers={"accept": "application/xml"},
     )
     assert response.status_code == 200
+    assert response.text.startswith("<?xml ")
 
 
 def test_yasgui():
@@ -186,7 +195,7 @@ SELECT ?concat ?concatLength WHERE {
 
 custom_concat_construct = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 CONSTRUCT {
-    <http://test> <http://concat> ?concat, ?concatLength .
+    <http://example.com/test> <http://example.com/concat> ?concat, ?concatLength .
 } WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)

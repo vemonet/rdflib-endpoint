@@ -15,18 +15,14 @@ repos:
       name: " 🪚 Fix end of files"
     - id: trailing-whitespace
       name: " ✂️  Trim trailing whitespaces"
-  - repo: https://github.com/psf/black
-    rev: 23.11.0
-    hooks:
-      - id: black
-        name: " ✒️  Formatting code with Black"
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.4.5
     hooks:
       - id: ruff
         name: " ⚡️ Formatting code with Ruff"
         args:
         - --fix
+      - id: ruff-format
   # Does not read the config from pyproject.toml
   # - repo: https://github.com/pre-commit/mirrors-mypy
   #   rev: v1.4.1
