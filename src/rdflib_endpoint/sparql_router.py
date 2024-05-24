@@ -433,7 +433,7 @@ class SparqlRouter(APIRouter):
         html_str = html_str.replace("$EXAMPLE_QUERIES", json.dumps(self.example_queries))
         return Response(content=html_str, media_type="text/html")
 
-    def get_service_graph(self) -> rdflib.Graph:
+    def get_service_graph(self) -> Graph:
         # Service description returned when no query provided
         service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
             public_url=self.public_url,

@@ -7,27 +7,22 @@ jobs:
     name: CodeQL analysis
     runs-on: ubuntu-latest
     permissions:
-      security-events: write # required for all workflows
-      # only required for workflows in private repositories:
-      actions: read
-      contents: read
+      security-events: write
+      packages: read
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: python
 
-      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, or Java).
-      # If this step fails, then you should remove it and run the build manually
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
-
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
 
 
   tests:
@@ -56,21 +51,3 @@ jobs:
 
     - name: ☂️ Upload coverage to Coveralls
       uses: coverallsapp/github-action@v2
-
-    - name: ☂️ Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-
-    - name: ☁️ Analyze with SonarCloud
-      if: github.event_name != 'pull_request'
-      uses: sonarsource/sonarcloud-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        args: >
-          -Dsonar.organization=vemonet
-          -Dsonar.projectKey=vemonet_rdflib-endpoint
-          -Dsonar.python.coverage.reportPaths=coverage.xml
-          -Dsonar.sources=src/rdflib_endpoint
-          -Dsonar.tests=tests/
-          -Dsonar.verbose=true

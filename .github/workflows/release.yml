@@ -26,10 +26,6 @@ jobs:
       run: |
         pip install build
 
-    # - name: Bump version to ${{github.ref_name}}
-    #   run: |
-    #     hatch version "${{github.ref_name}}"
-
     - name: Build package
       run: python -m build
 

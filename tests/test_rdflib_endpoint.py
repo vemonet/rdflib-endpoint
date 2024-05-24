@@ -152,6 +152,16 @@ def test_concat_construct_turtle():
     assert response.text.startswith("@prefix ")
 
 
+def test_concat_construct_csv():
+    response = endpoint.post(
+        "/",
+        data={"query": custom_concat_construct},
+        headers={"accept": "text/csv"},
+    )
+    assert response.status_code == 200
+    assert response.text.startswith("@prefix ")
+
+
 def test_concat_construct_jsonld():
     response = endpoint.post(
         "/",
