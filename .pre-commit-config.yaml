@@ -19,11 +19,11 @@ repos:
     rev: v0.4.5
     hooks:
       - id: ruff
-        name: " ⚡️ Linting code with Ruff"
+        name: " ⚡️ Lint code with ruff"
         args:
         - --fix
       - id: ruff-format
-        name: " ✒️  Formatting code with Ruff"
+        name: " ✒️  Format code with ruff"
   # Does not read the config from pyproject.toml
   # - repo: https://github.com/pre-commit/mirrors-mypy
   #   rev: v1.4.1
