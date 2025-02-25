@@ -97,7 +97,7 @@ rdflib-endpoint convert "*.ttl" "*.jsonld" "*.nq" --output "merged.trig"
 
 ## ✨ Deploy your SPARQL endpoint
 
-`rdflib-endpoint` enables you to easily define and deploy SPARQL endpoints based on RDFLib Graph, ConjunctiveGraph, and Dataset. Additionally it provides helpers to defines custom functions in the endpoint.
+`rdflib-endpoint` enables you to easily define and deploy SPARQL endpoints based on RDFLib Graph, and Dataset. Additionally it provides helpers to defines custom functions in the endpoint.
 
 Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, including a docker deployment. A good way to create a new SPARQL endpoint is to copy this `example` folder, and start from it.
 
@@ -106,11 +106,11 @@ Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/ex
 Deploy your SPARQL endpoint as a standalone API:
 
 ```python
-from rdflib import ConjunctiveGraph
+from rdflib import Dataset
 from rdflib_endpoint import SparqlEndpoint
 
 # Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
-g = ConjunctiveGraph()
+g = Dataset()
 # TODO: Add triples in your graph
 
 # Then use either SparqlEndpoint or SparqlRouter, they take the same arguments
@@ -156,10 +156,10 @@ Deploy your SPARQL endpoint as an `APIRouter` to include in an existing `FastAPI
 
 ```python
 from fastapi import FastAPI
-from rdflib import ConjunctiveGraph
+from rdflib import Dataset
 from rdflib_endpoint import SparqlRouter
 
-g = ConjunctiveGraph()
+g = Dataset()
 sparql_router = SparqlRouter(
     graph=g,
     path="/",
@@ -184,7 +184,7 @@ Create a `app/main.py` file in your project folder with your custom SPARQL funct
 
 ````python
 import rdflib
-from rdflib import ConjunctiveGraph
+from rdflib import Dataset
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib_endpoint import SparqlEndpoint
 
@@ -211,7 +211,7 @@ def custom_concat(query_results, ctx, part, eval_part):
     return query_results, ctx, part, eval_part
 
 # Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
-g = ConjunctiveGraph()
+g = Dataset(default_union=True)
 # Use either SparqlEndpoint or SparqlRouter, they take the same arguments
 app = SparqlEndpoint(
     graph=g,

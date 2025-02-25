@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, Optional, Union
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from rdflib import ConjunctiveGraph, Dataset, Graph
+from rdflib import Dataset, Graph
 from rdflib.query import Processor
 
 from rdflib_endpoint.sparql_router import (
@@ -33,7 +33,7 @@ class SparqlEndpoint(FastAPI):
         title: str = DEFAULT_TITLE,
         description: str = DEFAULT_DESCRIPTION,
         version: str = DEFAULT_VERSION,
-        graph: Union[None, Graph, ConjunctiveGraph, Dataset] = None,
+        graph: Union[None, Graph, Dataset] = None,
         functions: Optional[Dict[str, Callable[..., Any]]] = None,
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,

@@ -8,7 +8,7 @@ from urllib import parse
 import rdflib
 from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import JSONResponse
-from rdflib import RDF, ConjunctiveGraph, Dataset, Graph, Literal, URIRef
+from rdflib import RDF, Dataset, Graph, Literal, URIRef
 from rdflib.plugins.sparql import prepareQuery, prepareUpdate
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
@@ -180,7 +180,7 @@ class SparqlRouter(APIRouter):
         title: str = DEFAULT_TITLE,
         description: str = DEFAULT_DESCRIPTION,
         version: str = DEFAULT_VERSION,
-        graph: Union[None, Graph, ConjunctiveGraph, Dataset] = None,
+        graph: Union[None, Graph, Dataset] = None,
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         functions: Optional[Dict[str, Callable[..., Any]]] = None,
@@ -195,7 +195,7 @@ class SparqlRouter(APIRouter):
         Constructor of the SPARQL endpoint, everything happens here.
         FastAPI calls are defined in this constructor
         """
-        self.graph = graph if graph is not None else ConjunctiveGraph()
+        self.graph = graph if graph is not None else Dataset(default_union=True)
         self.functions = functions if functions is not None else {}
         self.processor = processor
         self.title = title
@@ -234,13 +234,13 @@ class SparqlRouter(APIRouter):
                 )
 
             if not query and not update:
-                if str(request.headers["accept"]).startswith("text/html"):
+                if str(request.headers.get("accept", "")).startswith("text/html"):
                     return self.serve_yasgui()
                 # If not asking HTML, return the SPARQL endpoint service description
                 service_graph = self.get_service_graph()
 
                 # Return the service description RDF as turtle or XML
-                if request.headers["accept"] == "text/turtle":
+                if request.headers.get("accept") == "text/turtle":
                     return Response(
                         service_graph.serialize(format="turtle"),
                         media_type="text/turtle",
@@ -366,13 +366,13 @@ class SparqlRouter(APIRouter):
             request_body = await request.body()
             body = request_body.decode("utf-8")
             content_type = request.headers.get("content-type")
-            if content_type == "application/sparql-query":
+            if content_type and "application/sparql-query" in content_type:
                 query = body
                 update = None
-            elif content_type == "application/sparql-update":
+            elif content_type and "application/sparql-update" in content_type:
                 query = None
                 update = body
-            elif content_type == "application/x-www-form-urlencoded":
+            elif content_type and "application/x-www-form-urlencoded" in content_type:
                 request_params = parse.parse_qsl(body)
                 query_params = [kvp[1] for kvp in request_params if kvp[0] == "query"]
                 query = parse.unquote(query_params[0]) if query_params else None
@@ -380,6 +380,10 @@ class SparqlRouter(APIRouter):
                 update = parse.unquote(update_params[0]) if update_params else None
                 # TODO: handle params `using-graph-uri` and `using-named-graph-uri`
                 # https://www.w3.org/TR/sparql11-protocol/#update-operation
+            elif not body and request.query_params:
+                # Blazegraph SERVICE calls uses query_params, not body
+                query = parse.unquote(request.query_params.get("query", ""))
+                update = request.query_params.get("update")
             else:
                 # Response with the service description
                 query = None

@@ -66,6 +66,7 @@ dev = [
     "pre-commit",
     "requests",
     "httpx",
+    "testcontainers",
     "types-PyYAML",
     "types-setuptools",
     "types-ujson",

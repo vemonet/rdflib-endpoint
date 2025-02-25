@@ -4,7 +4,7 @@ from typing import List
 
 import click
 import uvicorn
-from rdflib import ConjunctiveGraph
+from rdflib import Dataset
 
 from rdflib_endpoint import SparqlEndpoint
 
@@ -27,7 +27,7 @@ def serve(files: List[str], host: str, port: int, store: str, enable_update: boo
 def run_serve(files: List[str], host: str, port: int, store: str = "default", enable_update: bool = False) -> None:
     if store == "oxigraph":
         store = store.capitalize()
-    g = ConjunctiveGraph(store=store)
+    g = Dataset(store=store, default_union=True)
     for glob_file in files:
         file_list = glob.glob(glob_file)
         for file in file_list:
@@ -65,7 +65,7 @@ def convert(files: List[str], output: str, store: str) -> None:
 def run_convert(files: List[str], output: str, store: str = "default") -> None:
     if store == "oxigraph":
         store = store.capitalize()
-    g = ConjunctiveGraph(store=store)
+    g = Dataset(store=store, default_union=True)
     for glob_file in files:
         file_list = glob.glob(glob_file)
         for file in file_list:

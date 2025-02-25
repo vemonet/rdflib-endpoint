@@ -1,0 +1,51 @@
+# A compose file to try federated query from various triple stores
+services:
+  rdflib-endpoint:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    # volumes:
+    #   - ./:/app/
+
+  # https://github.com/vemonet/virtuoso-ldp/blob/main/prepare_virtuoso_docker.sh
+  virtuoso:
+    image: openlink/virtuoso-opensource-7:latest
+    # volumes:
+    #   - ./data:/database
+    ports:
+      - 8890:8890
+      - 1111:1111
+    environment:
+      - SPARQL_UPDATE=true
+      - DBA_PASSWORD=dba
+  # http://localhost:8890/conductor > System admin > User account > SPARQL Edit > SPARQL_SELECT_FED
+  # docker compose exec virtuoso isql -U dba -P dba exec="grant select on DB.DBA.SPARQL_SELECT_FED to 'SPARQL';"
+
+  # graphdb:
+  #   image: ontotext/graphdb:10.8.4
+  #   ports:
+  #     - 7200:7200
+
+  # blazegraph:
+  #   image: lyrasis/blazegraph:2.1.5
+  #   ports:
+  #     - 8080:8080
+
+  # oxigraph:
+  #   image: oxigraph/oxigraph:latest
+  #   ports:
+  #     - 7878:7878
+  #   # volumes:
+  #   #   - ./data/oxigraph:/data
+
+
+  # Admin login does not work as it is documented with fuseki
+  # fuseki:
+  #   image: stain/jena-fuseki
+  #   ports:
+  #     - 3030:3030
+  #   environment:
+  #     - ADMIN_PASSWORD=ADMIN_PASSWORD
+  #   # volumes:
+  #   #   - ./data/fuseki:/fuseki

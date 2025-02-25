@@ -1,5 +1,5 @@
 import rdflib
-from rdflib import RDF, RDFS, ConjunctiveGraph, Literal, URIRef
+from rdflib import RDF, RDFS, Dataset, Literal, URIRef
 from rdflib.plugins.sparql.evalutils import _eval
 
 from rdflib_endpoint import SparqlEndpoint
@@ -89,11 +89,11 @@ SELECT ?concat ?concatLength WHERE {
 }
 
 
-# Use ConjunctiveGraph to support nquads and graphs in SPARQL queries
+# Use Dataset to support nquads and graphs in SPARQL queries
 # identifier is the default graph
-g = ConjunctiveGraph(
+g = Dataset(
     # store="Oxigraph",
-    identifier=URIRef("https://w3id.org/um/sparql-functions/graph/default"),
+    default_union=True,
 )
 
 # Example to add a nquad to the exposed graph
