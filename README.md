@@ -10,7 +10,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/vemonet/rdflib-endpoint/badge.svg?branch=main)](https://coveralls.io/github/vemonet/rdflib-endpoint?branch=main)
 
 [![license](https://img.shields.io/pypi/l/rdflib-endpoint.svg?color=%2334D058)](https://github.com/vemonet/rdflib-endpoint/blob/main/LICENSE.txt)
-[![code style - black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![types - Mypy](https://img.shields.io/badge/types-mypy-blue.svg)](https://github.com/python/mypy)
 
 </div>
@@ -25,11 +24,11 @@ It aims to enable python developers to easily deploy functions that can be queri
 
 `rdflib-endpoint` can be used directly from the terminal to quickly serve RDF files through a SPARQL endpoint automatically deployed locally.
 
-It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions, and/or populate the RDFLib Graph using Python, then the endpoint is started using `uvicorn`/`gunicorn`.
+It can also be used to define custom SPARQL functions: the user defines and registers custom SPARQL functions, and/or populate the RDFLib Graph using Python, then the endpoint is started using `uvicorn`.
 
 The deployed SPARQL endpoint can be used as a `SERVICE` in a federated SPARQL query from regular triplestores SPARQL endpoints. Tested on OpenLink Virtuoso (Jena based) and Ontotext GraphDB (RDF4J based). The endpoint is CORS enabled by default to enable querying it from client JavaScript (can be turned off).
 
-Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/).
+> Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/).
 
 ## 📦️ Installation
 
@@ -48,13 +47,13 @@ pip install "rdflib-endpoint[web]"
 If you want to use `rdlib-endpoint` as a CLI you can install with the optional dependency `cli`:
 
 ```bash
-pip install "rdflib-endpoint[web,cli]"
+pip install "rdflib-endpoint[cli]"
 ```
 
 If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend triplestore you can install with the optional dependency `oxigraph`:
 
 ```bash
-pip install "rdflib-endpoint[web,cli,oxigraph]"
+pip install "rdflib-endpoint[cli,oxigraph]"
 ```
 
 > [!WARNING]
@@ -175,7 +174,7 @@ app = FastAPI()
 app.include_router(sparql_router)
 ```
 
-> TODO: add docs to integrate to a Flask app
+> To deploy this route in a **Flask** app checkout how it has been done in the [curies mapping service](https://github.com/biopragmatics/curies/blob/main/src/curies/mapping_service/api.py) of the [Bioregistry](https://bioregistry.io/).
 
 ### 📝 Define custom SPARQL functions
 
@@ -271,10 +270,11 @@ app = SparqlEndpoint(
 
 ### 🦄 Run the SPARQL endpoint
 
-You can then run the SPARQL endpoint server from the folder where your script is defined with `uvicorn` on http://localhost:8000 (it is installed automatically when you install the `rdflib-endpoint` package)
+You can then run the SPARQL endpoint server from the folder where your script is defined with `uvicorn` on http://localhost:8000
 
 ```bash
-uvicorn main:app --app-dir example/app --reload
+cd example
+uv run uvicorn app.main:app --reload
 ```
 
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.
@@ -284,7 +284,8 @@ uvicorn main:app --app-dir example/app --reload
 Here are some projects using `rdflib-endpoint` to deploy custom SPARQL endpoints with python:
 
 * [The Bioregistry](https://bioregistry.io/), an open source, community curated registry, meta-registry, and compact identifier resolver.
-* [proycon/codemeta-server](https://github.com/proycon/codemeta-server), server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user
+* [proycon/codemeta-server](https://github.com/proycon/codemeta-server), server for codemeta, in memory triple store, SPARQL endpoint and simple web-based visualisation for end-user.
+* [AKSW/sparql-file](https://github.com/AKSW/sparql-file), serve a RDF file as an RDFLib Graph through a SPARQL endpoint.
 
 ## 🛠️ Contributing
 

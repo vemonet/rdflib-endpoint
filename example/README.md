@@ -4,13 +4,13 @@ A SPARQL endpoint to serve machine learning models, or any other logic implement
 
 Built with [RDFLib](https://github.com/RDFLib/rdflib) and [FastAPI](https://fastapi.tiangolo.com/), CORS enabled.
 
-## Example queries 📬
+## 📬 Example queries
 
 ### Get predictions
 
 Concatenate the 2 given string, and also return the length as additional Length variable
 
-```SPARQL
+```sparql
 PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
@@ -24,7 +24,7 @@ Use this federated query to retrieve predicted treatments for a drug or disease 
 
 **From another SPARQL endpoint:**
 
-```SPARQL
+```sparql
 PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
 SELECT * WHERE
 {
@@ -47,7 +47,7 @@ SELECT * WHERE
 
 Run this federated query on the RDFLib endpoint https://service.translator.137.120.31.102.nip.io to resolve drug/disease labels retrieved from the Nanopublication network:
 
-```SPARQL
+```sparql
 SELECT DISTINCT ?label ?subject ?object (<https://w3id.org/um/translator/get_label>(str(?subject)) AS ?subjectLabel) (<https://w3id.org/um/translator/get_label>(str(?object)) AS ?objectLabel)
 WHERE {
   	service <http://virtuoso.np.dumontierlab.137.120.31.101.nip.io/sparql> {
@@ -85,42 +85,38 @@ WHERE {
 
 Insert data in the in-memory rdflib graph:
 
-```SPARQL
+```sparql
 INSERT DATA {
     <http://subject> <http://predicate> <http://object> .
 }
 ```
 
-## Install and run ✨️
+## ✨️ Run
 
-1. Install dependencies
+> Requirements: [`uv`](https://docs.astral.sh/uv/getting-started/installation/) to easily handle scripts and virtual environments.
 
-```bash
-pip install -r requirements.txt
+Run the server on http://localhost:8000
+
+```sh
+uv run uvicorn app.main:app --reload
 ```
 
-2. Run the server on http://localhost:8000
+## 🐳 Or run with docker
 
-```bash
-uvicorn main:app --reload --app-dir app
-```
+Checkout the `Dockerfile` to see how the image is built, and run it with the `compose.yml`:
 
-## Or run with docker 🐳
-
-Checkout the `Dockerfile` to see how the image is built, and run it with the `docker-compose.yml`:
-
-```bash
-docker-compose up -d --build
+```sh
+docker compose up -d --build
 ```
 
 Or build and run with docker:
 
-```bash
+```sh
 docker build -t rdflib-endpoint .
 ```
 
 Run on http://localhost:8080
 
-```bash
+```sh
 docker run -p 8080:80 rdflib-endpoint
 ```

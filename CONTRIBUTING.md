@@ -2,35 +2,29 @@
 
 This section is for if you want to run the package in development, and get involved by making a code contribution.
 
+> Requirements: [`uv`](https://docs.astral.sh/uv/getting-started/installation/) to easily handle scripts and virtual environments.
+
 ## 📥️ Clone
 
 Clone the repository:
 
-```bash
+```sh
 git clone https://github.com/vemonet/rdflib-endpoint
 cd rdflib-endpoint
 ```
 
-## 🐣 Install dependencies
+## 🪝 Install pre-commit hooks
 
-Install [Hatch](https://hatch.pypa.io), this will automatically handle virtual environments and make sure all dependencies are installed when you run a script in the project:
-
-```bash
-pipx install hatch
-```
-
-Install the dependencies in a local virtual environment (running this command is optional as `hatch` will automatically install and synchronize dependencies each time you run a script with `hatch run`):
-
-```bash
-hatch -v env create
+```sh
+./scripts/install.sh
 ```
 
 ## 🚀 Run example API
 
 The API will be automatically reloaded when the code is changed:
 
-```bash
-hatch run dev
+```sh
+./scripts/dev.sh
 ```
 
 Access the YASGUI interface at http://localhost:8000
@@ -39,36 +33,36 @@ Access the YASGUI interface at http://localhost:8000
 
 Make sure the existing tests still work by running the test suite and linting checks. Note that any pull requests to the fairworkflows repository on github will automatically trigger running of the test suite:
 
-```bash
-hatch run test
+```sh
+uv run pytest
 ```
 
 To display all `print()`:
 
-```bash
-hatch run test -s
-```
-
-You can also run the tests on multiple python versions:
-
-```bash
-hatch run all:test
+```sh
+uv run pytest -s
 ```
 
 ## 🧹 Code formatting
 
 The code will be automatically formatted when you commit your changes using `pre-commit`. But you can also run the script to format the code yourself:
 
+```sh
+./scripts/fmt.sh
 ```
-hatch run fmt
+
+### ♻️ Reset the environment
+
+Upgrade `uv`:
+
+```sh
+uv self update
 ```
 
-## ♻️ Reset the environment
+Clean `uv` cache:
 
-In case you are facing issues with dependencies not updating properly you can easily reset the virtual environment with:
-
-```bash
-hatch env prune
+```sh
+uv cache clean
 ```
 
 ## 🏷️ New release process
@@ -79,8 +73,8 @@ The deployment of new releases is done automatically by a GitHub Action workflow
 
 2. Increment the `version` number following semantic versioning, select between `fix`, `minor`, or `major`:
 
-   ```bash
-   hatch version fix
+   ```sh
+   uvx hatch version fix
    ```
 
 3. Commit the new version, and **create a new release on GitHub**, which will automatically trigger the workflow to publish the new release to [PyPI](https://pypi.org/project/rdflib-endpoint/).

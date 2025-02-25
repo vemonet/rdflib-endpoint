@@ -1,0 +1,7 @@
+[project]
+name = "example-rdflib-endpoint"
+version = "0.0.1"
+requires-python = "==3.13.*"
+dependencies = [
+    "rdflib-endpoint[web] >=0.5.1",
+]

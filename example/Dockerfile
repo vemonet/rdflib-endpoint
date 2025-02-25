@@ -1,11 +1,12 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
-COPY ./requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt && \
-    rm /tmp/requirements.txt
+COPY . /app/
 
-# cf. https://fastapi.tiangolo.com/deployment/docker/
-COPY ./app /app
+WORKDIR /app/
 
-# EXPOSE 80
-# ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+RUN uv sync
+
+ENV PYTHONUNBUFFERED='1'
+
+EXPOSE 80
+ENTRYPOINT ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "6"]

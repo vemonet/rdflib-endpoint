@@ -1,0 +1,6 @@
+services:
+  rdflib-endpoint:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 8000:80
