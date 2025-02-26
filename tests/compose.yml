@@ -1,0 +1,69 @@
+# A compose file to try federated query from various triple stores
+services:
+  rdflib-endpoint:
+    build:
+      context: ..
+      dockerfile: tests/Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    # volumes:
+    #   - ./:/app/
+
+  # https://github.com/vemonet/virtuoso-ldp/blob/main/prepare_virtuoso_docker.sh
+  # virtuoso:
+  #   image: openlink/virtuoso-opensource-7:latest
+  #   # volumes:
+  #   #   - ./data:/database
+  #   ports:
+  #     - 8890:8890
+  #     - 1111:1111
+  #   environment:
+  #     - SPARQL_UPDATE=true
+  #     - DBA_PASSWORD=dba
+  # # http://localhost:8890/conductor > System admin > User account > SPARQL Edit > SPARQL_SELECT_FED
+  # # docker compose exec virtuoso isql -U dba -P dba exec="grant select on DB.DBA.SPARQL_SELECT_FED to 'SPARQL';"
+
+  # graphdb:
+  #   image: ontotext/graphdb:10.8.4
+  #   ports:
+  #     - 7200:7200
+
+  # blazegraph:
+  #   image: lyrasis/blazegraph:2.1.5
+  #   ports:
+  #     - 8080:8080
+
+  # oxigraph:
+  #   image: oxigraph/oxigraph:latest
+  #   ports:
+  #     - 7878:7878
+  #   # volumes:
+  #   #   - ./data/oxigraph:/data
+
+  millenniumdb:
+    image: imfd/millenniumdb
+    ports:
+      - 1234:1234
+      - 4321:4321
+    # entrypoint: mdb-import /data/toast.ttl /data/toast && mdb-server
+    entrypoint: mdb-import /data/toast.ttl /data/toast && mdb-cli /data/toast
+    volumes:
+      - ../data:/data
+    #   - ./data/millenniumdb:/data
+
+  # fuseki:
+  #   image: stain/jena-fuseki
+  #   ports:
+  #     - 3030:3030
+  #   environment:
+  #     - ADMIN_PASSWORD=mypassword
+  #   # volumes:
+  #   #   - ./data/fuseki:/fuseki
+
+  # Not sure how to actually create a repository in rdf4j
+  # # http://localhost:8081/rdf4j-workbench
+  # rdf4j:
+  #   image: eclipse/rdf4j-workbench:latest
+  #   ports:
+  #     - 8081:8080

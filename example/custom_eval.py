@@ -34,7 +34,7 @@ from rdflib.plugins.sparql.algebra import pprintAlgebra, translateQuery
 from rdflib.plugins.sparql.evaluate import evalBGP
 
 # inferredSubClass = rdflib.RDFS.subClassOf * "*"  # any number of rdfs.subClassOf
-biolink = URIRef("https://w3id.org/biolink/vocab/")
+BIOLINK = URIRef("https://w3id.org/biolink/vocab/")
 
 
 class Result:
@@ -45,10 +45,10 @@ def add_to_graph(ctx, drug, disease, score):
     bnode = rdflib.BNode()
     ctx.graph.add((bnode, rdflib.RDF.type, rdflib.RDF.Statement))
     ctx.graph.add((bnode, rdflib.RDF.subject, drug))
-    ctx.graph.add((bnode, rdflib.RDF.predicate, biolink + "treats"))
+    ctx.graph.add((bnode, rdflib.RDF.predicate, BIOLINK + "treats"))
     ctx.graph.add((bnode, rdflib.RDF.object, disease))
-    ctx.graph.add((bnode, biolink + "category", biolink + "ChemicalToDiseaseOrPhenotypicFeatureAssociation"))
-    ctx.graph.add((bnode, biolink + "has_confidence_level", score))
+    ctx.graph.add((bnode, BIOLINK + "category", BIOLINK + "ChemicalToDiseaseOrPhenotypicFeatureAssociation"))
+    ctx.graph.add((bnode, BIOLINK + "has_confidence_level", score))
 
 
 def get_triples(disease):
@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     g = rdflib.Graph()
 
-    q = """PREFIX openpredict: <https://w3id.org/um/openpredict/>
+    q = """PREFIX openpredict: <https://w3id.org/sparql-functions/>
         PREFIX biolink: <https://w3id.org/biolink/vocab/>
         PREFIX omim: <http://bio2rdf.org/omim:>
         SELECT ?disease ?drug ?score

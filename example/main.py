@@ -39,7 +39,7 @@ def most_similar(query_results, ctx, part, eval_part):
     """
     Get most similar entities for a given entity
 
-    PREFIX openpredict: <https://w3id.org/um/openpredict/>
+    PREFIX openpredict: <https://w3id.org/sparql-functions/>
     SELECT ?drugOrDisease ?mostSimilar ?mostSimilarScore WHERE {
         BIND("OMIM:246300" AS ?drugOrDisease)
         BIND(openpredict:most_similar(?drugOrDisease) AS ?mostSimilar)
@@ -67,7 +67,7 @@ def most_similar(query_results, ctx, part, eval_part):
     return query_results, ctx, part, eval_part
 
 
-example_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+example_query = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT DISTINCT * WHERE {
     ?s ?p ?o .
 } LIMIT 100"""
@@ -80,7 +80,7 @@ example_queries = {
 } LIMIT 10""",
     },
     "Custom function": {
-        "query": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+        "query": """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
@@ -104,8 +104,8 @@ g.add((URIRef("http://subject"), RDFS.label, Literal("foo"), URIRef("http://grap
 app = SparqlEndpoint(
     graph=g,
     functions={
-        "https://w3id.org/um/openpredict/most_similar": most_similar,
-        "https://w3id.org/um/sparql-functions/custom_concat": custom_concat,
+        "https://w3id.org/sparql-functions/most_similar": most_similar,
+        "https://w3id.org/sparql-functions/custom_concat": custom_concat,
     },
     title="SPARQL endpoint for RDFLib graph",
     description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",

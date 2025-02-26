@@ -26,7 +26,7 @@ DEFAULT_VERSION: str = "0.1.0"
 DEFAULT_PUBLIC_URL: str = "https://your-endpoint/sparql"
 DEFAULT_FAVICON: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png"
 DEFAULT_EXAMPLE = """\
-PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
@@ -365,14 +365,14 @@ class SparqlRouter(APIRouter):
             """
             request_body = await request.body()
             body = request_body.decode("utf-8")
-            content_type = request.headers.get("content-type")
-            if content_type and "application/sparql-query" in content_type:
+            content_type = request.headers.get("content-type", "")
+            if "application/sparql-query" in content_type:
                 query = body
                 update = None
-            elif content_type and "application/sparql-update" in content_type:
+            elif "application/sparql-update" in content_type:
                 query = None
                 update = body
-            elif content_type and "application/x-www-form-urlencoded" in content_type:
+            elif "application/x-www-form-urlencoded" in content_type:
                 request_params = parse.parse_qsl(body)
                 query_params = [kvp[1] for kvp in request_params if kvp[0] == "query"]
                 query = parse.unquote(query_params[0]) if query_params else None
@@ -464,5 +464,4 @@ class SparqlRouter(APIRouter):
                     URIRef(custom_function_uri),
                 )
             )
-
         return graph

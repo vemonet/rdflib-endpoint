@@ -124,7 +124,7 @@ app = SparqlEndpoint(
     version="0.1.0",
     public_url='https://your-endpoint-url/',
     # Example query displayed in YASGUI default tab
-    example_query="""PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+    example_query="""PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
@@ -138,7 +138,7 @@ SELECT ?concat ?concatLength WHERE {
 } LIMIT 10""",
     	},
     	"Custom function": {
-        	"query": """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+        	"query": """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
@@ -218,7 +218,7 @@ app = SparqlEndpoint(
     path="/",
     # Register the functions:
     functions={
-        'https://w3id.org/um/sparql-functions/custom_concat': custom_concat
+        'https://w3id.org/sparql-functions/custom_concat': custom_concat
     },
     cors_enabled=True,
     # Metadata used for the SPARQL service description and Swagger UI:
@@ -227,7 +227,7 @@ app = SparqlEndpoint(
     version="0.1.0",
     public_url='https://your-endpoint-url/',
     # Example queries displayed in the Swagger UI to help users try your function
-    example_query="""PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+    example_query="""PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
@@ -274,7 +274,7 @@ You can then run the SPARQL endpoint server from the folder where your script is
 
 ```bash
 cd example
-uv run uvicorn app.main:app --reload
+uv run uvicorn main:app --reload
 ```
 
 > Checkout in the `example/README.md` for more details, such as deploying it with docker.

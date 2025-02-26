@@ -1,5 +1,5 @@
 import pytest
-from example.app.main import custom_concat
+from example.main import custom_concat
 from fastapi.testclient import TestClient
 from rdflib import RDFS, Graph, Literal, URIRef
 
@@ -20,7 +20,7 @@ def clear_graph():
 app = SparqlEndpoint(
     graph=graph,
     functions={
-        "https://w3id.org/um/sparql-functions/custom_concat": custom_concat,
+        "https://w3id.org/sparql-functions/custom_concat": custom_concat,
     },
     enable_update=True,
 )
@@ -197,13 +197,13 @@ def test_bad_request():
     assert response.status_code == 400
 
 
-concat_select = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+concat_select = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }"""
 
-custom_concat_construct = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+custom_concat_construct = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 CONSTRUCT {
     <http://example.com/test> <http://example.com/concat> ?concat, ?concatLength .
 } WHERE {
@@ -216,7 +216,7 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 
-<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function .
+<https://w3id.org/sparql-functions/custom_concat> a sd:Function .
 
 <https://your-endpoint/sparql> a sd:Service ;
     rdfs:label "SPARQL endpoint for RDFLib graph" ;
@@ -225,7 +225,7 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
             sd:defaultGraph [ a sd:Graph ] ] ;
     sd:defaultEntailmentRegime ent:RDFS ;
     sd:endpoint <https://your-endpoint/sparql> ;
-    sd:extensionFunction <https://w3id.org/um/sparql-functions/custom_concat> ;
+    sd:extensionFunction <https://w3id.org/sparql-functions/custom_concat> ;
     sd:feature sd:DereferencesURIs ;
     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
         <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;

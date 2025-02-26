@@ -1,4 +1,4 @@
-from example.app.main import app
+from example.main import app
 from fastapi.testclient import TestClient
 
 # Use app defined in example folder
@@ -40,7 +40,7 @@ def test_bad_request():
     assert response.status_code == 400
 
 
-custom_concat_query = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+custom_concat_query = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
@@ -51,9 +51,9 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 
-<https://w3id.org/um/openpredict/most_similar> a sd:Function .
+<https://w3id.org/sparql-functions/custom_concat> a sd:Function .
 
-<https://w3id.org/um/sparql-functions/custom_concat> a sd:Function .
+<https://w3id.org/sparql-functions/most_similar> a sd:Function .
 
 <https://your-website-url/> a sd:Service ;
     rdfs:label "SPARQL endpoint for RDFLib graph" ;
@@ -62,8 +62,8 @@ service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
             sd:defaultGraph [ a sd:Graph ] ] ;
     sd:defaultEntailmentRegime ent:RDFS ;
     sd:endpoint <https://your-website-url/> ;
-    sd:extensionFunction <https://w3id.org/um/openpredict/most_similar>,
-        <https://w3id.org/um/sparql-functions/custom_concat> ;
+    sd:extensionFunction <https://w3id.org/sparql-functions/custom_concat>,
+        <https://w3id.org/sparql-functions/most_similar> ;
     sd:feature sd:DereferencesURIs ;
     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
         <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;

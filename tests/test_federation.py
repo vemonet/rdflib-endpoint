@@ -4,7 +4,7 @@ from multiprocessing import Process
 import httpx
 import pytest
 import uvicorn
-from example.app.main import custom_concat
+from example.main import custom_concat
 from rdflib import Graph
 
 # from testcontainers.core.container import DockerContainer
@@ -20,7 +20,7 @@ def _get_app():
     return SparqlEndpoint(
         graph=graph,
         functions={
-            "https://w3id.org/um/sparql-functions/custom_concat": custom_concat,
+            "https://w3id.org/sparql-functions/custom_concat": custom_concat,
         },
         enable_update=True,
     )
@@ -101,7 +101,7 @@ def service_url():
 
 
 def test_direct_custom_concat(service_url):
-    direct_concat_select = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+    direct_concat_select = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat WHERE {
         BIND(myfunctions:custom_concat("First", "last") AS ?concat)
 }"""
@@ -111,7 +111,7 @@ SELECT ?concat WHERE {
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
 
-concat_select = """PREFIX myfunctions: <https://w3id.org/um/sparql-functions/>
+concat_select = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat WHERE {{
     SERVICE <{rdflib_endpoint_url}> {{
         BIND(myfunctions:custom_concat("First", "last") AS ?concat)

@@ -107,10 +107,10 @@ CONSTRUCT {
 #             sd:defaultGraph [ a sd:Graph ] ] ;
 #     sd:defaultEntailmentRegime ent:RDFS ;
 #     sd:endpoint <https://sparql.openpredict.semanticscience.org/sparql> ;
-#     sd:extensionFunction <https://w3id.org/um/sparql-functions/custom_concat> ;
+#     sd:extensionFunction <https://w3id.org/sparql-functions/custom_concat> ;
 #     sd:feature sd:DereferencesURIs ;
 #     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
 #         <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
 #     sd:supportedLanguage sd:SPARQL11Query .
 
-# <https://w3id.org/um/sparql-functions/custom_concat> a sd:Function ."""
+# <https://w3id.org/sparql-functions/custom_concat> a sd:Function ."""

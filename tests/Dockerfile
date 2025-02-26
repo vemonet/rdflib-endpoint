@@ -9,4 +9,4 @@ RUN uv sync --all-extras
 ENV PYTHONUNBUFFERED='1'
 
 EXPOSE 80
-ENTRYPOINT ["uv", "run", "uvicorn", "example.app.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "2"]
+ENTRYPOINT ["uv", "run", "uvicorn", "example.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "2"]
