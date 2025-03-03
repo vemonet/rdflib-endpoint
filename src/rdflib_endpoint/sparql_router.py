@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from importlib import resources
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
 from urllib import parse
 
 import rdflib
@@ -168,10 +168,15 @@ def parse_accept_header(accept: str) -> List[str]:
     return [pref[0] for pref in preferences]
 
 
+class QueryExample(TypedDict, total=False):
+    """Dictionary to store example queries for the SPARQL endpoint."""
+
+    query: str
+    endpoint: Optional[str]
+
+
 class SparqlRouter(APIRouter):
-    """
-    Class to deploy a SPARQL endpoint using a RDFLib Graph.
-    """
+    """Class to deploy a SPARQL endpoint using a RDFLib Graph."""
 
     def __init__(
         self,
@@ -188,11 +193,11 @@ class SparqlRouter(APIRouter):
         public_url: str = DEFAULT_PUBLIC_URL,
         favicon: str = DEFAULT_FAVICON,
         example_query: str = DEFAULT_EXAMPLE,
-        example_queries: Optional[Dict[str, Dict[str, str]]] = None,
+        example_queries: Optional[Dict[str, QueryExample]] = None,
         **kwargs: Any,
     ) -> None:
-        """
-        Constructor of the SPARQL endpoint, everything happens here.
+        """Constructor of the SPARQL endpoint, everything happens here.
+
         FastAPI calls are defined in this constructor
         """
         self.graph = graph if graph is not None else Dataset(default_union=True)
@@ -344,8 +349,7 @@ class SparqlRouter(APIRouter):
             request: Request,
             query: Optional[str] = Query(None),
         ) -> Response:
-            """
-            Send a SPARQL query to be executed through HTTP GET operation.
+            """Send a SPARQL query to be executed through HTTP GET operation.
 
             :param request: The HTTP GET request
             :param query: SPARQL query input.

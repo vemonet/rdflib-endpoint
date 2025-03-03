@@ -13,6 +13,7 @@ from rdflib_endpoint.sparql_router import (
     DEFAULT_PUBLIC_URL,
     DEFAULT_TITLE,
     DEFAULT_VERSION,
+    QueryExample,
     SparqlRouter,
 )
 
@@ -22,9 +23,7 @@ __all__ = [
 
 
 class SparqlEndpoint(FastAPI):
-    """
-    Class to deploy a SPARQL endpoint using a RDFLib Graph.
-    """
+    """Class to deploy a SPARQL endpoint using a RDFLib Graph."""
 
     def __init__(
         self,
@@ -41,13 +40,12 @@ class SparqlEndpoint(FastAPI):
         cors_enabled: bool = True,
         public_url: str = DEFAULT_PUBLIC_URL,
         example_query: str = DEFAULT_EXAMPLE,
-        example_queries: Optional[Dict[str, Dict[str, str]]] = None,
+        example_queries: Optional[Dict[str, QueryExample]] = None,
         favicon: str = DEFAULT_FAVICON,
         **kwargs: Any,
     ) -> None:
         """
-        Constructor of the SPARQL endpoint, everything happens here.
-        FastAPI calls are defined in this constructor
+        Constructor of the SPARQL endpoint, it's mainly a wrapper to include the SPARQL router. Everything happens in the router.
         """
         self.title = title
         self.description = description
@@ -90,6 +88,7 @@ class SparqlEndpoint(FastAPI):
 
         @self.middleware("http")
         async def add_process_time_header(request: Request, call_next: Any) -> Response:
+            """Add a Server-Timing header with the total processing time for each request."""
             start_time = time.time()
             response: Response = await call_next(request)
             response.headers["Server-Timing"] = f"total;dur={time.time() - start_time}"

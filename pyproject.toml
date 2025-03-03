@@ -82,7 +82,7 @@ Tracker = "https://github.com/vemonet/rdflib-endpoint/issues"
 Source = "https://github.com/vemonet/rdflib-endpoint"
 
 
-# ENVIRONMENTS AND SCRIPTS
+# ENVIRONMENTS AND SCRIPTS, not used anymore, checkout scripts/ folder
 [tool.hatch.envs.default]
 installer = "uv"
 features = [

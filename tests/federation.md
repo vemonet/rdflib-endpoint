@@ -1,5 +1,7 @@
 # Federated query to rdflib-endpoint
 
+To test it locally start the docker compose stack in this folder
+
 ## Test locally
 
 Need to use the host from the docker network:
