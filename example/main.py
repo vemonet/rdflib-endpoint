@@ -97,8 +97,8 @@ g = Dataset(
 )
 
 # Example to add a nquad to the exposed graph
-g.add((URIRef("http://subject"), RDF.type, URIRef("http://object"), URIRef("http://graph")))
-g.add((URIRef("http://subject"), RDFS.label, Literal("foo"), URIRef("http://graph")))
+g.add((URIRef("http://subject"), RDF.type, URIRef("http://object"), URIRef("http://graph1")))
+g.add((URIRef("http://subject"), RDFS.label, Literal("foo"), URIRef("http://graph2")))
 
 # Start the SPARQL endpoint based on the RDFLib Graph
 app = SparqlEndpoint(

@@ -15,13 +15,11 @@ endpoint = TestClient(app)
 
 def test_service_description():
     response = endpoint.get("/", headers={"accept": "text/turtle"})
-    print(response.text.strip())
+    # print(response.text.strip())
     assert response.status_code == 200
-    # assert response.text.strip() == service_description
 
     response = endpoint.post("/", headers={"accept": "text/turtle"})
     assert response.status_code == 200
-    # assert response.text.strip() == service_description
 
     # Check for application/xml
     response = endpoint.post("/", headers={"accept": "application/xml"})
@@ -94,23 +92,3 @@ CONSTRUCT {
 } WHERE {
     ?s rdfs:label ?label .
 }"""
-
-# service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
-# @prefix ent: <http://www.w3.org/ns/entailment/> .
-# @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-# @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
-
-# <https://sparql.openpredict.semanticscience.org/sparql> a sd:Service ;
-#     rdfs:label "SPARQL endpoint for RDFLib graph" ;
-#     dc:description "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. [Source code](https://github.com/vemonet/rdflib-endpoint)" ;
-#     sd:defaultDataset [ a sd:Dataset ;
-#             sd:defaultGraph [ a sd:Graph ] ] ;
-#     sd:defaultEntailmentRegime ent:RDFS ;
-#     sd:endpoint <https://sparql.openpredict.semanticscience.org/sparql> ;
-#     sd:extensionFunction <https://w3id.org/sparql-functions/custom_concat> ;
-#     sd:feature sd:DereferencesURIs ;
-#     sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
-#         <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
-#     sd:supportedLanguage sd:SPARQL11Query .
-
-# <https://w3id.org/sparql-functions/custom_concat> a sd:Function ."""

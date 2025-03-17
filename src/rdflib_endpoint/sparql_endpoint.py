@@ -6,16 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from rdflib import Dataset, Graph
 from rdflib.query import Processor
 
-from rdflib_endpoint.sparql_router import (
-    DEFAULT_DESCRIPTION,
-    DEFAULT_EXAMPLE,
-    DEFAULT_FAVICON,
-    DEFAULT_PUBLIC_URL,
-    DEFAULT_TITLE,
-    DEFAULT_VERSION,
-    QueryExample,
-    SparqlRouter,
-)
+from rdflib_endpoint.sparql_router import SparqlRouter
+from rdflib_endpoint.utils import Defaults, QueryExample
 
 __all__ = [
     "SparqlEndpoint",
@@ -29,23 +21,25 @@ class SparqlEndpoint(FastAPI):
         self,
         *args: Any,
         path: str = "/",
-        title: str = DEFAULT_TITLE,
-        description: str = DEFAULT_DESCRIPTION,
-        version: str = DEFAULT_VERSION,
+        title: str = Defaults.title,
+        description: str = Defaults.description,
+        version: str = Defaults.version,
         graph: Union[None, Graph, Dataset] = None,
         functions: Optional[Dict[str, Callable[..., Any]]] = None,
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         enable_update: bool = False,
         cors_enabled: bool = True,
-        public_url: str = DEFAULT_PUBLIC_URL,
-        example_query: str = DEFAULT_EXAMPLE,
+        public_url: str = Defaults.public_url,
+        example_query: str = Defaults.example,
         example_queries: Optional[Dict[str, QueryExample]] = None,
-        favicon: str = DEFAULT_FAVICON,
+        favicon: str = Defaults.favicon,
         **kwargs: Any,
     ) -> None:
         """
-        Constructor of the SPARQL endpoint, it's mainly a wrapper to include the SPARQL router. Everything happens in the router.
+        Create a SPARQL endpoint.
+
+        It's mainly a wrapper to include the SPARQL router. Everything happens in the router.
         """
         self.title = title
         self.description = description

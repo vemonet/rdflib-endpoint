@@ -2,13 +2,14 @@ import logging
 import os
 import re
 from importlib import resources
-from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 from urllib import parse
 
 import rdflib
 from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import JSONResponse
-from rdflib import RDF, Dataset, Graph, Literal, URIRef
+from rdflib import RDF, BNode, Dataset, Graph, Literal, URIRef
+from rdflib.namespace import DC, RDFS
 from rdflib.plugins.sparql import prepareQuery, prepareUpdate
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
@@ -16,163 +17,19 @@ from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 from rdflib.query import Processor
 
+from rdflib_endpoint.utils import (
+    API_RESPONSES,
+    CONTENT_TYPE_TO_RDFLIB_FORMAT,
+    FORMATS,
+    SD,
+    Defaults,
+    QueryExample,
+    parse_accept_header,
+)
+
 __all__ = [
     "SparqlRouter",
 ]
-
-DEFAULT_TITLE: str = "SPARQL endpoint for RDFLib graph"
-DEFAULT_DESCRIPTION: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)"
-DEFAULT_VERSION: str = "0.1.0"
-DEFAULT_PUBLIC_URL: str = "https://your-endpoint/sparql"
-DEFAULT_FAVICON: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png"
-DEFAULT_EXAMPLE = """\
-PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-
-SELECT ?concat ?concatLength WHERE {
-    BIND("First" AS ?first)
-    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}
-""".rstrip()
-
-SERVICE_DESCRIPTION_TTL_FMT = """\
-@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
-@prefix ent: <http://www.w3.org/ns/entailment/> .
-@prefix prof: <http://www.w3.org/ns/owl-profile/> .
-@prefix void: <http://rdfs.org/ns/void#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
-<{public_url}> a sd:Service ;
-    rdfs:label "{title}" ;
-    dc:description "{description}" ;
-    sd:endpoint <{public_url}> ;
-    sd:supportedLanguage sd:SPARQL11Query ;
-    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_JSON>, <http://www.w3.org/ns/formats/SPARQL_Results_CSV> ;
-    sd:feature sd:DereferencesURIs ;
-    sd:defaultEntailmentRegime ent:RDFS ;
-    sd:defaultDataset [
-        a sd:Dataset ;
-        sd:defaultGraph [
-            a sd:Graph ;
-        ]
-    ] .
-""".rstrip()
-
-api_responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
-    200: {
-        "description": "SPARQL query results",
-        "content": {
-            "application/sparql-results+json": {"example": {"results": {"bindings": []}, "head": {"vars": []}}},
-            "application/json": {"example": {"results": {"bindings": []}, "head": {"vars": []}}},
-            "text/csv": {"example": "s,p,o"},
-            "application/sparql-results+csv": {"example": "s,p,o"},
-            "application/sparql-results+xml": {"example": "<root></root>"},
-            "application/xml": {"example": "<root></root>"},
-            "text/turtle": {"example": "<http://subject> <http://predicate> <http://object> ."},
-            "application/n-triples": {"example": "<http://subject> <http://predicate> <http://object> ."},
-            "text/n3": {"example": "<http://subject> <http://predicate> <http://object> ."},
-            "application/n-quads": {"example": "<http://subject> <http://predicate> <http://object> <http://graph> ."},
-            "application/trig": {
-                "example": "GRAPH <http://graph> {<http://subject> <http://predicate> <http://object> .}"
-            },
-            "application/trix": {"example": "<xml></xml>"},
-            "application/ld+json": {
-                "example": [
-                    {
-                        "@id": "http://subject",
-                        "@type": ["http://object"],
-                        "http://www.w3.org/2000/01/rdf-schema#label": [{"@value": "foo"}],
-                    }
-                ]
-            },
-            # "application/rdf+xml": {
-            #     "example": '<?xml version="1.0" encoding="UTF-8"?> <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"></rdf:RDF>'
-            # },
-        },
-    },
-    400: {
-        "description": "Bad Request",
-    },
-    403: {
-        "description": "Forbidden",
-    },
-    422: {
-        "description": "Unprocessable Entity",
-    },
-}
-
-#: This is default for federated queries
-DEFAULT_CONTENT_TYPE = "application/xml"
-
-#: A mapping from content types to the keys used for serializing
-#: in :meth:`rdflib.Graph.serialize` and other serialization functions
-CONTENT_TYPE_TO_RDFLIB_FORMAT = {
-    # https://www.w3.org/TR/sparql11-results-json/
-    "application/sparql-results+json": "json",
-    "application/json": "json",
-    "text/json": "json",
-    # https://www.w3.org/TR/rdf-sparql-XMLres/
-    "application/sparql-results+xml": "xml",
-    "application/xml": "xml",  # for compatibility
-    "application/rdf+xml": "xml",  # for compatibility
-    "text/xml": "xml",  # not standard
-    "application/ld+json": "json-ld",
-    # https://www.w3.org/TR/sparql11-results-csv-tsv/
-    "application/sparql-results+csv": "csv",
-    "text/csv": "csv",  # for compatibility
-    # Extras
-    "text/turtle": "ttl",
-    "text/n3": "n3",
-    "application/n-triples": "nt",
-    "text/plain": "nt",
-    "application/trig": "trig",
-    "application/trix": "trix",
-    "application/n-quads": "nquads",
-}
-
-
-def parse_accept_header(accept: str) -> List[str]:
-    """
-    Given an accept header string, return a list of media types in order of preference.
-
-    :param accept: Accept header value
-    :return: Ordered list of media type preferences
-    """
-
-    def _parse_preference(qpref: str) -> float:
-        qparts = qpref.split("=")
-        try:
-            return float(qparts[1].strip())
-        except (ValueError, IndexError):
-            pass
-        return 1.0
-
-    preferences = []
-    types = accept.split(",")
-    dpref = 2.0
-    for mtype in types:
-        parts = mtype.split(";")
-        parts = [part.strip() for part in parts]
-        pref = dpref
-        try:
-            for part in parts[1:]:
-                if part.startswith("q="):
-                    pref = _parse_preference(part)
-                    break
-        except IndexError:
-            pass
-        # preserve order of appearance in the list
-        dpref = dpref - 0.01
-        preferences.append((parts[0], pref))
-    preferences.sort(key=lambda x: -x[1])
-    return [pref[0] for pref in preferences]
-
-
-class QueryExample(TypedDict, total=False):
-    """Dictionary to store example queries for the SPARQL endpoint."""
-
-    query: str
-    endpoint: Optional[str]
 
 
 class SparqlRouter(APIRouter):
@@ -182,27 +39,33 @@ class SparqlRouter(APIRouter):
         self,
         *args: Any,
         path: str = "/",
-        title: str = DEFAULT_TITLE,
-        description: str = DEFAULT_DESCRIPTION,
-        version: str = DEFAULT_VERSION,
+        title: str = Defaults.title,
+        description: str = Defaults.description,
+        version: str = Defaults.version,
         graph: Union[None, Graph, Dataset] = None,
+        service_description: Union[None, Graph] = None,
         processor: Union[str, Processor] = "sparql",
         custom_eval: Optional[Callable[..., Any]] = None,
         functions: Optional[Dict[str, Callable[..., Any]]] = None,
         enable_update: bool = False,
-        public_url: str = DEFAULT_PUBLIC_URL,
-        favicon: str = DEFAULT_FAVICON,
-        example_query: str = DEFAULT_EXAMPLE,
+        public_url: str = Defaults.public_url,
+        favicon: str = Defaults.favicon,
+        example_query: str = Defaults.example,
         example_queries: Optional[Dict[str, QueryExample]] = None,
         **kwargs: Any,
     ) -> None:
-        """Constructor of the SPARQL endpoint, everything happens here.
+        """Create a SPARQL endpoint router.
 
-        FastAPI calls are defined in this constructor
+        The endpoints calls are all defined in this constructor
         """
         self.graph = graph if graph is not None else Dataset(default_union=True)
+        """RDFLib Graph for the SPARQL endpoint."""
+        self.service_description = service_description if service_description is not None else Graph()
+        """RDFLib Graph for the SPARQL Service description."""
         self.functions = functions if functions is not None else {}
+        """Custom SPARQL functions to use in the SPARQL queries."""
         self.processor = processor
+        """Custom RDFLib SPARQL processor to use for the SPARQL queries."""
         self.title = title
         self.description = description
         self.version = version
@@ -217,7 +80,7 @@ class SparqlRouter(APIRouter):
         # Instantiate APIRouter
         super().__init__(
             *args,
-            responses=api_responses,
+            responses=API_RESPONSES,
             **kwargs,
         )
 
@@ -227,6 +90,8 @@ class SparqlRouter(APIRouter):
             rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = custom_eval
         elif len(self.functions) > 0:
             rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = self.eval_custom_functions
+
+        self.prepare_sd_graph()
 
         async def handle_sparql_request(
             request: Request, query: Optional[str] = None, update: Optional[str] = None
@@ -242,17 +107,14 @@ class SparqlRouter(APIRouter):
                 if str(request.headers.get("accept", "")).startswith("text/html"):
                     return self.serve_yasgui()
                 # If not asking HTML, return the SPARQL endpoint service description
-                service_graph = self.get_service_graph()
-
-                # Return the service description RDF as turtle or XML
                 if request.headers.get("accept") == "text/turtle":
                     return Response(
-                        service_graph.serialize(format="turtle"),
+                        self.service_description.serialize(format="turtle"),
                         media_type="text/turtle",
                     )
                 else:
                     return Response(
-                        service_graph.serialize(format="xml"),
+                        self.service_description.serialize(format="xml"),
                         media_type="application/xml",
                     )
 
@@ -270,11 +132,11 @@ class SparqlRouter(APIRouter):
                     query_results = self.graph.query(parsed_query, processor=self.processor)
 
                     # Format and return results depending on Accept mime type in request header
-                    mime_types = parse_accept_header(request.headers.get("accept", DEFAULT_CONTENT_TYPE))
+                    mime_types = parse_accept_header(request.headers.get("accept", Defaults.content_type))
 
                     # Handle cases that are more complicated, like it includes multiple
                     # types, extra information, etc.
-                    output_mime_type = DEFAULT_CONTENT_TYPE
+                    output_mime_type = Defaults.content_type
                     for mime_type in mime_types:
                         if mime_type in CONTENT_TYPE_TO_RDFLIB_FORMAT:
                             output_mime_type = mime_type
@@ -343,7 +205,7 @@ class SparqlRouter(APIRouter):
             self.path,
             name="SPARQL endpoint",
             description=self.example_markdown,
-            responses=api_responses,
+            responses=API_RESPONSES,
         )
         async def get_sparql_endpoint(
             request: Request,
@@ -360,7 +222,7 @@ class SparqlRouter(APIRouter):
             path,
             name="SPARQL endpoint",
             description=self.example_markdown,
-            responses=api_responses,
+            responses=API_RESPONSES,
         )
         async def post_sparql_endpoint(request: Request) -> Response:
             """Send a SPARQL query to be executed through HTTP POST operation.
@@ -441,31 +303,137 @@ class SparqlRouter(APIRouter):
         html_str = html_str.replace("$EXAMPLE_QUERIES", json.dumps(self.example_queries))
         return Response(content=html_str, media_type="text/html")
 
-    def get_service_graph(self) -> Graph:
-        # Service description returned when no query provided
-        service_description_ttl = SERVICE_DESCRIPTION_TTL_FMT.format(
-            public_url=self.public_url,
-            title=self.title,
-            description=self.description.replace("\n", ""),
-        )
-        graph = Graph()
-        graph.parse(data=service_description_ttl, format="ttl")
-        # service_graph.parse('app/service-description.ttl', format="ttl")
+    def prepare_sd_graph(self) -> None:
+        """Prepare the endpoint Service Description graph"""
+        # https://www.w3.org/TR/sparql12-service-description/
+        self.service_description.bind("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
+        self.service_description.bind("dc", "http://purl.org/dc/elements/1.1/")
+        self.service_description.bind("sd", SD)
+        self.service_description.bind("ent", "http://www.w3.org/ns/entailment/")
+        self.service_description.bind("prof", "http://www.w3.org/ns/owl-profile/")
+        self.service_description.bind("void", "http://rdfs.org/ns/void#")
+        self.service_description.bind("formats", FORMATS)
+        sd_subj = next(self.service_description.subjects(SD.endpoint, None), None) or BNode()
+
+        if (sd_subj, RDF.type, SD.Service) not in self.service_description:
+            self.service_description.add((sd_subj, RDF.type, SD.Service))
+
+        # Check and add endpoint, label and description
+        if not any(self.service_description.triples((sd_subj, SD.endpoint, None))):
+            self.service_description.add((sd_subj, SD.endpoint, URIRef(self.public_url)))
+        if not any(self.service_description.triples((sd_subj, RDFS.label, None))):
+            self.service_description.add((sd_subj, RDFS.label, Literal(self.title)))
+        if not any(self.service_description.triples((sd_subj, DC.description, None))):
+            self.service_description.add((sd_subj, DC.description, Literal(self.description)))
+
+        # Check and add supported language
+        if not any(self.service_description.triples((sd_subj, SD.supportedLanguage, SD.SPARQL11Query))):
+            self.service_description.add((sd_subj, SD.supportedLanguage, SD.SPARQL11Query))
+            if self.enable_update:
+                self.service_description.add((sd_subj, SD.supportedLanguage, SD.SPARQL11Update))
+
+        # Add features
+        if (
+            isinstance(self.graph, Dataset)
+            and getattr(self.graph, "default_union", False)
+            and not any(self.service_description.triples((sd_subj, SD.feature, SD.BasicFederatedQuery)))
+        ):
+            self.service_description.add((sd_subj, SD.feature, SD.UnionDefaultGraph))
+        if not any(self.service_description.triples((sd_subj, SD.feature, SD.BasicFederatedQuery))):
+            self.service_description.add((sd_subj, SD.feature, SD.BasicFederatedQuery))
+
+        # Add result formats
+        if not any(self.service_description.triples((sd_subj, SD.resultFormat, FORMATS.SPARQL_Results_JSON))):
+            self.service_description.add((sd_subj, SD.resultFormat, FORMATS.SPARQL_Results_JSON))
+        if not any(self.service_description.triples((sd_subj, SD.resultFormat, FORMATS.SPARQL_Results_CSV))):
+            self.service_description.add((sd_subj, SD.resultFormat, FORMATS.SPARQL_Results_CSV))
+        if not any(self.service_description.triples((sd_subj, SD.resultFormat, FORMATS.Turtle))):
+            self.service_description.add((sd_subj, SD.resultFormat, FORMATS.Turtle))
+        if not any(self.service_description.triples((sd_subj, SD.resultFormat, FORMATS.RDF_XML))):
+            self.service_description.add((sd_subj, SD.resultFormat, FORMATS.RDF_XML))
+
+        # Add input formats
+        if not any(self.service_description.triples((sd_subj, SD.inputFormat, None))):
+            self.service_description.add((sd_subj, SD.inputFormat, FORMATS.RDF_XML))
+            self.service_description.add((sd_subj, SD.inputFormat, FORMATS.Turtle))
+            self.service_description.add((sd_subj, SD.inputFormat, FORMATS.JSON_LD))
+            self.service_description.add((sd_subj, SD.inputFormat, FORMATS.N_Triples))
+            self.service_description.add((sd_subj, SD.inputFormat, FORMATS.N_Quads))
+            self.service_description.add((sd_subj, SD.inputFormat, FORMATS.TriG))
+
+        # Check and add entailment regime
+        # sd_default_entailment_regime = URIRef("http://www.w3.org/ns/sparql-service-description#defaultEntailmentRegime")
+        # ent_rdfs = URIRef("http://www.w3.org/ns/entailment/RDFS")
+        # if not any(self.service_description.triples((service_uri, sd_default_entailment_regime, ent_rdfs))):
+        #     self.service_description.add((service_uri, sd_default_entailment_regime, ent_rdfs))
+
+        # Check if default dataset exists, if not add it
+        has_dataset = False
+        dataset_node = None
+        for _s, _p, o in self.service_description.triples((sd_subj, SD.defaultDataset, None)):
+            has_dataset = True
+            dataset_node = o
+            break
+
+        if not has_dataset:
+            dataset_node = rdflib.BNode()
+            self.service_description.add((sd_subj, SD.defaultDataset, dataset_node))
+            self.service_description.add((dataset_node, RDF.type, SD.Dataset))
+
+            # Add default graph to the dataset
+            graph_node = rdflib.BNode()
+            self.service_description.add((dataset_node, SD.defaultGraph, graph_node))
+            self.service_description.add((graph_node, RDF.type, SD.Graph))
+
+            # Add named graphs to the dataset
+            if isinstance(self.graph, Dataset):
+                # Get the list of distinct graph names with a SPARQL query
+                results = self.graph.query("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } }")
+
+                for row in results:
+                    named_graph_node = rdflib.BNode()
+                    graph_node = rdflib.BNode()
+
+                    # Add the named graph reference
+                    self.service_description.add((dataset_node, SD.namedGraph, named_graph_node))
+                    self.service_description.add((named_graph_node, RDF.type, SD.NamedGraph))
+                    self.service_description.add((named_graph_node, SD.name, row.g))
+                    # self.service_description.add((named_graph_node, SD.entailmentRegime, URIRef("http://www.w3.org/ns/entailment/OWL-RDF-Based")))
+                    # self.service_description.add((named_graph_node, SD.supportedEntailmentProfile, URIRef("http://www.w3.org/ns/owl-profile/RL")))
+
+                    # Add graph metadata
+                    self.service_description.add((named_graph_node, SD.graph, graph_node))
+                    self.service_description.add((graph_node, RDF.type, SD.Graph))
+
+                    # Count triples in the named graph and add it to the description
+                    triple_count_query = f"SELECT (COUNT(*) AS ?count) WHERE {{ GRAPH <{row.g}> {{ ?s ?p ?o }} }}"
+                    count_result = self.graph.query(triple_count_query)
+                    triple_count = next(iter(count_result), [Literal(0)])[0]
+                    self.service_description.add((graph_node, URIRef("http://rdfs.org/ns/void#triples"), triple_count))
+
+        # Add custom functions to the service description
+        for custom_function_uri in self.functions:
+            function_uri = URIRef(custom_function_uri)
+
+            if (function_uri, RDF.type, SD.Function) not in self.service_description:
+                self.service_description.add((function_uri, RDF.type, SD.Function))
+            if (sd_subj, SD.extensionFunction, function_uri) not in self.service_description:
+                self.service_description.add((sd_subj, SD.extensionFunction, function_uri))
+        # return self.service_description
 
         # Add custom functions URI to the service description
         for custom_function_uri in self.functions:
-            graph.add(
+            self.service_description.add(
                 (
                     URIRef(custom_function_uri),
                     RDF.type,
-                    URIRef("http://www.w3.org/ns/sparql-service-description#Function"),
+                    SD.Function,
                 )
             )
-            graph.add(
+            self.service_description.add(
                 (
-                    URIRef(self.public_url),
-                    URIRef("http://www.w3.org/ns/sparql-service-description#extensionFunction"),
+                    sd_subj,
+                    SD.extensionFunction,
                     URIRef(custom_function_uri),
                 )
             )
-        return graph

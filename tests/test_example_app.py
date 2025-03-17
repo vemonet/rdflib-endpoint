@@ -1,23 +1,42 @@
 from example.main import app
 from fastapi.testclient import TestClient
+from rdflib import Graph
+
+from rdflib_endpoint.sparql_router import SD
 
 # Use app defined in example folder
 endpoint = TestClient(app)
 
 
 def test_service_description():
+    # Check GET turtle
     response = endpoint.get("/", headers={"accept": "text/turtle"})
-    # print(response.text.strip())
+    print(response.text)
     assert response.status_code == 200
-    assert response.text.strip() == service_description
+    g = Graph()
+    g.parse(data=response.text, format="turtle")
+    assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
+    assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 2, "Expected exactly 2 extension functions"
+    assert len(list(g.triples((None, SD.namedGraph, None)))) == 2, "Expected exactly 2 named graphs"
 
+    # Check POST turtle
     response = endpoint.post("/", headers={"accept": "text/turtle"})
     assert response.status_code == 200
-    assert response.text.strip() == service_description
+    g = Graph()
+    g.parse(data=response.text, format="turtle")
+    assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
+    assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 2, "Expected exactly 2 extension functions"
 
-    # Check for application/xml
+    # Check POST XML
     response = endpoint.post("/", headers={"accept": "application/xml"})
     assert response.status_code == 200
+    g = Graph()
+    g.parse(data=response.text, format="xml")
+    assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
+    assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 2, "Expected exactly 2 extension functions"
 
 
 def test_custom_concat():
@@ -45,26 +64,3 @@ SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }"""
-
-service_description = """@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix ent: <http://www.w3.org/ns/entailment/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
-
-<https://w3id.org/sparql-functions/custom_concat> a sd:Function .
-
-<https://w3id.org/sparql-functions/most_similar> a sd:Function .
-
-<https://your-website-url/> a sd:Service ;
-    rdfs:label "SPARQL endpoint for RDFLib graph" ;
-    dc:description "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. [Source code](https://github.com/vemonet/rdflib-endpoint)" ;
-    sd:defaultDataset [ a sd:Dataset ;
-            sd:defaultGraph [ a sd:Graph ] ] ;
-    sd:defaultEntailmentRegime ent:RDFS ;
-    sd:endpoint <https://your-website-url/> ;
-    sd:extensionFunction <https://w3id.org/sparql-functions/custom_concat>,
-        <https://w3id.org/sparql-functions/most_similar> ;
-    sd:feature sd:DereferencesURIs ;
-    sd:resultFormat <http://www.w3.org/ns/formats/SPARQL_Results_CSV>,
-        <http://www.w3.org/ns/formats/SPARQL_Results_JSON> ;
-    sd:supportedLanguage sd:SPARQL11Query ."""
