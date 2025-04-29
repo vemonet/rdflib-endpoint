@@ -388,7 +388,7 @@ class SparqlRouter(APIRouter):
             # Add named graphs to the dataset
             if isinstance(self.graph, Dataset):
                 # Get the list of distinct graph names with a SPARQL query
-                results = self.graph.query("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } }")
+                results: Any = self.graph.query("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } }")
 
                 for row in results:
                     named_graph_node = rdflib.BNode()
@@ -407,8 +407,10 @@ class SparqlRouter(APIRouter):
 
                     # Count triples in the named graph and add it to the description
                     triple_count_query = f"SELECT (COUNT(*) AS ?count) WHERE {{ GRAPH <{row.g}> {{ ?s ?p ?o }} }}"
-                    count_result = self.graph.query(triple_count_query)
+                    count_result: Any = self.graph.query(triple_count_query)
                     triple_count = next(iter(count_result), [Literal(0)])[0]
+                    # result_row: Any = next(iter(count_result), None)
+                    # triple_count = result_row.count if result_row else Literal(0)
                     self.service_description.add((graph_node, URIRef("http://rdfs.org/ns/void#triples"), triple_count))
 
         # Add custom functions to the service description

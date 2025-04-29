@@ -7,11 +7,9 @@ build/
 dist/
 __pycache__/
 .*_cache/
-.coverage
+.coverage*
 coverage.xml
 htmlcov/
-
-<tempfile.*
 
 # Virtual envs
 .env
