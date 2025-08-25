@@ -191,6 +191,18 @@ def test_concat_construct_xml():
     assert response.text.startswith("<?xml ")
 
 
+def test_concat_construct_rdf_xml_with_two_accept_options():
+    response = endpoint.post(
+        "/",
+        data={"query": custom_concat_construct},
+        headers={"accept": "application/sparql-results+xml, application/rdf+xml"},
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/rdf+xml"
+    assert response.text.startswith("<?xml ")
+    assert "<rdf:RDF" in response.text
+
+
 def test_yasgui():
     # expected to return turtle
     response = endpoint.get(
