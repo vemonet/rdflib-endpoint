@@ -19,9 +19,11 @@ from rdflib.query import Processor
 
 from rdflib_endpoint.utils import (
     API_RESPONSES,
-    CONTENT_TYPE_TO_RDFLIB_FORMAT,
     FORMATS,
+    GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+    GRAPH_CONTENT_TYPE_TO_RDFLIB_FORMAT,
     SD,
+    SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT,
     Defaults,
     QueryExample,
     parse_accept_header,
@@ -134,16 +136,27 @@ class SparqlRouter(APIRouter):
                     # Format and return results depending on Accept mime type in request header
                     mime_types = parse_accept_header(request.headers.get("accept", Defaults.content_type))
 
+                    query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
+
+                    if query_operation == "Construct Query":
+                        content_type_to_rdflib_format = {
+                            **GRAPH_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+                            **GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+                        }
+                    else:
+                        content_type_to_rdflib_format = {
+                            **SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+                            **GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+                        }
+
                     # Handle cases that are more complicated, like it includes multiple
                     # types, extra information, etc.
                     output_mime_type = Defaults.content_type
                     for mime_type in mime_types:
-                        if mime_type in CONTENT_TYPE_TO_RDFLIB_FORMAT:
+                        if mime_type in content_type_to_rdflib_format:
                             output_mime_type = mime_type
                             # Use the first mime_type that matches
                             break
-
-                    query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
 
                     # Handle mime type for construct queries
                     if query_operation == "Construct Query":
@@ -157,7 +170,7 @@ class SparqlRouter(APIRouter):
                             pass
 
                     try:
-                        rdflib_format = CONTENT_TYPE_TO_RDFLIB_FORMAT.get(output_mime_type, output_mime_type)
+                        rdflib_format = content_type_to_rdflib_format.get(output_mime_type, output_mime_type)
                         response = Response(
                             query_results.serialize(format=rdflib_format),
                             media_type=output_mime_type,

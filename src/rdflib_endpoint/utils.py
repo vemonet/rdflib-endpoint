@@ -71,20 +71,11 @@ API_RESPONSES: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
 
 #: A mapping from content types to the keys used for serializing
 #: in :meth:`rdflib.Graph.serialize` and other serialization functions
-CONTENT_TYPE_TO_RDFLIB_FORMAT = {
-    # https://www.w3.org/TR/sparql11-results-json/
-    "application/sparql-results+json": "json",
-    "application/json": "json",
-    "text/json": "json",
+GRAPH_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     # https://www.w3.org/TR/rdf-sparql-XMLres/
-    "application/sparql-results+xml": "xml",
-    "application/xml": "xml",  # for compatibility
     "application/rdf+xml": "xml",  # for compatibility
-    "text/xml": "xml",  # not standard
     "application/ld+json": "json-ld",
     # https://www.w3.org/TR/sparql11-results-csv-tsv/
-    "application/sparql-results+csv": "csv",
-    "text/csv": "csv",  # for compatibility
     # Extras
     "text/turtle": "ttl",
     "text/n3": "n3",
@@ -93,6 +84,26 @@ CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     "application/trig": "trig",
     "application/trix": "trix",
     "application/n-quads": "nquads",
+}
+
+SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
+    # https://www.w3.org/TR/sparql11-results-json/
+    "application/sparql-results+json": "json",
+    # https://www.w3.org/TR/rdf-sparql-XMLres/
+    "application/sparql-results+xml": "xml",
+    # https://www.w3.org/TR/sparql11-results-csv-tsv/
+    "application/sparql-results+csv": "csv",
+}
+
+GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
+    # https://www.w3.org/TR/sparql11-results-json/
+    "application/json": "json",
+    "text/json": "json",
+    # https://www.w3.org/TR/rdf-sparql-XMLres/
+    "application/xml": "xml",  # for compatibility
+    "text/xml": "xml",  # not standard
+    # https://www.w3.org/TR/sparql11-results-csv-tsv/
+    "text/csv": "csv",  # for compatibility
 }
 
 
