@@ -4,3 +4,8 @@ __version__ = "0.5.3"
 
 from .sparql_router import SparqlRouter
 from .sparql_endpoint import SparqlEndpoint
+
+__all__ = [
+    "SparqlEndpoint",
+    "SparqlRouter",
+]
