@@ -95,7 +95,7 @@ SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     "application/sparql-results+csv": "csv",
 }
 
-GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
+GENERIC_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     # https://www.w3.org/TR/sparql11-results-json/
     "application/json": "json",
     "text/json": "json",

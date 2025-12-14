@@ -20,7 +20,7 @@ from rdflib.query import Processor
 from rdflib_endpoint.utils import (
     API_RESPONSES,
     FORMATS,
-    GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+    GENERIC_CONTENT_TYPE_TO_RDFLIB_FORMAT,
     GRAPH_CONTENT_TYPE_TO_RDFLIB_FORMAT,
     SD,
     SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT,
@@ -141,12 +141,12 @@ class SparqlRouter(APIRouter):
                     if query_operation == "Construct Query":
                         content_type_to_rdflib_format = {
                             **GRAPH_CONTENT_TYPE_TO_RDFLIB_FORMAT,
-                            **GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+                            **GENERIC_CONTENT_TYPE_TO_RDFLIB_FORMAT,
                         }
                     else:
                         content_type_to_rdflib_format = {
                             **SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT,
-                            **GENERAL_CONTENT_TYPE_TO_RDFLIB_FORMAT,
+                            **GENERIC_CONTENT_TYPE_TO_RDFLIB_FORMAT,
                         }
 
                     # Handle cases that are more complicated, like it includes multiple
