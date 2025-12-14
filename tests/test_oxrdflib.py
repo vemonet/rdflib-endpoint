@@ -48,9 +48,10 @@ def test_select_csv():
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
-def test_fail_select_turtle():
+def test_select_turtle():
     response = endpoint.post("/", data={"query": label_select}, headers={"accept": "text/turtle"})
-    assert response.status_code == 422
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/sparql-results+xml"
     # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
