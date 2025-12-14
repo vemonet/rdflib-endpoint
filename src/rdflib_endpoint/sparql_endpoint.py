@@ -9,10 +9,6 @@ from rdflib.query import Processor
 from rdflib_endpoint.sparql_router import SparqlRouter
 from rdflib_endpoint.utils import Defaults, QueryExample
 
-__all__ = [
-    "SparqlEndpoint",
-]
-
 
 class SparqlEndpoint(FastAPI):
     """Class to deploy a SPARQL endpoint using a RDFLib Graph."""

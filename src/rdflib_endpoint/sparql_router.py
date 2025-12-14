@@ -5,12 +5,11 @@ from importlib import resources
 from typing import Any, Callable, Dict, List, Optional, Union
 from urllib import parse
 
-import rdflib
 from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import JSONResponse
 from rdflib import RDF, BNode, Dataset, Graph, Literal, URIRef
 from rdflib.namespace import DC, RDFS
-from rdflib.plugins.sparql import prepareQuery, prepareUpdate
+from rdflib.plugins.sparql import CUSTOM_EVALS, prepareQuery, prepareUpdate
 from rdflib.plugins.sparql.evaluate import evalPart
 from rdflib.plugins.sparql.evalutils import _eval
 from rdflib.plugins.sparql.parserutils import CompValue
@@ -28,10 +27,6 @@ from rdflib_endpoint.utils import (
     QueryExample,
     parse_accept_header,
 )
-
-__all__ = [
-    "SparqlRouter",
-]
 
 
 class SparqlRouter(APIRouter):
@@ -89,9 +84,9 @@ class SparqlRouter(APIRouter):
         # Save custom function in custom evaluation dictionary
         # Handle multiple functions directly in the evalCustomFunctions function
         if custom_eval:
-            rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = custom_eval
+            CUSTOM_EVALS["evalCustomFunctions"] = custom_eval
         elif len(self.functions) > 0:
-            rdflib.plugins.sparql.CUSTOM_EVALS["evalCustomFunctions"] = self.eval_custom_functions
+            CUSTOM_EVALS["evalCustomFunctions"] = self.eval_custom_functions
 
         self.prepare_sd_graph()
 
@@ -399,12 +394,12 @@ class SparqlRouter(APIRouter):
             break
 
         if not has_dataset:
-            dataset_node = rdflib.BNode()
+            dataset_node = BNode()
             self.service_description.add((sd_subj, SD.defaultDataset, dataset_node))
             self.service_description.add((dataset_node, RDF.type, SD.Dataset))
 
             # Add default graph to the dataset
-            graph_node = rdflib.BNode()
+            graph_node = BNode()
             self.service_description.add((dataset_node, SD.defaultGraph, graph_node))
             self.service_description.add((graph_node, RDF.type, SD.Graph))
 
@@ -414,8 +409,8 @@ class SparqlRouter(APIRouter):
                 results: Any = self.graph.query("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } }")
 
                 for row in results:
-                    named_graph_node = rdflib.BNode()
-                    graph_node = rdflib.BNode()
+                    named_graph_node = BNode()
+                    graph_node = BNode()
 
                     # Add the named graph reference
                     self.service_description.add((dataset_node, SD.namedGraph, named_graph_node))
