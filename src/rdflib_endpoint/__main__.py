@@ -4,9 +4,10 @@ from typing import List
 
 import click
 import uvicorn
-from rdflib import Dataset
+from rdflib import Dataset, Graph
 
 from rdflib_endpoint import SparqlEndpoint
+from pycottas import COTTASStore
 
 
 @click.group()
@@ -28,17 +29,22 @@ def run_serve(files: List[str], host: str, port: int, store: str = "default", en
     if store == "oxigraph":
         store = store.capitalize()
     g = Dataset(store=store, default_union=True)
-    for glob_file in files:
-        file_list = glob.glob(glob_file)
-        for file in file_list:
-            g.parse(file)
-            click.echo(
-                click.style("INFO", fg="green")
-                + ":     📥️ Loaded triples from "
-                + click.style(str(file), bold=True)
-                + ", for a total of "
-                + click.style(str(len(g)), bold=True)
-            )
+
+    if len(files) == 1 and files[0].lower().endswith(".cottas"):
+        g = Graph(store=COTTASStore(files[0]))
+        click.echo(click.style("INFO", fg="green") + f": 📦 Mapped triples from {files[0]}.")
+    else:
+        for glob_file in files:
+            file_list = glob.glob(glob_file)
+            for file in file_list:
+                g.parse(file)
+                click.echo(
+                    click.style("INFO", fg="green")
+                    + ":     📥️ Loaded triples from "
+                    + click.style(str(file), bold=True)
+                    + ", for a total of "
+                    + click.style(str(len(g)), bold=True)
+                )
 
     app = SparqlEndpoint(
         graph=g,

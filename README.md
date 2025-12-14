@@ -56,6 +56,12 @@ If you want to use [oxigraph](https://github.com/oxigraph/oxigraph) as backend t
 pip install "rdflib-endpoint[cli,oxigraph]"
 ```
 
+If you want to serve [COTTAS files](https://doi.org/10.1007/978-3-032-09530-5_18) you can install with the optional dependency `cottas`:
+
+```bash
+pip install "rdflib-endpoint[cottas]"
+```
+
 > [!WARNING]
 > Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
 
@@ -77,6 +83,12 @@ You can use wildcard and provide multiple files, for example to serve all turtle
 
 ```bash
 rdflib-endpoint serve *.ttl *.jsonld *.nq
+```
+
+To serve all COTTAS files in the current folder you could run:
+
+```bash
+rdflib-endpoint serve *.cottas
 ```
 
 > Then access the YASGUI SPARQL editor on http://localhost:8000

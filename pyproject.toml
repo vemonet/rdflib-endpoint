@@ -55,6 +55,9 @@ web = [
 oxigraph = [
     "oxrdflib",
 ]
+cottas = [
+    "pycottas",
+]
 
 
 [dependency-groups]
@@ -89,6 +92,7 @@ features = [
     "cli",
     "web",
     "oxigraph",
+    "cottas",
 ]
 post-install-commands = [
     "pre-commit install",
