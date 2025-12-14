@@ -158,14 +158,24 @@ class SparqlRouter(APIRouter):
                             # Use the first mime_type that matches
                             break
 
-                    # Handle mime type for construct queries
-                    if query_operation == "Construct Query":
+                    # Convert generic mime types to specific ones
+                    if query_operation == "Construct Query" or query_operation == "Describe Query":
                         if output_mime_type == "text/csv":
                             output_mime_type = "text/turtle"
                         elif output_mime_type == "application/json":
                             output_mime_type = "application/ld+json"
                         elif output_mime_type == "application/xml":
                             output_mime_type = "application/rdf+xml"
+                        else:
+                            pass
+
+                    if query_operation == "Select Query" or query_operation == "Ask Query":
+                        if output_mime_type == "text/csv":
+                            output_mime_type = "application/sparql-results+csv"
+                        elif output_mime_type == "application/json":
+                            output_mime_type = "application/sparql-results+json"
+                        elif output_mime_type == "application/xml":
+                            output_mime_type = "application/sparql-results+xml"
                         else:
                             pass
 
