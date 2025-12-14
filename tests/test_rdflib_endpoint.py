@@ -145,9 +145,10 @@ def test_multiple_accept_return_json2():
     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
 
-def test_fail_select_turtle():
+def test_select_turtle():
     response = endpoint.post("/", data={"query": concat_select}, headers={"accept": "text/turtle"})
-    assert response.status_code == 422
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/sparql-results+xml"
 
 
 def test_concat_construct_turtle():
