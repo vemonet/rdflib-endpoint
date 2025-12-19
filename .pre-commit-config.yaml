@@ -24,11 +24,12 @@ repos:
         - --fix
       - id: ruff-format
         name: " ✒️  Format code with ruff"
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.2
-    hooks:
-    - id: mypy
-      name: " 🔎 Check types with mypy"
+  # mypy need to be run manually because the hook is not capable of reading the config from pyproject.toml
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.18.2
+  #   hooks:
+  #   - id: mypy
+  #     name: " 🔎 Check types with mypy"
 
 ci:
     autofix_commit_msg: 🎨 [pre-commit] Auto format
