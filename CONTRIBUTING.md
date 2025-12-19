@@ -65,18 +65,18 @@ Clean `uv` cache:
 uv cache clean
 ```
 
-## 🏷️ New release process
+## 🏷️ Release process
 
-The deployment of new releases is done automatically by a GitHub Action workflow when a new release is created on GitHub. To release a new version:
+> [!IMPORTANT]
+>
+> Get a PyPI API token at [pypi.org/manage/account](https://pypi.org/manage/account).
 
-1. Make sure the `PYPI_TOKEN` secret has been defined in the GitHub repository (in Settings > Secrets > Actions). You can get an API token from PyPI at [pypi.org/manage/account](https://pypi.org/manage/account).
+Run the release script providing the version bump: `fix`, `minor`, or `major`
 
-2. Increment the `version` number following semantic versioning, select between `fix`, `minor`, or `major`:
+```sh
+./scripts/release.sh fix
+```
 
-   ```sh
-   uvx hatch version fix
-   ```
-
-3. Commit the new version, and **create a new release on GitHub**, which will automatically trigger the workflow to publish the new release to [PyPI](https://pypi.org/project/rdflib-endpoint/).
-
-You can also manually trigger the workflow from the Actions tab in your GitHub repository webpage if needed.
+> [!NOTE]
+>
+> This will generate the changelog, commit the new version and changelog, create a tag and push the tag, which will trigger the creation of a new release on GitHub.

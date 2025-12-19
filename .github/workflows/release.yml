@@ -1,30 +1,57 @@
 name: Release
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
 
-  tests:
-    uses: vemonet/rdflib-endpoint/.github/workflows/test.yml@main
-    secrets: inherit
-
-  publish:
-    needs: tests
+  generate-release:
+    name: 🏔️ Generate GitHub release
     runs-on: ubuntu-latest
-
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: astral-sh/setup-uv@v5
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: pyproject.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: CHANGES.md
 
-    - name: Install dependencies
-      run: uv build
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: CHANGES.md
+        if: startsWith(github.ref, 'refs/tags/')
 
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN }}
+
+  # tests:
+  #   uses: vemonet/rdflib-endpoint/.github/workflows/test.yml@main
+  #   secrets: inherit
+
+  # publish:
+  #   needs: tests
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - uses: actions/checkout@v6
+
+  #   - name: Set up Python
+  #     uses: astral-sh/setup-uv@v7
+
+  #   - name: Install dependencies
+  #     run: uv build
+
+  #   - name: Publish package
+  #     uses: pypa/gh-action-pypi-publish@release/v1
+  #     with:
+  #       user: __token__
+  #       password: ${{ secrets.PYPI_TOKEN }}
