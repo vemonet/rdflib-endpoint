@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.5](https://github.com/vemonet/rdflib-endpoint/compare/v0.5.4..v0.5.5) - 2026-02-03
+
+### ⚙️ Continuous Integration
+
+- Remove py3.14 from test workflow since pyo3 (for oxigraph) does not support it - ([1c0d5df](https://github.com/vemonet/rdflib-endpoint/commit/1c0d5df7880e3113b9be929aa56aef38093d526e))
+
+### 🐛 Bug Fixes
+
+- Remove `application/sparql-results+csv` mime type and just use `text/csv` as precognized by the specs, stop converting miume type, just use the one sent in the request, to avoid breaking stuff - ([3e4cf81](https://github.com/vemonet/rdflib-endpoint/commit/3e4cf815fd22fa689b9154a993a8fce8a453c7c5))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump to v0.5.4 - ([b107438](https://github.com/vemonet/rdflib-endpoint/commit/b107438de0950bed3eef11c68c158ec5b026e094))
+
 ## [0.5.4](https://github.com/vemonet/rdflib-endpoint/compare/v0.5.3..v0.5.4) - 2025-12-19
 
 ### ⚙️ Continuous Integration
