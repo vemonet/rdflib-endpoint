@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -25,6 +26,7 @@ from rdflib_endpoint.utils import (
     SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT,
     Defaults,
     QueryExample,
+    get_default_content_type,
     parse_accept_header,
 )
 
@@ -94,6 +96,7 @@ class SparqlRouter(APIRouter):
             request: Request, query: Optional[str] = None, update: Optional[str] = None
         ) -> Response:
             """Handle SPARQL requests to the GET and POST endpoints"""
+            # print(f"SPARQL request: {request.method} {request.url}\nHeaders: {dict(request.headers)}")
             if query and update:
                 return JSONResponse(
                     status_code=400,
@@ -128,9 +131,6 @@ class SparqlRouter(APIRouter):
                     parsed_query = prepareQuery(query, initNs=graph_ns)
                     query_results = self.graph.query(parsed_query, processor=self.processor)
 
-                    # Format and return results depending on Accept mime type in request header
-                    mime_types = parse_accept_header(request.headers.get("accept", Defaults.content_type))
-
                     query_operation = re.sub(r"(\w)([A-Z])", r"\1 \2", parsed_query.algebra.name)
 
                     if query_operation == "Construct Query":
@@ -146,33 +146,33 @@ class SparqlRouter(APIRouter):
 
                     # Handle cases that are more complicated, like it includes multiple
                     # types, extra information, etc.
-                    output_mime_type = Defaults.content_type
+                    output_mime_type = get_default_content_type(query_operation)
+                    mime_types = parse_accept_header(request.headers.get("accept", output_mime_type))
                     for mime_type in mime_types:
                         if mime_type in content_type_to_rdflib_format:
                             output_mime_type = mime_type
                             # Use the first mime_type that matches
                             break
 
-                    # Convert generic mime types to specific ones
-                    if query_operation == "Construct Query" or query_operation == "Describe Query":
-                        if output_mime_type == "text/csv":
-                            output_mime_type = "text/turtle"
-                        elif output_mime_type == "application/json":
-                            output_mime_type = "application/ld+json"
-                        elif output_mime_type == "application/xml":
-                            output_mime_type = "application/rdf+xml"
-                        else:
-                            pass
+                    # NOTE: we stop doing that, as it creates more confusion than helps
+                    # # Convert generic mime types to specific ones
+                    # if query_operation == "Construct Query" or query_operation == "Describe Query":
+                    #     if output_mime_type == "text/csv":
+                    #         output_mime_type = "text/turtle"
+                    #     elif output_mime_type == "application/json":
+                    #         output_mime_type = "application/ld+json"
+                    #     elif output_mime_type == "application/xml":
+                    #         output_mime_type = "application/rdf+xml"
+                    #     else:
+                    #         pass
 
-                    if query_operation == "Select Query" or query_operation == "Ask Query":
-                        if output_mime_type == "text/csv":
-                            output_mime_type = "application/sparql-results+csv"
-                        elif output_mime_type == "application/json":
-                            output_mime_type = "application/sparql-results+json"
-                        elif output_mime_type == "application/xml":
-                            output_mime_type = "application/sparql-results+xml"
-                        else:
-                            pass
+                    # if query_operation == "Select Query" or query_operation == "Ask Query":
+                    #     if output_mime_type == "application/json":
+                    #         output_mime_type = "application/sparql-results+json"
+                    #     elif output_mime_type == "application/xml":
+                    #         output_mime_type = "application/sparql-results+xml"
+                    #     else:
+                    #         pass
 
                     try:
                         rdflib_format = content_type_to_rdflib_format.get(output_mime_type, output_mime_type)
@@ -310,8 +310,6 @@ class SparqlRouter(APIRouter):
 
     def serve_yasgui(self) -> Response:
         """Serve YASGUI interface"""
-        import json
-
         with resources.open_text("rdflib_endpoint", "yasgui.html") as f:
             html_str = f.read()
         html_str = html_str.replace("$TITLE", self.title)

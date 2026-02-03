@@ -22,8 +22,13 @@ SELECT ?concat ?concatLength WHERE {
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }
 """.rstrip()
-    #: This is default for federated queries
-    content_type: str = "application/xml"
+
+
+def get_default_content_type(query_operation: str) -> str:
+    """Get the default content type based on query operation, using XML for federated queries."""
+    if query_operation == "Construct Query":
+        return "application/rdf+xml"
+    return "application/sparql-results+xml"
 
 
 API_RESPONSES: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
@@ -33,7 +38,6 @@ API_RESPONSES: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
             "application/sparql-results+json": {"example": {"results": {"bindings": []}, "head": {"vars": []}}},
             "application/json": {"example": {"results": {"bindings": []}, "head": {"vars": []}}},
             "text/csv": {"example": "s,p,o"},
-            "application/sparql-results+csv": {"example": "s,p,o"},
             "application/sparql-results+xml": {"example": "<root></root>"},
             "application/xml": {"example": "<root></root>"},
             "text/turtle": {"example": "<http://subject> <http://predicate> <http://object> ."},
@@ -53,6 +57,7 @@ API_RESPONSES: Optional[Dict[Union[int, str], Dict[str, Any]]] = {
                     }
                 ]
             },
+            # "application/sparql-results+csv": {"example": "s,p,o"},
             # "application/rdf+xml": {
             #     "example": '<?xml version="1.0" encoding="UTF-8"?> <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"></rdf:RDF>'
             # },
@@ -75,6 +80,8 @@ GRAPH_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     # https://www.w3.org/TR/rdf-sparql-XMLres/
     "application/rdf+xml": "xml",  # for compatibility
     "application/ld+json": "json-ld",
+    "application/json": "json-ld",
+    "text/json": "json-ld",
     # https://www.w3.org/TR/sparql11-results-csv-tsv/
     # Extras
     "text/turtle": "ttl",
@@ -84,26 +91,23 @@ GRAPH_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     "application/trig": "trig",
     "application/trix": "trix",
     "application/n-quads": "nquads",
+    "text/csv": "ttl",
 }
 
 SPARQL_RESULT_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
     # https://www.w3.org/TR/sparql11-results-json/
     "application/sparql-results+json": "json",
+    "application/json": "json",
+    "text/json": "json",  # not standard
     # https://www.w3.org/TR/rdf-sparql-XMLres/
     "application/sparql-results+xml": "xml",
-    # https://www.w3.org/TR/sparql11-results-csv-tsv/
-    "application/sparql-results+csv": "csv",
+    "application/sparql-results+csv": "csv",  # not standard
+    "text/csv": "csv",
 }
 
 GENERIC_CONTENT_TYPE_TO_RDFLIB_FORMAT = {
-    # https://www.w3.org/TR/sparql11-results-json/
-    "application/json": "json",
-    "text/json": "json",
-    # https://www.w3.org/TR/rdf-sparql-XMLres/
     "application/xml": "xml",  # for compatibility
     "text/xml": "xml",  # not standard
-    # https://www.w3.org/TR/sparql11-results-csv-tsv/
-    "text/csv": "csv",  # for compatibility
 }
 
 

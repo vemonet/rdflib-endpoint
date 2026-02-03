@@ -24,10 +24,10 @@ services:
   # # http://localhost:8890/conductor > System admin > User account > SPARQL Edit > SPARQL_SELECT_FED
   # # docker compose exec virtuoso isql -U dba -P dba exec="grant select on DB.DBA.SPARQL_SELECT_FED to 'SPARQL';"
 
-  # graphdb:
-  #   image: ontotext/graphdb:10.8.4
-  #   ports:
-  #     - 7200:7200
+  graphdb:
+    image: ontotext/graphdb:10.8.4
+    ports:
+      - 7200:7200
 
   # blazegraph:
   #   image: lyrasis/blazegraph:2.1.5
@@ -41,16 +41,16 @@ services:
   #   # volumes:
   #   #   - ./data/oxigraph:/data
 
-  millenniumdb:
-    image: imfd/millenniumdb
-    ports:
-      - 1234:1234
-      - 4321:4321
-    # entrypoint: mdb-import /data/toast.ttl /data/toast && mdb-server
-    entrypoint: mdb-import /data/toast.ttl /data/toast && mdb-cli /data/toast
-    volumes:
-      - ../data:/data
-    #   - ./data/millenniumdb:/data
+  # millenniumdb:
+  #   image: imfd/millenniumdb
+  #   ports:
+  #     - 1234:1234
+  #     - 4321:4321
+  #   # entrypoint: mdb-import /data/toast.ttl /data/toast && mdb-server
+  #   entrypoint: mdb-import /data/toast.ttl /data/toast && mdb-cli /data/toast
+  #   volumes:
+  #     - ../data:/data
+  #   #   - ./data/millenniumdb:/data
 
   # fuseki:
   #   image: stain/jena-fuseki
