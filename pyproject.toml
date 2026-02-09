@@ -31,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dynamic = ["version"]
 
@@ -166,6 +167,10 @@ warn_redundant_casts = true
 disallow_untyped_defs = true
 disallow_any_generics = true
 disallow_untyped_calls = false # needed due to _eval() not being typed in rdflib
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
 
 # https://docs.astral.sh/ruff/rules/
 [tool.ruff]

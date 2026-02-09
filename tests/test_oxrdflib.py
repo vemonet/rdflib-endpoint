@@ -59,18 +59,17 @@ def test_concat_construct_turtle():
     # expected to return turtle
     response = endpoint.post(
         "/",
-        data="query=" + label_construct,
+        data={"query": label_construct},
         headers={"accept": "application/json"},
     )
     assert response.status_code == 200
-    # assert response.json()['results']['bindings'][0]['concat']['value'] == "Firstlast"
 
 
 def test_concat_construct_xml():
     # expected to return turtle
     response = endpoint.post(
         "/",
-        data="query=" + label_construct,
+        data={"query": label_construct},
         headers={"accept": "application/xml"},
     )
     assert response.status_code == 200

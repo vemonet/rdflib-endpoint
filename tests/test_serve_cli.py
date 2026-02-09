@@ -12,10 +12,10 @@ runner = CliRunner()
 out_formats = ["ttl", "nt", "xml", "jsonld", "trig"]
 
 
-def test_convert():
+def test_convert() -> None:
     for out_format in out_formats:
         with tempfile.NamedTemporaryFile(delete=True) as tmp_file:
-            out_file = str(f"{tmp_file}.{out_format}")
+            out_file = f"{tmp_file.name}.{out_format}"
             result = runner.invoke(
                 cli,
                 ["convert", "tests/resources/test2.ttl", "--output", out_file],
@@ -30,7 +30,7 @@ def test_convert():
         os.remove(f)
 
 
-def test_convert_oxigraph():
+def test_convert_oxigraph() -> None:
     with tempfile.NamedTemporaryFile(delete=True) as tmp_file:
         result = runner.invoke(
             cli,
@@ -40,11 +40,11 @@ def test_convert_oxigraph():
                 "oxigraph",
                 "tests/resources/test2.ttl",
                 "--output",
-                str(tmp_file),
+                tmp_file.name,
             ],
         )
         assert result.exit_code == 0
-        with open(str(tmp_file)) as file:
+        with open(tmp_file.name) as file:
             content = file.read()
             assert len(content) > 1
     # Fix issue with python creating unnecessary temp files on disk
