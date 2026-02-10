@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Dict, List, Tuple
 
 from rdflib import RDF, RDFS, Dataset, Literal, URIRef, Variable
 from rdflib.plugins.sparql.evalutils import _eval
@@ -11,7 +11,7 @@ from rdflib_endpoint.utils import QueryExample
 
 def custom_concat(
     query_results: List[Any], ctx: QueryContext, part: CompValue, eval_part: Any
-) -> tuple[Any, Any, Any, Any]:
+) -> Tuple[Any, Any, Any, Any]:
     """
     Concat 2 string and return the length as additional Length variable
     \f
@@ -43,7 +43,7 @@ def custom_concat(
 
 def most_similar(
     query_results: List[Any], ctx: QueryContext, part: CompValue, eval_part: Any
-) -> tuple[Any, Any, Any, Any]:
+) -> Tuple[Any, Any, Any, Any]:
     """Get most similar entities for a given entity
 
     ```sparql
@@ -82,7 +82,7 @@ SELECT DISTINCT * WHERE {
     ?s ?p ?o .
 } LIMIT 100"""
 
-example_queries: dict[str, QueryExample] = {
+example_queries: Dict[str, QueryExample] = {
     "Bio2RDF query": {
         "endpoint": "https://bio2rdf.org/sparql",
         "query": """SELECT DISTINCT * WHERE {
