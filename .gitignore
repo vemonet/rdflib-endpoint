@@ -1,4 +1,5 @@
 data/
+example/uv.lock
 
 # Python build artefacts
 build/

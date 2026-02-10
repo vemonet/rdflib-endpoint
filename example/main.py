@@ -1,17 +1,23 @@
-import rdflib
-from rdflib import RDF, RDFS, Dataset, Literal, URIRef
+from typing import Any, List
+
+from rdflib import RDF, RDFS, Dataset, Literal, URIRef, Variable
 from rdflib.plugins.sparql.evalutils import _eval
+from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.plugins.sparql.sparql import QueryContext
 
 from rdflib_endpoint import SparqlEndpoint
+from rdflib_endpoint.utils import QueryExample
 
 
-def custom_concat(query_results, ctx, part, eval_part):
+def custom_concat(
+    query_results: List[Any], ctx: QueryContext, part: CompValue, eval_part: Any
+) -> tuple[Any, Any, Any, Any]:
     """
     Concat 2 string and return the length as additional Length variable
     \f
     :param query_results:   An array with the query results objects
-    :param ctx:             <class 'rdflib.plugins.sparql.sparql.QueryContext'>
-    :param part:            Part of the query processed (e.g. Extend or BGP) <class 'rdflib.plugins.sparql.parserutils.CompValue'>
+    :param ctx:             Query context
+    :param part:            Part of the query processed (e.g. Extend or BGP)
     :param eval_part:       Part currently evaluated
     :return:                the same query_results provided in input param, with additional results
     """
@@ -30,19 +36,23 @@ def custom_concat(query_results, ctx, part, eval_part):
     # Append our results to the query_results
     for i, result in enumerate(evaluation):
         query_results.append(
-            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + "Length"): Literal(scores[i])})
+            eval_part.merge({part.var: Literal(result), Variable(part.var + "Length"): Literal(scores[i])})
         )
     return query_results, ctx, part, eval_part
 
 
-def most_similar(query_results, ctx, part, eval_part):
-    """
-    Get most similar entities for a given entity
+def most_similar(
+    query_results: List[Any], ctx: QueryContext, part: CompValue, eval_part: Any
+) -> tuple[Any, Any, Any, Any]:
+    """Get most similar entities for a given entity
 
+    ```sparql
     PREFIX openpredict: <https://w3id.org/sparql-functions/>
     SELECT ?drugOrDisease ?mostSimilar ?mostSimilarScore WHERE {
         BIND("OMIM:246300" AS ?drugOrDisease)
         BIND(openpredict:most_similar(?drugOrDisease) AS ?mostSimilar)
+    }
+    ```
     """
     # argumentEntity = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
     # try:
@@ -62,7 +72,7 @@ def most_similar(query_results, ctx, part, eval_part):
     # Append our results to the query_results
     for i, result in enumerate(evaluation):
         query_results.append(
-            eval_part.merge({part.var: Literal(result), rdflib.term.Variable(part.var + "Score"): Literal(scores[i])})
+            eval_part.merge({part.var: Literal(result), Variable(part.var + "Score"): Literal(scores[i])})
         )
     return query_results, ctx, part, eval_part
 
@@ -72,7 +82,7 @@ SELECT DISTINCT * WHERE {
     ?s ?p ?o .
 } LIMIT 100"""
 
-example_queries = {
+example_queries: dict[str, QueryExample] = {
     "Bio2RDF query": {
         "endpoint": "https://bio2rdf.org/sparql",
         "query": """SELECT DISTINCT * WHERE {
@@ -91,18 +101,18 @@ SELECT ?concat ?concatLength WHERE {
 
 # Use Dataset to support nquads and graphs in SPARQL queries
 # identifier is the default graph
-g = Dataset(
+ds = Dataset(
     # store="Oxigraph",
     default_union=True,
 )
 
 # Example to add a nquad to the exposed graph
-g.add((URIRef("http://subject"), RDF.type, URIRef("http://object"), URIRef("http://graph1")))
-g.add((URIRef("http://subject"), RDFS.label, Literal("foo"), URIRef("http://graph2")))
+ds.graph(URIRef("http://graph1")).add((URIRef("http://subject"), RDF.type, URIRef("http://object")))
+ds.graph(URIRef("http://graph2")).add((URIRef("http://subject"), RDFS.label, Literal("foo")))
 
 # Start the SPARQL endpoint based on the RDFLib Graph
 app = SparqlEndpoint(
-    graph=g,
+    graph=ds,
     functions={
         "https://w3id.org/sparql-functions/most_similar": most_similar,
         "https://w3id.org/sparql-functions/custom_concat": custom_concat,
