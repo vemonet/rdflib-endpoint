@@ -38,7 +38,7 @@ def test_service_description():
     g.parse(data=response.text, format="turtle")
     assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
     assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
-    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 1, "Expected exactly 1 extension function"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) >= 1, "Expected at least 1 extension function"
 
     # Check POST XML
     response = endpoint.post("/", headers={"accept": "application/xml"})
@@ -47,7 +47,7 @@ def test_service_description():
     g.parse(data=response.text, format="xml")
     assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
     assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
-    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 1, "Expected exactly 1 extension function"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) >= 1, "Expected at least 1 extension function"
 
 
 def test_custom_concat_json():

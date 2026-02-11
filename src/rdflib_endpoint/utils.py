@@ -15,11 +15,11 @@ class Defaults:
     public_url: str = "https://your-endpoint/sparql"
     favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png"
     example: str = """\
-PREFIX myfunctions: <https://w3id.org/sparql-functions/>
+PREFIX func: <https://w3id.org/sparql-functions/>
 
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
-    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+    BIND(func:custom_concat(?first, "last") AS ?concat)
 }
 """.rstrip()
 

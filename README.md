@@ -73,19 +73,16 @@ rdflib-endpoint convert "*.ttl" "*.jsonld" "*.nq" --output "merged.trig"
 
 ### ⚡️ Deploy as a standalone API
 
-Deploy your SPARQL endpoint as a standalone API:
+Create and run a standalone SPARQL endpoint using `SparqlEndpoint`, e.g. in a `main.py` file:
 
 ```python
 from rdflib import Dataset
 from rdflib_endpoint import SparqlEndpoint
 
-# Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
-g = Dataset()
-# TODO: Add triples in your graph
+ds = Dataset()
 
-# Then use either SparqlEndpoint or SparqlRouter, they take the same arguments
 app = SparqlEndpoint(
-    graph=g,
+    graph=ds,
     path="/",
     # CORS enabled by default to enable querying it from client JavaScript
     cors_enabled=True,
@@ -112,26 +109,27 @@ SELECT ?concat ?concatLength WHERE {
 )
 ```
 
-Finally deploy this app using `uvicorn` (see below)
+Start the server on http://localhost:8000:
 
-### 🛣️ Include in an existing API as router
+```sh
+uv run uvicorn main:app --reload
+```
 
-Include the SPARQL endpoint in an existing `FastAPI` API as router. The `SparqlRouter` constructor takes the same arguments as the `SparqlEndpoint`, apart from `enable_cors` which is enabled at the API level.
+### 🛣️ Embedding in an existing app
+
+Instead of a full app, you can mount the endpoint as a router. `SparqlRouter` constructor takes the same arguments as `SparqlEndpoint`, apart from `enable_cors` which is defined at the API level.
 
 ```python
 from fastapi import FastAPI
 from rdflib import Dataset
 from rdflib_endpoint import SparqlRouter
 
-g = Dataset()
+ds = Dataset()
 sparql_router = SparqlRouter(
-    graph=g,
+    graph=ds,
     path="/",
     # Metadata used for the SPARQL service description and Swagger UI:
     title="SPARQL endpoint for RDFLib graph",
-    description="A SPARQL endpoint to serve any logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-    version="0.1.0",
-    public_url='https://your-endpoint-url/',
 )
 
 app = FastAPI()
@@ -142,19 +140,207 @@ app.include_router(sparql_router)
 >
 > To deploy this route in a **Flask** app checkout how it has been done in the [curies mapping service](https://github.com/biopragmatics/curies/blob/main/src/curies/mapping_service/api.py) of the [Bioregistry](https://bioregistry.io/).
 
-### 📝 Define custom SPARQL functions
+### 🧩 Custom SPARQL Functions using decorators
 
-This option makes it easier to define functions in your SPARQL endpoint, e.g. `BIND(myfunction:custom_concat("start", "end") AS ?concat)`. It can be used with the `SparqlEndpoint` and `SparqlRouter` classes.
+`DatasetExt` extends RDFLib `Dataset` with four decorator helpers to register python-based SPARQL evaluation functions.
 
-Create a `main.py` file in your project folder with your custom SPARQL functions, and endpoint parameters:
+| Decorator             | Triggered by                                        | Typical use                         |
+| --------------------- | --------------------------------------------------- | ----------------------------------- |
+| `@type_function`      | A triple pattern with subject typed by the function | Structured multi-field results      |
+| `@predicate_function` | A predicate in the given namespace                  | Fill object values via Python logic |
+| `@extension_function` | `BIND(func:myFunc(...))`                            | Scalar or multi-binding functions   |
+| `@graph_function`     | `BIND(func:funcGraph(...) AS ?g)`                   | Return a temporary graph            |
+
+Key behaviors:
+
+- Types, predicates and functions IRIs are generated from the provided namespace concatenated to their python counterpart following SPARQL naming conventions (classes in PascalCase, predicates and functions in camelCase)
+- Return a list to emit multiple result rows
+- Return dataclasses to populate multiple variables.
+- Python defaults handle missing input values.
+
+#### `type_function` · Typed triple-pattern functions
+
+Register a triple-pattern function, ideal for complex functions as all inputs/outputs are explicit in the SPARQL query. The function is selected when a subject is typed with the function name in PascalCase in the given namespace. The decorated function receives arguments extracted from input predicates derived from the arguments names, and returns either a single result or a list of results.
+
+```python
+from dataclasses import dataclass
+from rdflib import Namespace
+from rdflib_endpoint import DatasetExt
+
+ds = DatasetExt()
+
+@dataclass
+class SplitterResult:
+    splitted: str
+    index: int
+
+@ds.type_function(namespace=Namespace("https://w3id.org/sparql-functions/"))
+def string_splitter(
+    split_string: str,
+    separator: str = " ",
+) -> list[SplitterResult]:
+    """Split a string and return each part with their index."""
+    split = split_string.split(separator)
+    return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split)]
+```
+
+Example query:
+
+```SPARQL
+PREFIX func: <https://w3id.org/sparql-functions/>
+SELECT ?input ?part ?idx
+WHERE {
+    VALUES ?input { "hello world" "cheese is good" }
+    [] a func:StringSplitter ;
+        func:splitString ?input ;
+        func:separator " " ;
+        func:splitted ?part ;
+        func:index ?idx .
+}
+```
+
+#### `predicate_function` · Predicate evaluation
+
+Register a predicate function, ideal when the input is a simple IRI. The function is selected when the predicate IRI is in the given namespace. The decorated function receives the subject IRI as input and returns the object values.
+
+```python
+import bioregistry
+from rdflib import DC, OWL, URIRef
+from rdflib_endpoint import DatasetExt
+
+ds = DatasetExt()
+conv = bioregistry.get_converter()
+
+@ds.predicate_function(namespace=DC._NS)
+def identifier(input_iri: URIRef) -> URIRef:
+    """Get the standardized IRI for a given input IRI."""
+    return URIRef(conv.standardize_uri(input_iri))
+
+@ds.predicate_function(namespace=OWL._NS)
+def same_as(input_iri: URIRef) -> list[URIRef]:
+    """Get all alternative IRIs for a given IRI using the Bioregistry."""
+    prefix, identifier = conv.compress(input_iri).split(":", 1)
+    return [URIRef(iri) for iri in bioregistry.get_providers(prefix, identifier).values()]
+```
+
+Example queries:
+
+```sparql
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+SELECT ?id WHERE {
+    <https://identifiers.org/CHEBI/1> dc:identifier ?id .
+}
+```
+
+```sparql
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?sameAs WHERE {
+    <https://identifiers.org/CHEBI/1> owl:sameAs ?sameAs .
+}
+```
+
+#### `extension_function` · Standard SPARQL extension functions
+
+Register a SPARQL extension function usable with `BIND(<namespace+name>(...) AS ?var)`. The Python function receives evaluated args, returning a list emits multiple bound values.
+
+```python
+from dataclasses import dataclass
+from rdflib import Namespace
+from rdflib_endpoint import DatasetExt
+
+ds = DatasetExt()
+
+@ds.extension_function(namespace=Namespace("https://w3id.org/sparql-functions/"))
+def split(input_str: str, separator: str = ",") -> list[str]:
+    """Split a string and return each part."""
+    return input_str.split(separator)
+```
+
+Example query:
+
+```sparql
+PREFIX func: <https://w3id.org/sparql-functions/>
+SELECT ?input ?part WHERE {
+    VALUES ?input { "hello world" "cheese is good" }
+    BIND(func:split(?input, " ") AS ?part)
+}
+```
+
+Use a dataclass to **populate multiple variables**, the first field of the dataclass will be returned in the bound variable, other fields will populate variables derived from the base bound variable concatenated with the fields in pascal case:
+
+```python
+from dataclasses import dataclass
+from rdflib import Namespace
+from rdflib_endpoint import DatasetExt
+
+ds = DatasetExt()
+
+@dataclass
+class SplitResult:
+    value: str
+    index: int
+
+@ds.extension_function(namespace=Namespace("https://w3id.org/sparql-functions/"))
+def split_index(input_str: str, separator: str = ",") -> list[SplitResult]:
+    """Split a string and return each part with their index."""
+    return [SplitResult(value=part, index=idx) for idx, part in enumerate(input_str.split(separator))]
+```
+
+Example query:
+
+```sparql
+PREFIX func: <https://w3id.org/sparql-functions/>
+SELECT ?input ?part ?partIndex WHERE {
+    VALUES ?input { "hello world" "cheese is good" }
+    BIND(func:splitIndex(?input, " ") AS ?part)
+}
+```
+
+#### `graph_function` · Return temporary graph
+
+Register a function that returns an `rdflib.Graph`. Use it in SPARQL as `BIND(<namespace+name>(...) AS ?g)` and then query the temporary graph with `GRAPH ?g { ... }`. Returned graphs are added to the dataset for the duration of the query and cleaned up afterwards.
+
+```python
+from rdflib import Graph, Literal, Namespace
+from rdflib_endpoint import DatasetExt
+
+ds = DatasetExt(default_union=True)
+FUNC = Namespace("https://w3id.org/sparql-functions/")
+
+@ds.graph_function(namespace=FUNC)
+def split_graph(input_str: str, separator: str = ",") -> Graph:
+    g = Graph()
+    for part in input_str.split(separator):
+        g.add((FUNC.splitting, FUNC.splitted, Literal(part)))
+    return g
+```
+
+Example query:
+
+```sparql
+PREFIX func: <https://w3id.org/sparql-functions/>
+SELECT * WHERE {
+    VALUES ?input { "hello world" "cheese is good" }
+    BIND(func:splitGraph(?input, " ") AS ?g)
+    GRAPH ?g {
+        ?s ?p ?o .
+    }
+}
+```
+
+### 📝 Define custom SPARQL functions (legacy API)
+
+Alternatively you can manually implement evaluation extension functions by passing a `functions={...}` dict to `SparqlEndpoint` or `SparqlRouter`.
 
 ````python
 import rdflib
 from rdflib import Dataset
 from rdflib.plugins.sparql.evalutils import _eval
+from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.plugins.sparql.sparql import QueryContext
 from rdflib_endpoint import SparqlEndpoint
 
-def custom_concat(query_results, ctx, part, eval_part):
+def custom_concat(query_results, ctx: QueryContext, part: CompValue, eval_part):
     """Concat 2 strings in the 2 senses and return the length as additional Length variable
     """
     # Retrieve the 2 input arguments
@@ -193,10 +379,10 @@ app = SparqlEndpoint(
     version="0.1.0",
     public_url='https://your-endpoint-url/',
     # Example queries displayed in the Swagger UI to help users try your function
-    example_query="""PREFIX myfunctions: <https://w3id.org/sparql-functions/>
+    example_query="""PREFIX func: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
-    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+    BIND(func:custom_concat(?first, "last") AS ?concat)
 }"""
 )
 ````
@@ -206,14 +392,16 @@ SELECT ?concat ?concatLength WHERE {
 
 ### ✒️ Or directly define the custom evaluation
 
-You can also directly provide the custom evaluation function, this will override the `functions`. Refer to the [RDFLib documentation](https://rdflib.readthedocs.io/en/stable/apidocs/examples.custom_eval/) to define the custom evaluation function. Then provide it when instantiating the SPARQL endpoint:
+For full control, override the evaluation process entirely using `custom_eval`. Refer to the [RDFLib documentation](https://rdflib.readthedocs.io/en/stable/apidocs/examples.custom_eval/) for more details.
 
 ```python
 import rdflib
 from rdflib.plugins.sparql.evaluate import evalBGP
+from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.plugins.sparql.sparql import QueryContext
 from rdflib.namespace import FOAF, RDF, RDFS
 
-def custom_eval(ctx, part):
+def custom_eval(ctx: QueryContext, part: CompValue):
     """Rewrite triple patterns to get super-classes"""
     if part.name == "BGP":
         # rewrite triples
@@ -234,17 +422,6 @@ app = SparqlEndpoint(
     custom_eval=custom_eval
 )
 ```
-
-### 🦄 Run the SPARQL endpoint
-
-You can then run the SPARQL endpoint server from the folder where your script is defined with `uvicorn` on http://localhost:8000
-
-```bash
-cd example
-uv run uvicorn main:app --reload
-```
-
-> Checkout in the `example/README.md` for more details, such as deploying it with docker.
 
 ## 📂 Projects using rdflib-endpoint
 

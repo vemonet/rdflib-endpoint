@@ -4,8 +4,10 @@ __version__ = "0.5.5"
 
 from .sparql_router import SparqlRouter
 from .sparql_endpoint import SparqlEndpoint
+from .dataset_ext import DatasetExt
 
 __all__ = [
+    "DatasetExt",
     "SparqlEndpoint",
     "SparqlRouter",
 ]

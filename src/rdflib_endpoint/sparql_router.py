@@ -154,26 +154,6 @@ class SparqlRouter(APIRouter):
                             # Use the first mime_type that matches
                             break
 
-                    # NOTE: we stop doing that, as it creates more confusion than helps
-                    # # Convert generic mime types to specific ones
-                    # if query_operation == "Construct Query" or query_operation == "Describe Query":
-                    #     if output_mime_type == "text/csv":
-                    #         output_mime_type = "text/turtle"
-                    #     elif output_mime_type == "application/json":
-                    #         output_mime_type = "application/ld+json"
-                    #     elif output_mime_type == "application/xml":
-                    #         output_mime_type = "application/rdf+xml"
-                    #     else:
-                    #         pass
-
-                    # if query_operation == "Select Query" or query_operation == "Ask Query":
-                    #     if output_mime_type == "application/json":
-                    #         output_mime_type = "application/sparql-results+json"
-                    #     elif output_mime_type == "application/xml":
-                    #         output_mime_type = "application/sparql-results+xml"
-                    #     else:
-                    #         pass
-
                     try:
                         rdflib_format = content_type_to_rdflib_format.get(output_mime_type, output_mime_type)
                         response = Response(
@@ -430,7 +410,9 @@ class SparqlRouter(APIRouter):
                     self.service_description.add((graph_node, URIRef("http://rdfs.org/ns/void#triples"), triple_count))
 
         # Add custom functions to the service description
-        for custom_function_uri in self.functions:
+        for custom_function_uri in [
+            key for key in CUSTOM_EVALS if key.startswith("http://") or key.startswith("https://")
+        ]:
             function_uri = URIRef(custom_function_uri)
 
             if (function_uri, RDF.type, SD.Function) not in self.service_description:

@@ -66,6 +66,7 @@ dev = [
     "mypy >=1.4.1",
     "pre-commit",
     "requests",
+    "bioregistry",
     "httpx",
     "git-cliff",
     "testcontainers",

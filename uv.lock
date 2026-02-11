@@ -69,6 +69,71 @@ wheels = [
 ]
 
 [[package]]
+name = "bioregistry"
+version = "0.11.17"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.8.1' and python_full_version < '3.9'",
+    "python_full_version < '3.8.1'",
+]
+dependencies = [
+    { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "curies", version = "0.7.10", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "more-click", version = "0.1.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "pydantic", version = "2.10.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "pystow", version = "0.5.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "requests", version = "2.32.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "tqdm", marker = "python_full_version < '3.9'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8c/bf/35e4ca9dacaaa3dd6982e7d4c0cd1160add6231fc593b83da79957a39cd1/bioregistry-0.11.17.tar.gz", hash = "sha256:929360a5071efa85674817981de44d071776eea632645c0f39d32d77b4cf2eae", size = 6007358, upload-time = "2024-09-07T02:16:59.033Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/66/c4/2b2df4e4cfbb176be9400985a44fcd36d9834f7f69e1bd694c1f23cd0345/bioregistry-0.11.17-py3-none-any.whl", hash = "sha256:90850e681c4f20cb7ab9895b7907d0694a475a35032f5fe62130a5060d7722ef", size = 5213270, upload-time = "2024-09-07T02:16:55.286Z" },
+]
+
+[[package]]
+name = "bioregistry"
+version = "0.12.36"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.9.2' and python_full_version < '3.10'",
+    "python_full_version >= '3.9' and python_full_version < '3.9.2'",
+]
+dependencies = [
+    { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "curies", version = "0.10.23", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "more-click", version = "0.1.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, extra = ["email"], marker = "python_full_version == '3.9.*'" },
+    { name = "pystow", version = "0.7.11", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "tqdm", marker = "python_full_version == '3.9.*'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/37/30/8594e3ad3d4b3afd6852441e8510f798e0f799b5185a7a22ed0c92e5dbb1/bioregistry-0.12.36.tar.gz", hash = "sha256:f31d113e55d62cc8bea94dce15dfb49abffee3a09d2762f48f01426ac16ec421", size = 6361530, upload-time = "2025-08-30T02:35:03.74Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/84/53/5e963dc4ec3b70339839dee6c26d2471bd2e68eb6450b8bc90c922af0293/bioregistry-0.12.36-py3-none-any.whl", hash = "sha256:1f6cac6bf2700c52dbc8ef4ebc6b7638ed8e762dc495e22cb83c56ca4fec3f94", size = 5547588, upload-time = "2025-08-30T02:34:59.797Z" },
+]
+
+[[package]]
+name = "bioregistry"
+version = "0.13.20"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.10'",
+]
+dependencies = [
+    { name = "click", version = "8.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "curies", version = "0.12.9", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "more-click", version = "0.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, extra = ["email"], marker = "python_full_version >= '3.10'" },
+    { name = "pystow", version = "0.7.23", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "tqdm", marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0b/7f/ccdf530267cd98a89e7b9c472b428370533d58723d4caa222e3aeed4832a/bioregistry-0.13.20.tar.gz", hash = "sha256:e2f4f5d341fb0e633e3dfd1342c44cdd482edc7bf987b6be8747f04254833ac4", size = 5801555, upload-time = "2026-02-07T03:20:31.229Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/f6/87c6a53cc03cb18ac01fb0a8b1083840afc94fb39cf2e808d58402384c41/bioregistry-0.13.20-py3-none-any.whl", hash = "sha256:0e7d299f2f7daa065b3ddae061cedf8fa2a2594b6b50f55d06f2cbe2a8c90c05", size = 5881122, upload-time = "2026-02-07T03:20:28.172Z" },
+]
+
+[[package]]
 name = "certifi"
 version = "2026.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -582,6 +647,59 @@ toml = [
 ]
 
 [[package]]
+name = "curies"
+version = "0.7.10"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.8.1' and python_full_version < '3.9'",
+    "python_full_version < '3.8.1'",
+]
+dependencies = [
+    { name = "pydantic", version = "2.10.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "pytrie", marker = "python_full_version < '3.9'" },
+    { name = "requests", version = "2.32.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/45/30/b81496fb344e41e006f745022f50f13a06a2c3dbcc5185e0e2f5d8cd3ee5/curies-0.7.10.tar.gz", hash = "sha256:98a7ceb94710fab3a02727a7f85ba0719dd22be5fc8b5f2ad1d7d4cfc47d64ce", size = 239194, upload-time = "2024-07-09T07:14:06.804Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dc/8e/ee360a94aa8a2079e805044ea08cfffb61c7c30284ae784af97760e4a4ef/curies-0.7.10-py3-none-any.whl", hash = "sha256:ad80f420dd76b6f3e921a245370ff6ab7473c48c29c17254970c03cd2e58af5f", size = 46352, upload-time = "2024-07-09T07:14:04.95Z" },
+]
+
+[[package]]
+name = "curies"
+version = "0.10.23"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.9.2' and python_full_version < '3.10'",
+    "python_full_version >= '3.9' and python_full_version < '3.9.2'",
+]
+dependencies = [
+    { name = "eval-type-backport", marker = "python_full_version == '3.9.*'" },
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "pytrie", marker = "python_full_version == '3.9.*'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4b/3d/305b5fbc6fa16ead33e6b5227cd5f2a2b6bc76ec2517f340c8334480ea25/curies-0.10.23.tar.gz", hash = "sha256:4dec36f371a7e47673817c6dc5d2c079cd81a349cef7bdc26f8b396708c7a984", size = 278203, upload-time = "2025-09-08T11:37:03.499Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/76/a18f435fc02e8933e3edd92703076ff6a5c291be4aa4b93d99247ea6aa5f/curies-0.10.23-py3-none-any.whl", hash = "sha256:dccb9339724393a15b5ca0385c6d7a9a8eaa63c572b7d3d20c021512588e1c84", size = 65926, upload-time = "2025-09-08T11:37:02.27Z" },
+]
+
+[[package]]
+name = "curies"
+version = "0.12.9"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.10'",
+]
+dependencies = [
+    { name = "pydantic", version = "2.12.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c4/b3/53a8e2e3075d98d89b611a38c275b444eb2a8f3fb4a87b8ea24d15570110/curies-0.12.9.tar.gz", hash = "sha256:bd6826550bd21f0c7508ac9c9869b8dfa4b3376b0bdf4d68fbc461d9bb4af037", size = 283491, upload-time = "2026-01-14T12:10:12.096Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/15/77/b2c333b9d9d908048a854943217a6dab7d2dca991cd87bea3fea6e6a4d45/curies-0.12.9-py3-none-any.whl", hash = "sha256:0f5cc8f5c72d3099dd7cf2a70a56c10664f82b52eda8072d45b7586caf3a5745", size = 70247, upload-time = "2026-01-14T12:10:14.895Z" },
+]
+
+[[package]]
 name = "deprecation"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -603,6 +721,31 @@ wheels = [
 ]
 
 [[package]]
+name = "dnspython"
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.9.2' and python_full_version < '3.10'",
+    "python_full_version >= '3.9' and python_full_version < '3.9.2'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b5/4a/263763cb2ba3816dd94b08ad3a33d5fdae34ecb856678773cc40a3605829/dnspython-2.7.0.tar.gz", hash = "sha256:ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1", size = 345197, upload-time = "2024-10-05T20:14:59.362Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/1b/e0a87d256e40e8c888847551b20a017a6b98139178505dc7ffb96f04e954/dnspython-2.7.0-py3-none-any.whl", hash = "sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86", size = 313632, upload-time = "2024-10-05T20:14:57.687Z" },
+]
+
+[[package]]
+name = "dnspython"
+version = "2.8.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.10'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8c/8b/57666417c0f90f08bcafa776861060426765fdb422eb10212086fb811d26/dnspython-2.8.0.tar.gz", hash = "sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f", size = 368251, upload-time = "2025-09-07T18:58:00.022Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/5a/18ad964b0086c6e62e2e7500f7edc89e3faa45033c71c1893d34eed2b2de/dnspython-2.8.0-py3-none-any.whl", hash = "sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af", size = 331094, upload-time = "2025-09-07T18:57:58.071Z" },
+]
+
+[[package]]
 name = "docker"
 version = "7.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -616,6 +759,29 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/91/9b/4a2ea29aeba62471211598dac5d96825bb49348fa07e906ea930394a83ce/docker-7.1.0.tar.gz", hash = "sha256:ad8c70e6e3f8926cb8a92619b832b4ea5299e2831c14284663184e200546fa6c", size = 117834, upload-time = "2024-05-23T11:13:57.216Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/26/57c6fb270950d476074c087527a558ccb6f4436657314bfb6cdf484114c4/docker-7.1.0-py3-none-any.whl", hash = "sha256:c96b93b7f0a746f9e77d325bcfb87422a3d8bd4f03136ae8a85b37f1898d5fc0", size = 147774, upload-time = "2024-05-23T11:13:55.01Z" },
+]
+
+[[package]]
+name = "email-validator"
+version = "2.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dnspython", version = "2.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "dnspython", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "idna", marker = "python_full_version >= '3.9'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/22/900cb125c76b7aaa450ce02fd727f452243f2e91a61af068b40adba60ea9/email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426", size = 51238, upload-time = "2025-08-26T13:09:06.831Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/de/15/545e2b6cf2e3be84bc1ed85613edd75b8aea69807a71c26f4ca6a9258e82/email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4", size = 35604, upload-time = "2025-08-26T13:09:05.858Z" },
+]
+
+[[package]]
+name = "eval-type-backport"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/a3/cafafb4558fd638aadfe4121dc6cefb8d743368c085acb2f521df0f3d9d7/eval_type_backport-0.3.1.tar.gz", hash = "sha256:57e993f7b5b69d271e37482e62f74e76a0276c82490cf8e4f0dffeb6b332d5ed", size = 9445, upload-time = "2025-12-02T11:51:42.987Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cf/22/fdc2e30d43ff853720042fa15baa3e6122722be1a7950a98233ebb55cd71/eval_type_backport-0.3.1-py3-none-any.whl", hash = "sha256:279ab641905e9f11129f56a8a78f493518515b83402b860f6f06dd7c011fdfa8", size = 6063, upload-time = "2025-12-02T11:51:41.665Z" },
 ]
 
 [[package]]
@@ -1062,6 +1228,39 @@ wheels = [
 ]
 
 [[package]]
+name = "more-click"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.9.2' and python_full_version < '3.10'",
+    "python_full_version >= '3.9' and python_full_version < '3.9.2'",
+    "python_full_version >= '3.8.1' and python_full_version < '3.9'",
+    "python_full_version < '3.8.1'",
+]
+dependencies = [
+    { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cf/c7/da345a948fb09129c524e81209c32c07c56f5e30786b973116247c4eba61/more_click-0.1.2.tar.gz", hash = "sha256:085da66d5a9b823c5d912a888dca1fa0c8b3a14ed1b21ea9c8a1b814857a3981", size = 8040, upload-time = "2022-12-06T11:45:11.395Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ad/8e/4e25da8883c5d661eaf4225a951046b8f4466e75eadb8594e204550b3179/more_click-0.1.2-py3-none-any.whl", hash = "sha256:f6387af37ef7e7423bd94b72a81a53c79c5086a3bfe5cc035da534ff0c2a0a9e", size = 6680, upload-time = "2022-12-06T11:45:08.907Z" },
+]
+
+[[package]]
+name = "more-click"
+version = "0.1.3"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.10'",
+]
+dependencies = [
+    { name = "click", version = "8.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/74/52/dc524f10307c472f3ee83ceef5cc3c3c1d987f9554c90cf34616bdcb2ca9/more_click-0.1.3.tar.gz", hash = "sha256:c170987d37334278169fe3b9b388f1fcd9fc96439579354fd7c537537a182128", size = 11793, upload-time = "2025-10-21T15:28:23.531Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/21/c8/62a253fdb3f66529ed0d7f0e4703fdb44cc8745610f199e173550d8f85eb/more_click-0.1.3-py3-none-any.whl", hash = "sha256:12f0f3da94c84d39daaaec08e9503df8877f493812f8ebc3f0713081da48d282", size = 12052, upload-time = "2025-10-21T15:28:22.456Z" },
+]
+
+[[package]]
 name = "mypy"
 version = "1.14.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1382,6 +1581,11 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/69/44/36f1a6e523abc58ae5f928898e4aca2e0ea509b5aa6f6f392a5d882be928/pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49", size = 821591, upload-time = "2025-11-26T15:11:46.471Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5a/87/b70ad306ebb6f9b585f114d0ac2137d792b48be34d732d60e597c2f8465a/pydantic-2.12.5-py3-none-any.whl", hash = "sha256:e561593fccf61e8a20fc46dfc2dfe075b8be7d0188df33f221ad1f0139180f9d", size = 463580, upload-time = "2025-11-26T15:11:44.605Z" },
+]
+
+[package.optional-dependencies]
+email = [
+    { name = "email-validator", marker = "python_full_version >= '3.9'" },
 ]
 
 [[package]]
@@ -1737,6 +1941,61 @@ wheels = [
 ]
 
 [[package]]
+name = "pystow"
+version = "0.5.6"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.8.1' and python_full_version < '3.9'",
+    "python_full_version < '3.8.1'",
+]
+dependencies = [
+    { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "requests", version = "2.32.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "tqdm", marker = "python_full_version < '3.9'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2a/f8/07cd9abc4103bba1f68cb688d9b867243b25224cf210b954de73fd5aa6ab/pystow-0.5.6.tar.gz", hash = "sha256:db567e82a5b7aea34cdcf4ae00ba822cd64a51ae2f465b1995599676e4cdbff2", size = 45885, upload-time = "2024-10-03T10:01:15.389Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/60/8a/41303009edd44b7786da70e89c1e62caadcee4823cc92f0a7dca0c982228/pystow-0.5.6-py3-none-any.whl", hash = "sha256:3a44349dccc1260238e8f4c8f2dec5d72e2952a126fb897df663e94e6a910c86", size = 32986, upload-time = "2024-10-03T10:01:13.987Z" },
+]
+
+[[package]]
+name = "pystow"
+version = "0.7.11"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.9.2' and python_full_version < '3.10'",
+    "python_full_version >= '3.9' and python_full_version < '3.9.2'",
+]
+dependencies = [
+    { name = "click", version = "8.1.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "tqdm", marker = "python_full_version == '3.9.*'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b7/84/463607744ee8694f696653a4e28000928f9d22762e1a6f3e5c16d0bcefc5/pystow-0.7.11.tar.gz", hash = "sha256:2b8b10dbf78b13d36a7fcd71efd47921cea1c5c9f1078b7c3cf49f658278f0e9", size = 40511, upload-time = "2025-10-01T19:52:51.412Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b2/00/3f73c0bb43d6e1ea1292c0ccaea47255a2cb1d9f1856c599c872f029cb85/pystow-0.7.11-py3-none-any.whl", hash = "sha256:bcafe098310499b2e91fedb8671b13e206058605319ad6987ecc2388ec8b5200", size = 43628, upload-time = "2025-10-01T19:52:49.759Z" },
+]
+
+[[package]]
+name = "pystow"
+version = "0.7.23"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.10'",
+]
+dependencies = [
+    { name = "click", version = "8.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "tqdm", marker = "python_full_version >= '3.10'" },
+    { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/51/97/7b99406d23c5ff8d5ca2886ce81899963dc7111438e21f900dd32c744a7f/pystow-0.7.23.tar.gz", hash = "sha256:d240007167b76622bd6c25eac01d11599023893f6174862eb260338b80eabc68", size = 49684, upload-time = "2026-02-06T12:54:32.457Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/af/b0/0e6bcdf5ff9837b95b7a3abd74b4a0bb01353ee8f0854dcdd6aa3fce4ce3/pystow-0.7.23-py3-none-any.whl", hash = "sha256:af548a856de6f48f65e2928c0dfefec0a92782bbe599d7e0084dfbbc053a2c99", size = 56651, upload-time = "2026-02-06T12:54:34.08Z" },
+]
+
+[[package]]
 name = "pytest"
 version = "8.3.5"
 source = { registry = "https://pypi.org/simple" }
@@ -1863,6 +2122,18 @@ resolution-markers = [
 sdist = { url = "https://files.pythonhosted.org/packages/f0/26/19cadc79a718c5edbec86fd4919a6b6d3f681039a2f6d66d14be94e75fb9/python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6", size = 44221, upload-time = "2025-10-26T15:12:10.434Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/14/1b/a298b06749107c305e1fe0f814c6c74aea7b2f1e10989cb30f544a1b3253/python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61", size = 21230, upload-time = "2025-10-26T15:12:09.109Z" },
+]
+
+[[package]]
+name = "pytrie"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sortedcontainers", marker = "python_full_version < '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/19/15ec77ab9c85f7c36eb590d6ab7dd529f8c8516c0e2219f1a77a99d7ee77/PyTrie-0.4.0.tar.gz", hash = "sha256:8f4488f402d3465993fb6b6efa09866849ed8cda7903b50647b7d0342b805379", size = 95139, upload-time = "2020-10-21T15:39:30.334Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/fd/499b261a34e9c6e39b9f5711c4b3093bca980b8db4b49de3009d808f41c9/PyTrie-0.4.0-py3-none-any.whl", hash = "sha256:f687c224ee8c66cda8e8628a903011b692635ffbb08d4b39c5f92b18eb78c950", size = 6061, upload-time = "2024-03-09T16:59:46.768Z" },
 ]
 
 [[package]]
@@ -2037,6 +2308,9 @@ web = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "bioregistry", version = "0.11.17", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "bioregistry", version = "0.12.36", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "bioregistry", version = "0.13.20", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "git-cliff" },
     { name = "httpx" },
     { name = "mypy", version = "1.14.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -2078,6 +2352,7 @@ provides-extras = ["cli", "oxigraph", "web"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "bioregistry" },
     { name = "git-cliff" },
     { name = "httpx" },
     { name = "mypy", specifier = ">=1.4.1" },
@@ -2173,6 +2448,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a2/87/a6771e1546d97e7e041b6ae58d80074f81b7d5121207425c964ddf5cfdbd/sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc", size = 20372, upload-time = "2024-02-25T23:20:04.057Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e9/44/75a9c9421471a6c4805dbf2356f7c181a29c1879239abab1ea2cc8f38b40/sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2", size = 10235, upload-time = "2024-02-25T23:20:01.196Z" },
+]
+
+[[package]]
+name = "sortedcontainers"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
 ]
 
 [[package]]
@@ -2351,6 +2635,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/de/69/9aa0c6a505c2f80e519b43764f8b4ba93b5a0bbd2d9a9de6e2b24271b9a5/tomli-2.4.0-cp314-cp314t-win_amd64.whl", hash = "sha256:2add28aacc7425117ff6364fe9e06a183bb0251b03f986df0e78e974047571fd", size = 120504, upload-time = "2026-01-11T11:22:35.764Z" },
     { url = "https://files.pythonhosted.org/packages/b3/9f/f1668c281c58cfae01482f7114a4b88d345e4c140386241a1a24dcc9e7bc/tomli-2.4.0-cp314-cp314t-win_arm64.whl", hash = "sha256:2b1e3b80e1d5e52e40e9b924ec43d81570f0e7d09d11081b797bc4692765a3d4", size = 99561, upload-time = "2026-01-11T11:22:36.624Z" },
     { url = "https://files.pythonhosted.org/packages/23/d1/136eb2cb77520a31e1f64cbae9d33ec6df0d78bdf4160398e86eec8a8754/tomli-2.4.0-py3-none-any.whl", hash = "sha256:1f776e7d669ebceb01dee46484485f43a4048746235e683bcdffacdf1fb4785a", size = 14477, upload-time = "2026-01-11T11:22:37.446Z" },
+]
+
+[[package]]
+name = "tqdm"
+version = "4.67.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/09/a9/6ba95a270c6f1fbcd8dac228323f2777d886cb206987444e4bce66338dd4/tqdm-4.67.3.tar.gz", hash = "sha256:7d825f03f89244ef73f1d4ce193cb1774a8179fd96f31d7e1dcde62092b960bb", size = 169598, upload-time = "2026-02-03T17:35:53.048Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/16/e1/3079a9ff9b8e11b846c6ac5c8b5bfb7ff225eee721825310c91b3b50304f/tqdm-4.67.3-py3-none-any.whl", hash = "sha256:ee1e4c0e59148062281c49d80b25b67771a127c85fc9676d3be5f243206826bf", size = 78374, upload-time = "2026-02-03T17:35:50.982Z" },
 ]
 
 [[package]]

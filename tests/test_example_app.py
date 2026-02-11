@@ -17,8 +17,8 @@ def test_service_description():
     g.parse(data=response.text, format="turtle")
     assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
     assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
-    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 2, "Expected exactly 2 extension functions"
-    assert len(list(g.triples((None, SD.namedGraph, None)))) == 2, "Expected exactly 2 named graphs"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) >= 2, "Expected at least 2 extension functions"
+    assert len(list(g.triples((None, SD.namedGraph, None)))) >= 2, "Expected at least 2 named graphs"
 
     # Check POST turtle
     response = endpoint.post("/", headers={"accept": "text/turtle"})
@@ -27,7 +27,7 @@ def test_service_description():
     g.parse(data=response.text, format="turtle")
     assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
     assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
-    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 2, "Expected exactly 2 extension functions"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) >= 2, "Expected at least 2 extension functions"
 
     # Check POST XML
     response = endpoint.post("/", headers={"accept": "application/xml"})
@@ -36,7 +36,7 @@ def test_service_description():
     g.parse(data=response.text, format="xml")
     assert any(g.triples((None, SD.endpoint, None))), "Missing sd:endpoint in service description"
     assert any(g.triples((None, SD.extensionFunction, None))), "Missing sd:extensionFunction in service description"
-    assert len(list(g.triples((None, SD.extensionFunction, None)))) == 2, "Expected exactly 2 extension functions"
+    assert len(list(g.triples((None, SD.extensionFunction, None)))) >= 2, "Expected at least 2 extension functions"
 
 
 def test_custom_concat():
