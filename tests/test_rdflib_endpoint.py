@@ -1,13 +1,49 @@
+from typing import Any, List, Tuple
+
 import pytest
-from example.main import custom_concat
 from fastapi.testclient import TestClient
-from rdflib import RDFS, Graph, Literal, URIRef
+from rdflib import RDFS, Graph, Literal, URIRef, Variable
+from rdflib.plugins.sparql.evalutils import _eval
+from rdflib.plugins.sparql.parserutils import CompValue
+from rdflib.plugins.sparql.sparql import QueryContext
 
 from rdflib_endpoint import SparqlEndpoint
 from rdflib_endpoint.sparql_router import SD
 
 # graph = Dataset(default_union=False)
 graph = Graph()
+
+
+def custom_concat(
+    query_results: List[Any], ctx: QueryContext, part: CompValue, eval_part: Any
+) -> Tuple[Any, Any, Any, Any]:
+    """
+    Concat 2 string and return the length as additional Length variable
+    \f
+    :param query_results:   An array with the query results objects
+    :param ctx:             Query context
+    :param part:            Part of the query processed (e.g. Extend or BGP)
+    :param eval_part:       Part currently evaluated
+    :return:                the same query_results provided in input param, with additional results
+    """
+    argument1 = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
+    argument2 = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
+    evaluation = []
+    scores = []
+    concat_string = argument1 + argument2
+    reverse_string = argument2 + argument1
+    # Append the concatenated string to the results
+    evaluation.append(concat_string)
+    evaluation.append(reverse_string)
+    # Append the scores for each row of results
+    scores.append(len(concat_string))
+    scores.append(len(reverse_string))
+    # Append our results to the query_results
+    for i, result in enumerate(evaluation):
+        query_results.append(
+            eval_part.merge({part.var: Literal(result), Variable(part.var + "Length"): Literal(scores[i])})
+        )
+    return query_results, ctx, part, eval_part
 
 
 @pytest.fixture(autouse=True)

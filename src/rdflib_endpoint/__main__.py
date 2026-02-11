@@ -43,11 +43,6 @@ def run_serve(files: List[str], host: str, port: int, store: str = "default", en
     app = SparqlEndpoint(
         graph=g,
         enable_update=enable_update,
-        example_query="""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT * WHERE {
-    ?s ?p ?o .
-} LIMIT 100""",
     )
     uvicorn.run(app, host=host, port=port)
 

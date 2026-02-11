@@ -1,7 +1,9 @@
+import inspect
 import json
 import logging
 import os
 import re
+import warnings
 from importlib import resources
 from typing import Any, Callable, Dict, List, Optional, Union
 from urllib import parse
@@ -17,6 +19,7 @@ from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 from rdflib.query import Processor
 
+from rdflib_endpoint.dataset_ext import DatasetExt
 from rdflib_endpoint.utils import (
     API_RESPONSES,
     FORMATS,
@@ -49,13 +52,27 @@ class SparqlRouter(APIRouter):
         enable_update: bool = False,
         public_url: str = Defaults.public_url,
         favicon: str = Defaults.favicon,
-        example_query: str = Defaults.example,
         example_queries: Optional[Dict[str, QueryExample]] = None,
+        example_query: str | None = None,
         **kwargs: Any,
     ) -> None:
         """Create a SPARQL endpoint router.
 
-        The endpoints calls are all defined in this constructor
+        Args:
+            path: The path where the SPARQL endpoint will be available.
+            title: A title for the SPARQL endpoint.
+            description: A description for the SPARQL endpoint.
+            version: A version for the SPARQL endpoint.
+            graph: An RDFLib `Graph` or `Dataset` to be served as a SPARQL endpoint. If None, an empty `Dataset` with default union is used.
+            functions: LEGACY: a dictionary of custom functions
+            processor: The RDFLib query processor to use.
+            custom_eval: A custom function to evaluate SPARQL queries.
+            enable_update: Whether to enable SPARQL Update queries.
+            cors_enabled: Whether to enable CORS for the endpoint.
+            public_url: The public URL of the endpoint, used for the SPARQL service description and for the YASGUI example queries.
+            example_queries: A dictionary of example queries to be displayed in YASGUI tabs. If empty and a `DatasetExt` with custom functions is provided, they will be extracted from docstrings. The first query is used as the default YASGUI tab.
+            favicon: A URL to a favicon to be used for the endpoint.
+            example_query: DEPRECATED: use `example_queries` instead, the first one will be used as default YASGUI tab.
         """
         self.graph = graph if graph is not None else Dataset(default_union=True)
         """RDFLib Graph for the SPARQL endpoint."""
@@ -70,9 +87,13 @@ class SparqlRouter(APIRouter):
         self.version = version
         self.path = path
         self.public_url = public_url
-        self.example_query = example_query
         self.example_queries = example_queries
-        self.example_markdown = f"Example query:\n\n```\n{example_query}\n```"
+        if not self.example_queries and isinstance(self.graph, DatasetExt):
+            self.example_queries = self._build_example_queries_from_dataset(self.graph)
+        if example_query:
+            warnings.warn(
+                "`example_query` is deprecated. Use `example_queries` instead.", DeprecationWarning, stacklevel=2
+            )
         self.enable_update = enable_update
         self.favicon = favicon
 
@@ -202,7 +223,6 @@ class SparqlRouter(APIRouter):
         @self.get(
             self.path,
             name="SPARQL endpoint",
-            description=self.example_markdown,
             responses=API_RESPONSES,
         )
         async def get_sparql_endpoint(
@@ -219,7 +239,6 @@ class SparqlRouter(APIRouter):
         @self.post(
             path,
             name="SPARQL endpoint",
-            description=self.example_markdown,
             responses=API_RESPONSES,
         )
         async def post_sparql_endpoint(request: Request) -> Response:
@@ -253,6 +272,19 @@ class SparqlRouter(APIRouter):
                 query = None
                 update = None
             return await handle_sparql_request(request, query, update)
+
+    def _build_example_queries_from_dataset(self, dataset: DatasetExt) -> Optional[Dict[str, QueryExample]]:
+        """Extract example queries from DatasetExt custom function docstrings."""
+        examples: Dict[str, QueryExample] = {}
+        for func in dataset.get_custom_functions():
+            docstring = inspect.getdoc(func) or ""
+            matches = re.findall(r"```sparql\s*(.*?)```", docstring, flags=re.DOTALL | re.IGNORECASE)
+            if not matches:
+                continue
+            query = matches[0].strip()
+            if query:
+                examples[func.__name__.replace("_", " ").capitalize()] = {"query": query}
+        return examples or None
 
     def eval_custom_functions(self, ctx: QueryContext, part: CompValue) -> List[Any]:
         """Retrieve variables from a SPARQL-query, then execute registered SPARQL functions
@@ -295,7 +327,6 @@ class SparqlRouter(APIRouter):
         html_str = html_str.replace("$TITLE", self.title)
         html_str = html_str.replace("$DESCRIPTION", self.description)
         html_str = html_str.replace("$FAVICON", self.favicon)
-        html_str = html_str.replace("$EXAMPLE_QUERY", self.example_query)
         html_str = html_str.replace("$EXAMPLE_QUERIES", json.dumps(self.example_queries))
         return Response(content=html_str, media_type="text/html")
 

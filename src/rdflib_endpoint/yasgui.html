@@ -13,8 +13,15 @@
     <body>
         <div id="yasgui"></div>
         <script>
-            Yasqe.defaults.value = `$EXAMPLE_QUERY`
-            const queries_obj = $EXAMPLE_QUERIES || []
+            let queries_obj = $EXAMPLE_QUERIES;
+            if (!queries_obj) queries_obj = {};
+            const queryKeys = Object.keys(queries_obj);
+            let defaultQuery = "SELECT * WHERE {\n    ?s ?p ?o .\n    } LIMIT 25";
+            if (queryKeys.length > 0) {
+                const firstKey = queryKeys[0];
+                defaultQuery = queries_obj[firstKey]['query'] || '';
+                delete queries_obj[firstKey];
+            }
 
             const url = window.location.href.endsWith('/') ? window.location.href.slice(0, -1) : window.location.href;
             // Make sure the endpoints list is unique
@@ -29,6 +36,7 @@
                     },
                     keys: [],
                 },
+                yasqe: { value: defaultQuery }
             });
 
             // Add tab to yasgui for each query

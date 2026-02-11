@@ -27,7 +27,7 @@ class SparqlEndpoint(FastAPI):
         enable_update: bool = False,
         cors_enabled: bool = True,
         public_url: str = Defaults.public_url,
-        example_query: str = Defaults.example,
+        example_query: str | None = None,
         example_queries: Optional[Dict[str, QueryExample]] = None,
         favicon: str = Defaults.favicon,
         **kwargs: Any,
@@ -36,6 +36,22 @@ class SparqlEndpoint(FastAPI):
         Create a SPARQL endpoint.
 
         It's mainly a wrapper to include the SPARQL router. Everything happens in the router.
+
+        Args:
+            path: The path where the SPARQL endpoint will be available.
+            title: A title for the SPARQL endpoint.
+            description: A description for the SPARQL endpoint.
+            version: A version for the SPARQL endpoint.
+            graph: An RDFLib `Graph` or `Dataset` to be served as a SPARQL endpoint. If None, an empty `Dataset` with default union is used.
+            functions: LEGACY: a dictionary of custom functions
+            processor: The RDFLib query processor to use.
+            custom_eval: A custom function to evaluate SPARQL queries.
+            enable_update: Whether to enable SPARQL Update queries.
+            cors_enabled: Whether to enable CORS for the endpoint.
+            public_url: The public URL of the endpoint, used for the SPARQL service description and for the YASGUI example queries.
+            favicon: A URL to a favicon to be used for the endpoint.
+            example_queries: A dictionary of example queries to be displayed in YASGUI tabs. If empty and a `DatasetExt` with custom functions is provided, they will be extracted from docstrings.
+            example_query: DEPRECATED: use `example_queries` instead, the first one will be used as default YASGUI tab.
         """
         self.title = title
         self.description = description
@@ -61,9 +77,9 @@ class SparqlEndpoint(FastAPI):
             custom_eval=custom_eval,
             enable_update=enable_update,
             public_url=public_url,
-            example_query=example_query,
-            example_queries=example_queries,
             favicon=favicon,
+            example_queries=example_queries,
+            example_query=example_query,
         )
         self.include_router(sparql_router)
 

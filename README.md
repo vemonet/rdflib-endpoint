@@ -90,22 +90,7 @@ app = SparqlEndpoint(
     title="SPARQL endpoint for RDFLib graph",
     description="A SPARQL endpoint to serve any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
-    public_url='https://your-endpoint-url/',
-    # Example query displayed in YASGUI default tab
-    example_query="""PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-SELECT ?concat ?concatLength WHERE {
-    BIND("First" AS ?first)
-    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}""",
-    # Additional example queries displayed in additional YASGUI tabs
-    example_queries = {
-    	"Concat function": {
-        	"query": """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-SELECT ?concat ?concatLength WHERE {
-    BIND(myfunctions:custom_concat("first", "last") AS ?concat)
-}""",
-    	}
-	}
+    public_url='https://127.0.0.1:8000/',
 )
 ```
 
@@ -128,7 +113,6 @@ ds = Dataset()
 sparql_router = SparqlRouter(
     graph=ds,
     path="/",
-    # Metadata used for the SPARQL service description and Swagger UI:
     title="SPARQL endpoint for RDFLib graph",
 )
 
@@ -180,8 +164,7 @@ def string_splitter(
     separator: str = " ",
 ) -> list[SplitterResult]:
     """Split a string and return each part with their index."""
-    split = split_string.split(separator)
-    return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split)]
+    return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split_string.split(separator))]
 ```
 
 Example query:
@@ -362,28 +345,21 @@ def custom_concat(query_results, ctx: QueryContext, part: CompValue, eval_part):
         }))
     return query_results, ctx, part, eval_part
 
-# Start the SPARQL endpoint based on a RDFLib Graph and register your custom functions
-g = Dataset(default_union=True)
-# Use either SparqlEndpoint or SparqlRouter, they take the same arguments
 app = SparqlEndpoint(
-    graph=g,
-    path="/",
+    graph=Dataset(default_union=True),
     # Register the functions:
     functions={
         'https://w3id.org/sparql-functions/custom_concat': custom_concat
     },
-    cors_enabled=True,
-    # Metadata used for the SPARQL service description and Swagger UI:
-    title="SPARQL endpoint for RDFLib graph",
-    description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
-    version="0.1.0",
-    public_url='https://your-endpoint-url/',
-    # Example queries displayed in the Swagger UI to help users try your function
-    example_query="""PREFIX func: <https://w3id.org/sparql-functions/>
+    # Example queries used to populate YASGUI tabs
+    example_queries={
+        "Custom function": {
+            "query": """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
 SELECT ?concat ?concatLength WHERE {
-    BIND("First" AS ?first)
-    BIND(func:custom_concat(?first, "last") AS ?concat)
-}"""
+    BIND(myfunctions:custom_concat("First", "last") AS ?concat)
+}""",
+        },
+    },
 )
 ````
 

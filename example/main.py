@@ -1,130 +1,192 @@
-from typing import Any, Dict, List, Tuple
+from dataclasses import dataclass
+from typing import List
 
-from rdflib import RDF, RDFS, Dataset, Literal, URIRef, Variable
-from rdflib.plugins.sparql.evalutils import _eval
-from rdflib.plugins.sparql.parserutils import CompValue
-from rdflib.plugins.sparql.sparql import QueryContext
+import bioregistry
+from rdflib import DC, OWL, RDF, RDFS, Graph, Literal, Namespace, URIRef
 
-from rdflib_endpoint import SparqlEndpoint
-from rdflib_endpoint.utils import QueryExample
+from rdflib_endpoint import DatasetExt, SparqlEndpoint
 
-
-def custom_concat(
-    query_results: List[Any], ctx: QueryContext, part: CompValue, eval_part: Any
-) -> Tuple[Any, Any, Any, Any]:
-    """
-    Concat 2 string and return the length as additional Length variable
-    \f
-    :param query_results:   An array with the query results objects
-    :param ctx:             Query context
-    :param part:            Part of the query processed (e.g. Extend or BGP)
-    :param eval_part:       Part currently evaluated
-    :return:                the same query_results provided in input param, with additional results
-    """
-    argument1 = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
-    argument2 = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
-    evaluation = []
-    scores = []
-    concat_string = argument1 + argument2
-    reverse_string = argument2 + argument1
-    # Append the concatenated string to the results
-    evaluation.append(concat_string)
-    evaluation.append(reverse_string)
-    # Append the scores for each row of results
-    scores.append(len(concat_string))
-    scores.append(len(reverse_string))
-    # Append our results to the query_results
-    for i, result in enumerate(evaluation):
-        query_results.append(
-            eval_part.merge({part.var: Literal(result), Variable(part.var + "Length"): Literal(scores[i])})
-        )
-    return query_results, ctx, part, eval_part
-
-
-def most_similar(
-    query_results: List[Any], ctx: QueryContext, part: CompValue, eval_part: Any
-) -> Tuple[Any, Any, Any, Any]:
-    """Get most similar entities for a given entity
-
-    ```sparql
-    PREFIX openpredict: <https://w3id.org/sparql-functions/>
-    SELECT ?drugOrDisease ?mostSimilar ?mostSimilarScore WHERE {
-        BIND("OMIM:246300" AS ?drugOrDisease)
-        BIND(openpredict:most_similar(?drugOrDisease) AS ?mostSimilar)
-    }
-    ```
-    """
-    # argumentEntity = str(_eval(part.expr.expr[0], eval_part.forget(ctx, _except=part.expr._vars)))
-    # try:
-    #     argumentLimit = str(_eval(part.expr.expr[1], eval_part.forget(ctx, _except=part.expr._vars)))
-    # except:
-    #     argumentLimit = None
-
-    # Using stub data
-    similarity_results = [{"mostSimilar": "DRUGBANK:DB00001", "score": 0.42}]
-
-    evaluation = []
-    scores = []
-    for most_similar in similarity_results:
-        evaluation.append(most_similar["mostSimilar"])
-        scores.append(most_similar["score"])
-
-    # Append our results to the query_results
-    for i, result in enumerate(evaluation):
-        query_results.append(
-            eval_part.merge({part.var: Literal(result), Variable(part.var + "Score"): Literal(scores[i])})
-        )
-    return query_results, ctx, part, eval_part
-
-
-example_query = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-SELECT DISTINCT * WHERE {
-    ?s ?p ?o .
-} LIMIT 100"""
-
-example_queries: Dict[str, QueryExample] = {
-    "Bio2RDF query": {
-        "endpoint": "https://bio2rdf.org/sparql",
-        "query": """SELECT DISTINCT * WHERE {
-    ?s a ?o .
-} LIMIT 10""",
-    },
-    "Custom function": {
-        "query": """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-SELECT ?concat ?concatLength WHERE {
-    BIND("First" AS ?first)
-    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
-}""",
-    },
-}
-
-
-# Use Dataset to support nquads and graphs in SPARQL queries
-# identifier is the default graph
-ds = Dataset(
+ds = DatasetExt(
     # store="Oxigraph",
     default_union=True,
 )
+FUNC = Namespace("https://w3id.org/sparql-functions/")
 
-# Example to add a nquad to the exposed graph
+
+@dataclass
+class SplitterResult:
+    splitted: str
+    index: int
+
+
+# NOTE: add sparql codeblocks in docstrings with example on how to use the functions,
+# these will be extracted and added as YASGUI queries tabs
+
+
+# Type pattern function
+@ds.type_function(namespace=FUNC)
+def string_splitter(
+    split_string: str,
+    separator: str = " ",
+) -> List[SplitterResult]:
+    """Split a string and return each part with their index.
+
+    ```sparql
+    PREFIX func: <https://w3id.org/sparql-functions/>
+    SELECT ?input ?part ?idx
+    WHERE {
+        VALUES ?input { "hello world" "cheese is good" }
+        [] a func:StringSplitter ;
+            func:splitString ?input ;
+            func:separator " " ;
+            func:splitted ?part ;
+            func:index ?idx .
+    }
+    ```
+    """
+    split = split_string.split(separator)
+    return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split)]
+
+
+@ds.type_function(namespace=FUNC)
+def uri_splitter(
+    split_string: URIRef,
+    separator: str = "/",
+) -> List[SplitterResult]:
+    """Split a URI and return each part with their index.
+
+    ```sparql
+    PREFIX func: <https://w3id.org/sparql-functions/>
+    SELECT ?input ?part ?idx
+    WHERE {
+        VALUES ?input { "hello world" "cheese is good" }
+        [] a func:UriSplitter ;
+            func:splitString ?input ;
+            func:separator " " ;
+            func:splitted ?part ;
+            func:index ?idx .
+    }
+    ```
+    """
+    split = split_string.split(separator)
+    return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split)]
+
+
+# Predicate function
+conv = bioregistry.get_converter()
+
+
+@ds.predicate_function(namespace=OWL._NS)
+def same_as(input_iri: URIRef) -> list[URIRef]:
+    """Get all alternative IRIs for a given IRI using the Bioregistry.
+
+    ```sparql
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    SELECT ?sameAs WHERE {
+        <https://identifiers.org/CHEBI/1> owl:sameAs ?sameAs .
+    }
+    ```
+    """
+    prefix, identifier = conv.compress(input_iri).split(":", 1)
+    return [URIRef(iri) for iri in bioregistry.get_providers(prefix, identifier).values()]
+
+
+@ds.predicate_function(namespace=DC._NS)
+def identifier(input_iri: URIRef) -> URIRef:
+    """Get the standardized IRI for a given input IRI.
+
+    ```sparql
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    SELECT ?id WHERE {
+        <https://identifiers.org/CHEBI/1> dc:identifier ?id .
+    }
+    ```
+    """
+    return URIRef(conv.standardize_uri(input_iri))
+
+
+# Extension function with single output
+@ds.extension_function(namespace=FUNC)
+def split(
+    input_str: str,
+    separator: str = " ",
+) -> List[str]:
+    """Split a string.
+
+    ```sparql
+    PREFIX func: <https://w3id.org/sparql-functions/>
+    SELECT ?input ?part WHERE {
+        VALUES ?input { "hello world" "cheese is good" }
+        BIND(func:split(?input, " ") AS ?part)
+    }
+    ```
+    """
+    return input_str.split(separator)
+
+
+# Extension function with outputs to multiple variables
+@dataclass
+class SplitResult:
+    splitted: str
+    index: int
+
+
+@ds.extension_function(namespace=FUNC)
+def split_index(
+    input_str: str,
+    separator: str = " ",
+) -> List[SplitResult]:
+    """Split a string and return each part with their index.
+
+    ```sparql
+    PREFIX func: <https://w3id.org/sparql-functions/>
+    SELECT ?input ?part ?partIndex WHERE {
+        VALUES ?input { "hello world" "cheese is good" }
+        BIND(func:splitIndex(?input, " ") AS ?part)
+    }
+    ```
+    """
+    split = input_str.split(separator)
+    return [SplitResult(splitted=part, index=idx) for idx, part in enumerate(split)]
+
+
+@ds.graph_function(namespace=FUNC)
+def split_graph(
+    input_str: str,
+    separator: str = " ",
+) -> Graph:
+    """Split a string and return the results in a graph.
+
+    ```sparql
+    PREFIX func: <https://w3id.org/sparql-functions/>
+    SELECT * WHERE {
+        VALUES ?input { "hello world" "cheese is good" }
+        BIND(func:splitGraph(?input, " ") AS ?g)
+        GRAPH ?g {
+            ?s ?p ?o .
+        }
+    }
+    ```
+    """
+    g = Graph()
+    for part in input_str.split(separator):
+        g.add((FUNC.splitting, FUNC.splitted, Literal(part)))
+    return g
+
+
+# You can also direcrtly add triples to the dataset graphs
 ds.graph(URIRef("http://graph1")).add((URIRef("http://subject"), RDF.type, URIRef("http://object")))
 ds.graph(URIRef("http://graph2")).add((URIRef("http://subject"), RDFS.label, Literal("foo")))
 
 # Start the SPARQL endpoint based on the RDFLib Graph
 app = SparqlEndpoint(
     graph=ds,
-    functions={
-        "https://w3id.org/sparql-functions/most_similar": most_similar,
-        "https://w3id.org/sparql-functions/custom_concat": custom_concat,
-    },
     title="SPARQL endpoint for RDFLib graph",
-    description="A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
+    description="A SPARQL endpoint to serve any logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)",
     version="0.1.0",
     path="/",
-    public_url="https://your-website-url/",
+    public_url="http://127.0.0.1:8000/",
     cors_enabled=True,
-    example_query=example_query,
-    example_queries=example_queries,
     enable_update=True,
 )
 

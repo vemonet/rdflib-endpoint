@@ -72,10 +72,20 @@ class DatasetExt(Dataset):
     """Dataset with decorator-based custom SPARQL evaluation function registration."""
 
     _tmp_graph_uris: set[Identifier]
+    _custom_functions: dict[str, Callable[..., Any]]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._tmp_graph_uris = set()
+        self._custom_functions = {}
+
+    def _register_custom_function(self, func: Callable[..., Any]) -> None:
+        """Track a decorated function for later introspection."""
+        self._custom_functions[func.__name__] = func
+
+    def get_custom_functions(self) -> list[Callable[..., Any]]:
+        """Return custom functions registered via DatasetExt decorators."""
+        return list(self._custom_functions.values())
 
     def _register_tmp_graph(self, graph_uri: Identifier) -> None:
         """Register a temporary graph URI for cleanup."""
@@ -234,6 +244,7 @@ class DatasetExt(Dataset):
 
             # Register with RDFLib using function name as key
             CUSTOM_EVALS[f"type_{func.__name__}"] = custom_eval_func
+            self._register_custom_function(func)
             return func
 
         return decorator
@@ -313,6 +324,7 @@ class DatasetExt(Dataset):
 
             # Register with RDFLib
             CUSTOM_EVALS[f"predicate_{func.__name__}"] = custom_eval_func
+            self._register_custom_function(func)
             return func
 
         return decorator
@@ -385,6 +397,7 @@ class DatasetExt(Dataset):
                 return query_results
 
             CUSTOM_EVALS[str(iri_value)] = _eval_extension_function
+            self._register_custom_function(func)
             return func
 
         return decorator
@@ -440,6 +453,7 @@ class DatasetExt(Dataset):
                 return query_results
 
             CUSTOM_EVALS[f"graph_{func.__name__}"] = _eval_graph_function
+            self._register_custom_function(func)
             return func
 
         return decorator

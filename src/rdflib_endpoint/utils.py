@@ -10,18 +10,10 @@ class Defaults:
     """Default configuration values for the SPARQL endpoint."""
 
     title: str = "SPARQL endpoint for RDFLib graph"
-    description: str = "A SPARQL endpoint to serve machine learning models, or any other logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)"
+    description: str = "A SPARQL endpoint to serve any logic implemented in Python. \n[Source code](https://github.com/vemonet/rdflib-endpoint)"
     version: str = "0.1.0"
-    public_url: str = "https://your-endpoint/sparql"
+    public_url: str = "http://127.0.0.1:8000/"
     favicon: str = "https://rdflib.readthedocs.io/en/stable/_static/RDFlib.png"
-    example: str = """\
-PREFIX func: <https://w3id.org/sparql-functions/>
-
-SELECT ?concat ?concatLength WHERE {
-    BIND("First" AS ?first)
-    BIND(func:custom_concat(?first, "last") AS ?concat)
-}
-""".rstrip()
 
 
 def get_default_content_type(query_operation: str) -> str:

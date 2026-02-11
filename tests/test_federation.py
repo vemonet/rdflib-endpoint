@@ -4,8 +4,7 @@ from multiprocessing import Process
 import httpx
 import pytest
 import uvicorn
-from example.main import custom_concat
-from rdflib import Graph
+from example.main import ds
 
 # from testcontainers.core.container import DockerContainer
 # from testcontainers.core.waiting_utils import wait_for_logs
@@ -13,15 +12,10 @@ from rdflib_endpoint import SparqlEndpoint
 
 # https://github.com/biopragmatics/curies/blob/main/tests/test_federated_sparql.py
 
-graph = Graph()
-
 
 def _get_app():
     return SparqlEndpoint(
-        graph=graph,
-        functions={
-            "https://w3id.org/sparql-functions/custom_concat": custom_concat,
-        },
+        graph=ds,
         enable_update=True,
     )
 
@@ -42,6 +36,18 @@ def service_url():
     yield endpoint_url
     service_process.kill()
     service_process.join()
+
+
+def test_direct_custom_concat(service_url):
+    custom_function_query = """PREFIX func: <https://w3id.org/sparql-functions/>
+SELECT ?input ?part ?partIndex WHERE {
+    VALUES ?input { "hello world" "cheese is good" }
+    BIND(func:splitIndex(?input, " ") AS ?part)
+}"""
+    response = httpx.get(service_url, params={"query": custom_function_query}, headers={"accept": "application/json"})
+    # print(response.text)
+    assert response.status_code == 200
+    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
 
 
 # Stop and delete all testcontainers: docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
@@ -100,20 +106,10 @@ def service_url():
 #     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
 
-def test_direct_custom_concat(service_url):
-    direct_concat_select = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-SELECT ?concat WHERE {
-        BIND(myfunctions:custom_concat("First", "last") AS ?concat)
-}"""
-    response = httpx.get(service_url, params={"query": direct_concat_select}, headers={"accept": "application/json"})
-    print(response.text)
-    assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
-
-
-concat_select = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-SELECT ?concat WHERE {{
-    SERVICE <{rdflib_endpoint_url}> {{
-        BIND(myfunctions:custom_concat("First", "last") AS ?concat)
-    }}
-}}"""
+# custom_fed_query = """PREFIX func: <https://w3id.org/sparql-functions/>
+# SELECT ?input ?part ?partIndex WHERE {{
+#     SERVICE <{rdflib_endpoint_url}> {{
+#         VALUES ?input { "hello world" "cheese is good" }
+#         BIND(func:splitIndex(?input, " ") AS ?part)
+#     }}
+# }}"""

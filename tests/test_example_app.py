@@ -40,18 +40,18 @@ def test_service_description():
 
 
 def test_custom_concat():
-    response = endpoint.get("/", params={"query": custom_concat_query}, headers={"accept": "application/json"})
+    response = endpoint.get("/", params={"query": custom_function_query}, headers={"accept": "application/json"})
     # print(response.json())
     assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
+    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
 
     response = endpoint.post(
         "/",
-        data={"query": custom_concat_query},
+        data={"query": custom_function_query},
         headers={"accept": "application/json"},
     )
     assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
+    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
 
 
 def test_bad_request():
@@ -59,8 +59,8 @@ def test_bad_request():
     assert response.status_code == 400
 
 
-custom_concat_query = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
-SELECT ?concat ?concatLength WHERE {
-    BIND("First" AS ?first)
-    BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
+custom_function_query = """PREFIX func: <https://w3id.org/sparql-functions/>
+SELECT ?input ?part ?partIndex WHERE {
+    VALUES ?input { "hello world" "cheese is good" }
+    BIND(func:splitIndex(?input, " ") AS ?part)
 }"""
