@@ -77,7 +77,7 @@ conv = bioregistry.get_converter()
 
 
 @ds.predicate_function(namespace=OWL._NS)
-def same_as(input_iri: URIRef) -> list[URIRef]:
+def same_as(input_iri: URIRef) -> List[URIRef]:
     """Get all alternative IRIs for a given IRI using the Bioregistry.
 
     ```sparql

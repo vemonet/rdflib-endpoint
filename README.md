@@ -141,6 +141,7 @@ Key behaviors:
 - Return a list to emit multiple result rows
 - Return dataclasses to populate multiple variables.
 - Python defaults handle missing input values.
+- Add sparql codeblocks in docstrings with a query example on how to use the function, these will be extracted and added as YASGUI queries tabs when deployed through the `SparqlEndpoint` or `SparqlRouter`
 
 #### `type_function` · Typed triple-pattern functions
 
@@ -196,7 +197,15 @@ conv = bioregistry.get_converter()
 
 @ds.predicate_function(namespace=DC._NS)
 def identifier(input_iri: URIRef) -> URIRef:
-    """Get the standardized IRI for a given input IRI."""
+    """Get the standardized IRI for a given input IRI.
+
+    ```sparql
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    SELECT ?id WHERE {
+        <https://identifiers.org/CHEBI/1> dc:identifier ?id .
+    }
+    ```
+    """
     return URIRef(conv.standardize_uri(input_iri))
 
 @ds.predicate_function(namespace=OWL._NS)

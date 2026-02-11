@@ -27,9 +27,9 @@ class SparqlEndpoint(FastAPI):
         enable_update: bool = False,
         cors_enabled: bool = True,
         public_url: str = Defaults.public_url,
-        example_query: str | None = None,
-        example_queries: Optional[Dict[str, QueryExample]] = None,
         favicon: str = Defaults.favicon,
+        example_queries: Optional[Dict[str, QueryExample]] = None,
+        example_query: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """

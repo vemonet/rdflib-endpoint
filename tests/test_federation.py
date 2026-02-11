@@ -1,5 +1,5 @@
 import time
-from multiprocessing import Process
+from multiprocessing import Process, set_start_method
 
 import httpx
 import pytest
@@ -22,6 +22,9 @@ def _get_app():
 
 @pytest.fixture(scope="module")
 def service_url():
+    # Force fork start method for macOS compatibility with unpicklable objects, to fix this on py3.8 and 3.9
+    set_start_method("fork", force=True)
+
     host = "localhost"
     port = 8000
     service_process = Process(

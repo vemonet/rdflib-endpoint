@@ -53,7 +53,7 @@ class SparqlRouter(APIRouter):
         public_url: str = Defaults.public_url,
         favicon: str = Defaults.favicon,
         example_queries: Optional[Dict[str, QueryExample]] = None,
-        example_query: str | None = None,
+        example_query: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """Create a SPARQL endpoint router.
