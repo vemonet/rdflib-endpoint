@@ -19,6 +19,8 @@ from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import FrozenBindings, QueryContext, SPARQLError
 from rdflib.term import Identifier
 
+DEFAULT_NAMESPACE = Namespace("https://w3id.org/sparql-functions/")
+
 
 def _to_node(value: Any) -> Identifier:
     """Convert Python value to RDF node."""
@@ -110,7 +112,7 @@ class DatasetExt(Dataset):
 
     def type_function(
         self,
-        namespace: Namespace,
+        namespace: Namespace = DEFAULT_NAMESPACE,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Decorator to register a custom triple pattern evaluated by a python function.
 
@@ -251,7 +253,7 @@ class DatasetExt(Dataset):
 
     def predicate_function(
         self,
-        namespace: Namespace,
+        namespace: Namespace = DEFAULT_NAMESPACE,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         # ) -> Callable[[Callable[[str], str | list[str]]], Callable[[str], str | list[str]]]:
         """Decorator to register a custom predicate evaluated by a python function.
@@ -331,7 +333,7 @@ class DatasetExt(Dataset):
 
     def extension_function(
         self,
-        namespace: Namespace,
+        namespace: Namespace = DEFAULT_NAMESPACE,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Decorator to register a custom [SPARQL extension function](https://www.w3.org/TR/sparql12-query/#extensionFunctions).
 
@@ -404,7 +406,7 @@ class DatasetExt(Dataset):
 
     def graph_function(
         self,
-        namespace: Namespace,
+        namespace: Namespace = DEFAULT_NAMESPACE,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Decorator to register a custom graph-producing SPARQL extension function.
 

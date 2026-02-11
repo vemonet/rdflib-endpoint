@@ -141,7 +141,7 @@ Key behaviors:
 - Return a list to emit multiple result rows
 - Return dataclasses to populate multiple variables.
 - Python defaults handle missing input values.
-- Add sparql codeblocks in docstrings with a query example on how to use the function, these will be extracted and added as YASGUI queries tabs when deployed through the `SparqlEndpoint` or `SparqlRouter`
+- Add sparql codeblocks with a query example in the function docstring, these will be extracted and added as YASGUI queries tabs when deployed through the `SparqlEndpoint` or `SparqlRouter`
 
 #### `type_function` · Typed triple-pattern functions
 
@@ -149,7 +149,6 @@ Register a triple-pattern function, ideal for complex functions as all inputs/ou
 
 ```python
 from dataclasses import dataclass
-from rdflib import Namespace
 from rdflib_endpoint import DatasetExt
 
 ds = DatasetExt()
@@ -159,7 +158,7 @@ class SplitterResult:
     splitted: str
     index: int
 
-@ds.type_function(namespace=Namespace("https://w3id.org/sparql-functions/"))
+@ds.type_function()
 def string_splitter(
     split_string: str,
     separator: str = " ",
@@ -204,7 +203,7 @@ def identifier(input_iri: URIRef) -> URIRef:
     SELECT ?id WHERE {
         <https://identifiers.org/CHEBI/1> dc:identifier ?id .
     }
-    ```
+```
     """
     return URIRef(conv.standardize_uri(input_iri))
 
@@ -237,12 +236,11 @@ Register a SPARQL extension function usable with `BIND(<namespace+name>(...) AS 
 
 ```python
 from dataclasses import dataclass
-from rdflib import Namespace
 from rdflib_endpoint import DatasetExt
 
 ds = DatasetExt()
 
-@ds.extension_function(namespace=Namespace("https://w3id.org/sparql-functions/"))
+@ds.extension_function()
 def split(input_str: str, separator: str = ",") -> list[str]:
     """Split a string and return each part."""
     return input_str.split(separator)
@@ -262,7 +260,6 @@ Use a dataclass to **populate multiple variables**, the first field of the datac
 
 ```python
 from dataclasses import dataclass
-from rdflib import Namespace
 from rdflib_endpoint import DatasetExt
 
 ds = DatasetExt()
@@ -272,7 +269,7 @@ class SplitResult:
     value: str
     index: int
 
-@ds.extension_function(namespace=Namespace("https://w3id.org/sparql-functions/"))
+@ds.extension_function()
 def split_index(input_str: str, separator: str = ",") -> list[SplitResult]:
     """Split a string and return each part with their index."""
     return [SplitResult(value=part, index=idx) for idx, part in enumerate(input_str.split(separator))]
@@ -293,17 +290,16 @@ SELECT ?input ?part ?partIndex WHERE {
 Register a function that returns an `rdflib.Graph`. Use it in SPARQL as `BIND(<namespace+name>(...) AS ?g)` and then query the temporary graph with `GRAPH ?g { ... }`. Returned graphs are added to the dataset for the duration of the query and cleaned up afterwards.
 
 ```python
-from rdflib import Graph, Literal, Namespace
+from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib_endpoint import DatasetExt
 
 ds = DatasetExt(default_union=True)
-FUNC = Namespace("https://w3id.org/sparql-functions/")
 
-@ds.graph_function(namespace=FUNC)
+@ds.graph_function()
 def split_graph(input_str: str, separator: str = ",") -> Graph:
     g = Graph()
     for part in input_str.split(separator):
-        g.add((FUNC.splitting, FUNC.splitted, Literal(part)))
+        g.add((URIRef("http://splitted"), URIRef["http://part"], Literal(part)))
     return g
 ```
 

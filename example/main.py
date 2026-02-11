@@ -24,7 +24,7 @@ class SplitterResult:
 
 
 # Type pattern function
-@ds.type_function(namespace=FUNC)
+@ds.type_function()
 def string_splitter(
     split_string: str,
     separator: str = " ",
@@ -48,7 +48,7 @@ def string_splitter(
     return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split)]
 
 
-@ds.type_function(namespace=FUNC)
+@ds.type_function()
 def uri_splitter(
     split_string: URIRef,
     separator: str = "/",
@@ -106,7 +106,7 @@ def identifier(input_iri: URIRef) -> URIRef:
 
 
 # Extension function with single output
-@ds.extension_function(namespace=FUNC)
+@ds.extension_function()
 def split(
     input_str: str,
     separator: str = " ",
@@ -131,7 +131,7 @@ class SplitResult:
     index: int
 
 
-@ds.extension_function(namespace=FUNC)
+@ds.extension_function()
 def split_index(
     input_str: str,
     separator: str = " ",
@@ -150,7 +150,7 @@ def split_index(
     return [SplitResult(splitted=part, index=idx) for idx, part in enumerate(split)]
 
 
-@ds.graph_function(namespace=FUNC)
+@ds.graph_function()
 def split_graph(
     input_str: str,
     separator: str = " ",
