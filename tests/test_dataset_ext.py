@@ -8,7 +8,7 @@ from rdflib_endpoint import DatasetExt
 
 # ds = DatasetExt(default_union=True)
 ds = DatasetExt()
-FUNC = Namespace("https://w3id.org/sparql-functions/")
+FUNC = Namespace("urn:sparql-function:")
 
 
 @dataclass
@@ -24,8 +24,7 @@ def string_splitter(
     separator: str = " ",
 ) -> List[SplitterResult]:
     """Split a string and return each part with their index."""
-    split = split_string.split(separator)
-    return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split)]
+    return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split_string.split(separator))]
 
 
 @ds.type_function()
@@ -104,7 +103,7 @@ expected_with_index = [
 
 
 def test_extension_function_multi_output() -> None:
-    query = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query = """PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?partIndex WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:splitIndex(?input, " ") AS ?part)
@@ -112,7 +111,7 @@ def test_extension_function_multi_output() -> None:
     assert list(ds.query(query)) == expected_with_index
 
     # With default separator
-    query_default_sep = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query_default_sep = """PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?partIndex WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:splitIndex(?input) AS ?part)
@@ -128,7 +127,7 @@ def test_extension_function_single_output() -> None:
         (Literal("cheese is good"), Literal("is"), None),
         (Literal("cheese is good"), Literal("good"), None),
     ]
-    query = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query = """PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?partIndex WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:split(?input, " ") AS ?part)
@@ -136,7 +135,7 @@ def test_extension_function_single_output() -> None:
     assert list(ds.query(query)) == expected
 
     # With default separator
-    query_default_sep = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query_default_sep = """PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?partIndex WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:split(?input) AS ?part)
@@ -145,7 +144,7 @@ def test_extension_function_single_output() -> None:
 
 
 def test_pattern_function() -> None:
-    query = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query = """PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?idx WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         [] a func:StringSplitter ;
@@ -157,7 +156,7 @@ def test_pattern_function() -> None:
     assert list(ds.query(query)) == expected_with_index
 
     # With default separator
-    query_default_sep = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query_default_sep = """PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?idx WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         [] a func:StringSplitter ;
@@ -176,7 +175,7 @@ def test_graph_function() -> None:
         (FUNC["graph/split_graph"], FUNC["splitting"], FUNC["splitted"], Literal("hello")),
         (FUNC["graph/split_graph"], FUNC["splitting"], FUNC["splitted"], Literal("world")),
     ]
-    query = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query = """PREFIX func: <urn:sparql-function:>
     SELECT ?g ?s ?p ?o WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:splitGraph(?input, " ") AS ?g)
@@ -188,7 +187,7 @@ def test_graph_function() -> None:
         assert row in expected
 
     # With default separator
-    query_default_sep = """PREFIX func: <https://w3id.org/sparql-functions/>
+    query_default_sep = """PREFIX func: <urn:sparql-function:>
     SELECT ?g ?s ?p ?o WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:splitGraph(?input) AS ?g)
@@ -221,7 +220,7 @@ def test_predicate_function_same_as() -> None:
 
 def test_multiple_functions_combined() -> None:
     query = """PREFIX dc: <http://purl.org/dc/elements/1.1/>
-    PREFIX func: <https://w3id.org/sparql-functions/>
+    PREFIX func: <urn:sparql-function:>
     SELECT ?splitted WHERE {
         <https://identifiers.org/CHEBI/1> dc:identifier ?id .
         BIND(func:split(?id, "_") AS ?part)
@@ -241,7 +240,7 @@ def test_multiple_functions_combined() -> None:
 
 def test_type_function_uri_input() -> None:
     query = """PREFIX dc: <http://purl.org/dc/elements/1.1/>
-    PREFIX func: <https://w3id.org/sparql-functions/>
+    PREFIX func: <urn:sparql-function:>
     SELECT ?splitted WHERE {
         [] a func:UriSplitter ;
             func:splitString <http://purl.org/dc/elements/1.1/> ;

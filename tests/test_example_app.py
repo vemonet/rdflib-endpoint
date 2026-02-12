@@ -59,7 +59,7 @@ def test_bad_request():
     assert response.status_code == 400
 
 
-custom_function_query = """PREFIX func: <https://w3id.org/sparql-functions/>
+custom_function_query = """PREFIX func: <urn:sparql-function:>
 SELECT ?input ?part ?partIndex WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:splitIndex(?input, " ") AS ?part)

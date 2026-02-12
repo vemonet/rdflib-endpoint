@@ -58,7 +58,7 @@ def clear_graph():
 app = SparqlEndpoint(
     graph=graph,
     functions={
-        "https://w3id.org/sparql-functions/custom_concat": custom_concat,
+        "urn:sparql-function:custom_concat": custom_concat,
     },
     enable_update=True,
 )
@@ -254,13 +254,13 @@ def test_bad_request():
     assert response.status_code == 400
 
 
-concat_select = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
+concat_select = """PREFIX myfunctions: <urn:sparql-function:>
 SELECT ?concat ?concatLength WHERE {
     BIND("First" AS ?first)
     BIND(myfunctions:custom_concat(?first, "last") AS ?concat)
 }"""
 
-custom_concat_construct = """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
+custom_concat_construct = """PREFIX myfunctions: <urn:sparql-function:>
 CONSTRUCT {
     <http://example.com/test> <http://example.com/concat> ?concat, ?concatLength .
 } WHERE {

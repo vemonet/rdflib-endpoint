@@ -10,7 +10,7 @@ ds = DatasetExt(
     # store="Oxigraph",
     default_union=True,
 )
-FUNC = Namespace("https://w3id.org/sparql-functions/")
+FUNC = Namespace("urn:sparql-function:")
 
 
 @dataclass
@@ -32,7 +32,7 @@ def string_splitter(
     """Split a string and return each part with their index.
 
     ```sparql
-    PREFIX func: <https://w3id.org/sparql-functions/>
+    PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?idx
     WHERE {
         VALUES ?input { "hello world" "cheese is good" }
@@ -56,7 +56,7 @@ def uri_splitter(
     """Split a URI and return each part with their index.
 
     ```sparql
-    PREFIX func: <https://w3id.org/sparql-functions/>
+    PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?idx
     WHERE {
         VALUES ?input { "hello world" "cheese is good" }
@@ -114,7 +114,7 @@ def split(
     """Split a string.
 
     ```sparql
-    PREFIX func: <https://w3id.org/sparql-functions/>
+    PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:split(?input, " ") AS ?part)
@@ -139,7 +139,7 @@ def split_index(
     """Split a string and return each part with their index.
 
     ```sparql
-    PREFIX func: <https://w3id.org/sparql-functions/>
+    PREFIX func: <urn:sparql-function:>
     SELECT ?input ?part ?partIndex WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:splitIndex(?input, " ") AS ?part)
@@ -158,7 +158,7 @@ def split_graph(
     """Split a string and return the results in a graph.
 
     ```sparql
-    PREFIX func: <https://w3id.org/sparql-functions/>
+    PREFIX func: <urn:sparql-function:>
     SELECT * WHERE {
         VALUES ?input { "hello world" "cheese is good" }
         BIND(func:splitGraph(?input, " ") AS ?g)

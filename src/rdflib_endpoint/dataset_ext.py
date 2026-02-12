@@ -19,7 +19,7 @@ from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import FrozenBindings, QueryContext, SPARQLError
 from rdflib.term import Identifier
 
-DEFAULT_NAMESPACE = Namespace("https://w3id.org/sparql-functions/")
+DEFAULT_NAMESPACE = Namespace("urn:sparql-function:")
 
 
 def _to_node(value: Any) -> Identifier:
@@ -262,7 +262,7 @@ class DatasetExt(Dataset):
         The predicate IRI is generated from the function name (camelCase) + namespace.
 
         Args:
-            namespace: Base namespace used to infer the predicate IRI.
+            namespace: Base namespace used to infer the predicate IRI. Default to `urn:sparql-function:`
         """
 
         def decorator(func: Callable[[str], str | list[str]]) -> Callable[[str], str | list[str]]:
@@ -454,7 +454,7 @@ class DatasetExt(Dataset):
                     query_results.append(eval_part.merge({part.var: _to_node(graph_uri)}))
                 return query_results
 
-            CUSTOM_EVALS[f"graph_{func.__name__}"] = _with_filter_support(_eval_graph_function)
+            CUSTOM_EVALS[str(iri_value)] = _with_filter_support(_eval_graph_function)
             self._register_custom_function(func)
             return func
 

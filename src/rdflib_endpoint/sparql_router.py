@@ -442,10 +442,11 @@ class SparqlRouter(APIRouter):
 
         # Add custom functions to the service description
         for custom_function_uri in [
-            key for key in CUSTOM_EVALS if key.startswith("http://") or key.startswith("https://")
+            key
+            for key in CUSTOM_EVALS
+            if key.startswith("urn:") or key.startswith("https://") or key.startswith("http://")
         ]:
             function_uri = URIRef(custom_function_uri)
-
             if (function_uri, RDF.type, SD.Function) not in self.service_description:
                 self.service_description.add((function_uri, RDF.type, SD.Function))
             if (sd_subj, SD.extensionFunction, function_uri) not in self.service_description:

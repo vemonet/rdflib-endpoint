@@ -42,7 +42,7 @@ def service_url():
 
 
 def test_direct_custom_concat(service_url):
-    custom_function_query = """PREFIX func: <https://w3id.org/sparql-functions/>
+    custom_function_query = """PREFIX func: <urn:sparql-function:>
 SELECT ?input ?part ?partIndex WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:splitIndex(?input, " ") AS ?part)
@@ -109,7 +109,7 @@ SELECT ?input ?part ?partIndex WHERE {
 #     assert response.json()["results"]["bindings"][0]["concat"]["value"] == "Firstlast"
 
 
-# custom_fed_query = """PREFIX func: <https://w3id.org/sparql-functions/>
+# custom_fed_query = """PREFIX func: <urn:sparql-function:>
 # SELECT ?input ?part ?partIndex WHERE {{
 #     SERVICE <{rdflib_endpoint_url}> {{
 #         VALUES ?input { "hello world" "cheese is good" }

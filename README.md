@@ -143,6 +143,10 @@ Key behaviors:
 - Python defaults handle missing input values.
 - Add sparql codeblocks with a query example in the function docstring, these will be extracted and added as YASGUI queries tabs when deployed through the `SparqlEndpoint` or `SparqlRouter`
 
+> [!CAUTION]
+>
+> For now RDFLib uses a global variable to define custom evaluations, that means if you declare 2 datasets in the same process the functions defined on one dataset will be also used on another dataset.
+
 #### `type_function` · Typed triple-pattern functions
 
 Register a triple-pattern function, ideal for complex functions as all inputs/outputs are explicit in the SPARQL query. The function is selected when a subject is typed with the function name in PascalCase in the given namespace. The decorated function receives arguments extracted from input predicates derived from the arguments names, and returns either a single result or a list of results.
@@ -170,7 +174,7 @@ def string_splitter(
 Example query:
 
 ```SPARQL
-PREFIX func: <https://w3id.org/sparql-functions/>
+PREFIX func: <urn:sparql-function:>
 SELECT ?input ?part ?idx
 WHERE {
     VALUES ?input { "hello world" "cheese is good" }
@@ -249,7 +253,7 @@ def split(input_str: str, separator: str = ",") -> list[str]:
 Example query:
 
 ```sparql
-PREFIX func: <https://w3id.org/sparql-functions/>
+PREFIX func: <urn:sparql-function:>
 SELECT ?input ?part WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:split(?input, " ") AS ?part)
@@ -278,7 +282,7 @@ def split_index(input_str: str, separator: str = ",") -> list[SplitResult]:
 Example query:
 
 ```sparql
-PREFIX func: <https://w3id.org/sparql-functions/>
+PREFIX func: <urn:sparql-function:>
 SELECT ?input ?part ?partIndex WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:splitIndex(?input, " ") AS ?part)
@@ -306,7 +310,7 @@ def split_graph(input_str: str, separator: str = ",") -> Graph:
 Example query:
 
 ```sparql
-PREFIX func: <https://w3id.org/sparql-functions/>
+PREFIX func: <urn:sparql-function:>
 SELECT * WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:splitGraph(?input, " ") AS ?g)
@@ -354,12 +358,12 @@ app = SparqlEndpoint(
     graph=Dataset(default_union=True),
     # Register the functions:
     functions={
-        'https://w3id.org/sparql-functions/custom_concat': custom_concat
+        'urn:sparql-function:custom_concat': custom_concat
     },
     # Example queries used to populate YASGUI tabs
     example_queries={
         "Custom function": {
-            "query": """PREFIX myfunctions: <https://w3id.org/sparql-functions/>
+            "query": """PREFIX myfunctions: <urn:sparql-function:>
 SELECT ?concat ?concatLength WHERE {
     BIND(myfunctions:custom_concat("First", "last") AS ?concat)
 }""",
