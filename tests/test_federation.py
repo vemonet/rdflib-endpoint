@@ -2,6 +2,7 @@ import os
 import platform
 import time
 from multiprocessing import Process, set_start_method
+from typing import Any
 
 import httpx
 import pytest
@@ -26,13 +27,31 @@ def _get_app():
     )
 
 
-custom_fed_query = """PREFIX func: <urn:sparql-function:>
+fed_query_function = """PREFIX func: <urn:sparql-function:>
 SELECT ?input ?part ?partIndex WHERE {{
     SERVICE <{rdflib_endpoint_url}> {{
         VALUES ?input {{ "hello world" "cheese is good" }}
         BIND(func:splitIndex(?input, " ") AS ?part)
     }}
 }}"""
+
+fed_query_sameas = """PREFIX dc: <http://purl.org/dc/elements/1.1/>
+SELECT ?id WHERE {{
+    SERVICE <{rdflib_endpoint_url}> {{
+        <https://identifiers.org/CHEBI/1> dc:identifier ?id .
+    }}
+}}"""
+
+
+def sparql_query(endpoint: str, query: str) -> Any:
+    response = httpx.post(
+        endpoint,
+        data={"query": query},
+        headers={"accept": "application/sparql-results+json"},
+    )
+    print(response.text)
+    assert response.status_code == 200
+    return response.json()["results"]["bindings"]
 
 
 @pytest.fixture(scope="module")
@@ -63,14 +82,8 @@ SELECT ?input ?part ?partIndex WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:splitIndex(?input, " ") AS ?part)
 }"""
-    response = httpx.get(
-        "http://localhost:8000",
-        params={"query": custom_function_query},
-        headers={"accept": "application/json"},
-    )
-    # print(response.text)
-    assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+    resp = sparql_query("http://localhost:8000", custom_function_query)
+    assert resp[0]["part"]["value"] == "hello"
 
 
 admin_password = "root"  # noqa: S105
@@ -114,15 +127,8 @@ def graphdb():
 
 
 def test_federated_query_graphdb(service_url, graphdb):
-    # print(custom_fed_query.format(rdflib_endpoint_url="http://host.docker.internal:8000"))
-    response = httpx.post(
-        graphdb,
-        data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)},
-        headers={"accept": "application/sparql-results+json"},
-    )
-    print(response.text)
-    assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+    resp = sparql_query(graphdb, fed_query_function.format(rdflib_endpoint_url=service_url))
+    assert resp[0]["part"]["value"] == "hello"
 
 
 @pytest.fixture(scope="module")
@@ -136,20 +142,12 @@ def blazegraph():
         f"http://{container.get_container_host_ip()}:{container.get_exposed_port(8080)}/bigdata/namespace/kb/sparql"
     )
     print(f"Blazegraph started in {delay:.0f}s at {base_url}")
-    # print(container.get_logs())
     yield base_url
 
 
 def test_federated_query_blazegraph(service_url, blazegraph):
-    # print(custom_fed_query.format(rdflib_endpoint_url=service_url))
-    response = httpx.post(
-        blazegraph,
-        data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)},
-        headers={"accept": "application/sparql-results+json"},
-    )
-    print(response.text)
-    assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+    resp = sparql_query(blazegraph, fed_query_function.format(rdflib_endpoint_url=service_url))
+    assert resp[0]["part"]["value"] == "hello"
 
 
 @pytest.fixture(scope="module")
@@ -161,19 +159,16 @@ def oxigraph():
     delay = wait_for_logs(container, "Listening for requests at")
     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(7878)}/query"
     print(f"Oxigraph started in {delay:.0f}s at {base_url}")
-    # print(container.get_logs())
     yield base_url
 
 
 def test_federated_query_oxigraph(service_url, oxigraph):
-    response = httpx.post(
-        oxigraph,
-        data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)},
-        headers={"accept": "application/sparql-results+json"},
-    )
-    print(response.text)
-    assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+    resp = sparql_query(oxigraph, fed_query_sameas.format(rdflib_endpoint_url=service_url))
+    assert resp[0]["id"]["value"] == "http://purl.obolibrary.org/obo/CHEBI_1"
+
+    # TODO: somehow this fails only when running in GitHub actions: The custom function <urn:sparql-function:splitIndex> is not supported
+    # resp = sparql_query(oxigraph, fed_query_function.format(rdflib_endpoint_url=service_url))
+    # assert resp[0]["part"]["value"] == "hello"
 
 
 @pytest.fixture(scope="module")
@@ -194,19 +189,12 @@ def fuseki():
         auth=("admin", admin_password),
     )
     assert response.status_code == 200, f"Failed to create dataset: {response.text}"
-    # print(container.get_logs())
     yield f"{base_url}/testfed/sparql"
 
 
 def test_federated_query_fuseki(service_url, fuseki):
-    response = httpx.post(
-        fuseki,
-        data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)},
-        headers={"accept": "application/sparql-results+json"},
-    )
-    print(response.text)
-    assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+    resp = sparql_query(fuseki, fed_query_function.format(rdflib_endpoint_url=service_url))
+    assert resp[0]["part"]["value"] == "hello"
 
 
 @pytest.fixture(scope="module")
@@ -214,12 +202,10 @@ def rdf4j():
     """Start rdf4j container as a fixture."""
     container = DockerContainer("eclipse/rdf4j-workbench:latest")
     container.with_exposed_ports(8080).with_bind_ports(8080, 8081)
-    # container.with_env("JAVA_OPTS", "-Xms1g -Xmx4g")
     container.start()
     delay = wait_for_logs(container, "Server startup in")
     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(8080)}/rdf4j-server/repositories/testfed"
-    print(f"rdf4j started in {delay:.0f}s at {base_url}")
-    # print(container.get_logs())
+    print(f"RDF4J started in {delay:.0f}s at {base_url}")
     # Create repository https://graphdb.ontotext.com/documentation/10.8/manage-repos-with-restapi.html
     config = """@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix config: <tag:rdf4j.org,2023:config/>.
@@ -238,14 +224,8 @@ def rdf4j():
 
 
 def test_federated_query_rdf4j(service_url, rdf4j):
-    response = httpx.post(
-        rdf4j,
-        data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)},
-        headers={"accept": "application/sparql-results+json"},
-    )
-    print(response.text)
-    assert response.status_code == 200
-    assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+    resp = sparql_query(rdf4j, fed_query_function.format(rdflib_endpoint_url=service_url))
+    assert resp[0]["part"]["value"] == "hello"
 
 
 # Virtuoso https://community.openlinksw.com/t/enabling-sparql-1-1-federated-query-processing-in-virtuoso/2477
@@ -286,18 +266,12 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     # NOTE: getting error when sending an extension function to virtuoso
 #     # Virtuoso RDF02 Error SR619: SPARUL LOAD SERVICE DATA access denied: database user 107 (SPARQL) has no write permission on graph http://host.docker.internal:8000
 #     # response = httpx.post(virtuoso, data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)}, headers={"accept": "application/sparql-results+json"})
+#     # resp = sparql_query(virtuoso, fed_query_function.format(rdflib_endpoint_url=service_url))
+#     # assert resp[0]["part"]["value"] == "hello"
 
 #     # ERROR: Virtuoso HTCLI Error HC001: Connection Error in HTTP Client
-#     virtuoso_fed_query = """PREFIX dc: <http://purl.org/dc/elements/1.1/>
-# SELECT ?id WHERE {{
-#     SERVICE <{rdflib_endpoint_url}> {{
-#         <https://identifiers.org/CHEBI/1> dc:identifier ?id .
-#     }}
-# }}"""
-#     response = httpx.post(virtuoso, data={"query": virtuoso_fed_query.format(rdflib_endpoint_url=service_url)}, headers={"accept": "application/sparql-results+json"})
-#     print(response.text)
-#     assert response.status_code == 200
-#     assert response.json()["results"]["bindings"][0]["id"]["value"] == "https://identifiers.org/chebi/1"
+#     resp = sparql_query(virtuoso, fed_query_sameas.format(rdflib_endpoint_url=service_url))
+#     assert resp[0]["id"]["value"] == "http://purl.obolibrary.org/obo/CHEBI_1"
 
 
 # Qlever
@@ -317,8 +291,5 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     yield base_url
 
 # def test_federated_query_qlever(service_url, qlever):
-#     # print(custom_fed_query.format(rdflib_endpoint_url=service_url))
-#     response = httpx.post(qlever, data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)}, headers={"accept": "application/sparql-results+json"})
-#     print(response.text)
-#     assert response.status_code == 200
-#     assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+#     resp = sparql_query(qlever, fed_query_function.format(rdflib_endpoint_url=service_url))
+#     assert resp[0]["part"]["value"] == "hello"
