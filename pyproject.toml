@@ -150,7 +150,8 @@ addopts = [
     "--cov-fail-under=85",
 ]
 filterwarnings = [
-    "ignore::DeprecationWarning:httpx.*:"
+    "ignore::DeprecationWarning:httpx.*:",
+    "ignore::pyparsing.exceptions.PyparsingDeprecationWarning", # https://github.com/RDFLib/rdflib/issues/3361
 ]
 
 

@@ -255,3 +255,24 @@ def test_type_function_uri_input() -> None:
     # assert "obolibrary" in split_res
     # assert "org/obo/CHEBI" in split_res
     # assert "1" in split_res
+
+
+def test_filter_based_list() -> None:
+    query = """PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    SELECT ?id WHERE {
+        ?s dc:identifier ?id .
+        FILTER ( ?s = <https://identifiers.org/CHEBI/1> )
+    }"""
+    expected = (URIRef("http://purl.obolibrary.org/obo/CHEBI_1"),)
+    assert list(ds.query(query)) == [expected]
+
+    query = """PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    SELECT ?id WHERE {
+        ?s dc:identifier ?id .
+        FILTER (  (( ?s = <https://identifiers.org/CHEBI/1>) || ( ?s = <https://identifiers.org/CHEBI/2>)) )
+    }"""
+    expected2 = [
+        (URIRef("http://purl.obolibrary.org/obo/CHEBI_1"),),
+        (URIRef("http://purl.obolibrary.org/obo/CHEBI_2"),),
+    ]
+    assert list(ds.query(query)) == expected2

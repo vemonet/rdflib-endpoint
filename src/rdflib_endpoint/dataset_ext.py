@@ -245,7 +245,7 @@ class DatasetExt(Dataset):
                         yield FrozenBindings(ctx, new_bindings)
 
             # Register with RDFLib using function name as key
-            CUSTOM_EVALS[f"type_{func.__name__}"] = custom_eval_func
+            CUSTOM_EVALS[f"type_{func.__name__}"] = _with_filter_support(custom_eval_func)
             self._register_custom_function(func)
             return func
 
@@ -325,7 +325,7 @@ class DatasetExt(Dataset):
                     yield from binding_candidates
 
             # Register with RDFLib
-            CUSTOM_EVALS[f"predicate_{func.__name__}"] = custom_eval_func
+            CUSTOM_EVALS[f"predicate_{func.__name__}"] = _with_filter_support(custom_eval_func)
             self._register_custom_function(func)
             return func
 
@@ -398,7 +398,7 @@ class DatasetExt(Dataset):
                             query_results.append(eval_part.merge({part.var: _to_node(res)}))
                 return query_results
 
-            CUSTOM_EVALS[str(iri_value)] = _eval_extension_function
+            CUSTOM_EVALS[str(iri_value)] = _with_filter_support(_eval_extension_function)
             self._register_custom_function(func)
             return func
 
@@ -454,8 +454,94 @@ class DatasetExt(Dataset):
                     query_results.append(eval_part.merge({part.var: _to_node(graph_uri)}))
                 return query_results
 
-            CUSTOM_EVALS[f"graph_{func.__name__}"] = _eval_graph_function
+            CUSTOM_EVALS[f"graph_{func.__name__}"] = _with_filter_support(_eval_graph_function)
             self._register_custom_function(func)
             return func
 
         return decorator
+
+
+def _try_single_equality(expr: Any) -> dict[Variable, Identifier] | None:
+    """Try to extract a single ?var = value from a RelationalExpression."""
+    if getattr(expr, "name", None) != "RelationalExpression":
+        return None
+    if str(getattr(expr, "op", "")) != "=":
+        return None
+    left = getattr(expr, "expr", None)
+    right = getattr(expr, "other", None)
+    if isinstance(left, Variable) and isinstance(right, Identifier) and not isinstance(right, Variable):
+        return {left: right}
+    if isinstance(right, Variable) and isinstance(left, Identifier) and not isinstance(left, Variable):
+        return {right: left}
+    return None
+
+
+def _collect_equality_bindings(expr: Any, results: list[dict[Variable, Identifier]]) -> bool:
+    """Recursively extract equality bindings from a FILTER expression.
+
+    Returns True if the entire expression is reducible to equality bindings.
+    """
+    eq = _try_single_equality(expr)
+    if eq is not None:
+        results.append(eq)
+        return True
+    name = getattr(expr, "name", None)
+    if name == "ConditionalOrExpression":
+        first = getattr(expr, "expr", None)
+        others = getattr(expr, "other", [])
+        if not isinstance(others, list):
+            others = [others]
+        for branch in [first, *others]:
+            if not _collect_equality_bindings(branch, results):
+                results.clear()
+                return False
+        return True
+    return False
+
+
+def _extract_equality_bindings(expr: Any) -> list[dict[Variable, Identifier]]:
+    """Extract ?var = value equality bindings from a FILTER expression.
+
+    Handles:
+    - Simple equality: FILTER(?s = <uri>) -> [{?s: <uri>}]
+    - OR of equalities: FILTER(?s = <uri1> || ?s = <uri2>) -> [{?s: <uri1>}, {?s: <uri2>}]
+    """
+    results: list[dict[Variable, Identifier]] = []
+    if _collect_equality_bindings(expr, results):
+        return results
+    return []
+
+
+def _with_filter_support(eval_func: Callable[..., Any]) -> Callable[..., Any]:
+    """Wrap a custom eval function to also handle Filter parts with equality bindings.
+
+    When a Filter part is encountered, equality bindings (e.g. ?s = <uri>) are
+    extracted and injected into the query context before evaluating the inner part.
+    """
+
+    def wrapper(ctx: QueryContext, part: CompValue) -> Any:
+        if part.name != "Filter":
+            return eval_func(ctx, part)
+        binding_sets = _extract_equality_bindings(part.expr)
+        if not binding_sets:
+            raise NotImplementedError()
+        # Evaluate for first binding set (also checks if inner part is handled)
+        try:
+            first_ctx = ctx.push()
+            for var, val in binding_sets[0].items():
+                first_ctx[var] = val
+        except Exception as e:
+            raise NotImplementedError() from e
+        first_results = eval_func(first_ctx, part.p)  # raises NotImplementedError if not handled
+        if len(binding_sets) == 1:
+            return first_results
+        # Multiple binding sets (OR): collect all results
+        all_results = list(first_results)
+        for binding_set in binding_sets[1:]:
+            child_ctx = ctx.push()
+            for var, val in binding_set.items():
+                child_ctx[var] = val
+            all_results.extend(eval_func(child_ctx, part.p))
+        return iter(all_results)
+
+    return wrapper
