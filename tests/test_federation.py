@@ -1,4 +1,5 @@
 import os
+import platform
 import time
 from multiprocessing import Process, set_start_method
 
@@ -48,8 +49,9 @@ def service_url():
     )
     service_process.start()
     time.sleep(2)
-    # endpoint_url = f"http://localhost:{port}"
-    endpoint_url = f"http://host.docker.internal:{port}"
+    # Use host.docker.internal on macOS (Docker Desktop), 172.17.0.1 on Linux (GitHub Actions)
+    host_ip = "host.docker.internal" if platform.system() == "Darwin" else "172.17.0.1"
+    endpoint_url = f"http://{host_ip}:{port}"
     yield endpoint_url
     service_process.kill()
     service_process.join()
@@ -62,7 +64,7 @@ SELECT ?input ?part ?partIndex WHERE {
     BIND(func:splitIndex(?input, " ") AS ?part)
 }"""
     response = httpx.get(
-        service_url.replace("host.docker.internal", "localhost"),
+        "http://localhost:8000",
         params={"query": custom_function_query},
         headers={"accept": "application/json"},
     )
@@ -246,9 +248,14 @@ def test_federated_query_rdf4j(service_url, rdf4j):
     assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
 
 
-# Virtuoso
-# VIRTUOSO_PASSWORD = "dba"
-# # https://community.openlinksw.com/t/enabling-sparql-1-1-federated-query-processing-in-virtuoso/2477
+# Virtuoso https://community.openlinksw.com/t/enabling-sparql-1-1-federated-query-processing-in-virtuoso/2477
+# docker run -it -e DBA_PASSWORD=dba -p 8890:8890 --rm openlink/virtuoso-opensource-7:latest
+# """
+# isql -U dba -P dba exec='GRANT "SPARQL_SELECT_FED" TO "SPARQL";'
+# isql -U dba -P dba exec='GRANT "SPARQL_LOAD_SERVICE_DATA" TO "SPARQL";'
+# isql -U dba -P dba exec='GRANT SELECT ON DB.DBA.SPARQL_SINV_2 TO "SPARQL";'
+# isql -U dba -P dba exec='GRANT EXECUTE ON DB.DBA.SPARQL_SINV_IMP TO "SPARQL";'
+# """
 
 # @pytest.fixture(scope="module")
 # def virtuoso():
@@ -256,27 +263,26 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     container = DockerContainer("openlink/virtuoso-opensource-7:latest")
 #     container.with_exposed_ports(8890).with_bind_ports(8890, 8890)
 #     container.with_env("VIRT_SPARQL_AllowQueryService", "1")
-#     container.with_env("DBA_PASSWORD", VIRTUOSO_PASSWORD)
+#     container.with_env("DBA_PASSWORD", admin_password)
 #     container.start()
 #     delay = wait_for_logs(container, "Server online at")
 #     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(8890)}/sparql"
 
 #     # Enable federated queries
-#     container.exec(f'isql -U dba -P {VIRTUOSO_PASSWORD} exec=\'GRANT "SPARQL_SELECT_FED" TO "SPARQL";\'')
-#     container.exec(f'isql -U dba -P {VIRTUOSO_PASSWORD} exec=\'GRANT "SPARQL_LOAD_SERVICE_DATA" TO "SPARQL";\'')
-#     container.exec(f'isql -U dba -P {VIRTUOSO_PASSWORD} exec=\'GRANT SELECT ON DB.DBA.SPARQL_SINV_2 TO "SPARQL";\'')
-#     container.exec(f'isql -U dba -P {VIRTUOSO_PASSWORD} exec=\'GRANT EXECUTE ON DB.DBA.SPARQL_SINV_IMP TO "SPARQL";\'')
-#     # container.exec(f'isql -U dba -P {VIRTUOSO_PASSWORD} exec=\'GRANT SPARQL_UPDATE ON GRAPH <http://host.docker.internal:8000> TO "SPARQL";\'')
+#     container.exec(f'isql -U dba -P {admin_password} exec=\'GRANT "SPARQL_SELECT_FED" TO "SPARQL";\'')
+#     container.exec(f'isql -U dba -P {admin_password} exec=\'GRANT "SPARQL_LOAD_SERVICE_DATA" TO "SPARQL";\'')
+#     container.exec(f'isql -U dba -P {admin_password} exec=\'GRANT SELECT ON DB.DBA.SPARQL_SINV_2 TO "SPARQL";\'')
+#     container.exec(f'isql -U dba -P {admin_password} exec=\'GRANT EXECUTE ON DB.DBA.SPARQL_SINV_IMP TO "SPARQL";\'')
+#     container.exec("apt-get update")
+#     container.exec("apt-get install -y curl")
+#     print(container.exec("curl -I http://host.docker.internal:8000"))
+#     # container.exec(f'isql -U dba -P {admin_password} exec=\'GRANT SPARQL_UPDATE ON GRAPH <http://host.docker.internal:8000> TO "SPARQL";\'')
 #     time.sleep(5)
-#     # isql -U dba -P dba exec='GRANT "SPARQL_SELECT_FED" TO "SPARQL";'
-#     # isql -U dba -P dba exec='GRANT "SPARQL_LOAD_SERVICE_DATA" TO "SPARQL";'
-#     # isql -U dba -P dba exec='GRANT SELECT ON DB.DBA.SPARQL_SINV_2 TO "SPARQL";'
-#     # isql -U dba -P dba exec='GRANT EXECUTE ON DB.DBA.SPARQL_SINV_IMP TO "SPARQL";'
 #     print(f"Virtuoso started in {delay:.0f}s at {base_url}")
 #     yield base_url
 
 
-# def test_virtuoso_federated_query(service_url, virtuoso):
+# def test_federated_query_virtuoso(service_url, virtuoso):
 #     # NOTE: getting error when sending an extension function to virtuoso
 #     # Virtuoso RDF02 Error SR619: SPARUL LOAD SERVICE DATA access denied: database user 107 (SPARQL) has no write permission on graph http://host.docker.internal:8000
 #     # response = httpx.post(virtuoso, data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)}, headers={"accept": "application/sparql-results+json"})
@@ -291,7 +297,7 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     response = httpx.post(virtuoso, data={"query": virtuoso_fed_query.format(rdflib_endpoint_url=service_url)}, headers={"accept": "application/sparql-results+json"})
 #     print(response.text)
 #     assert response.status_code == 200
-#     assert response.json()["results"]["bindings"][0]["part"]["value"] == "hello"
+#     assert response.json()["results"]["bindings"][0]["id"]["value"] == "https://identifiers.org/chebi/1"
 
 
 # Qlever
@@ -310,7 +316,7 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     # print(container.get_logs())
 #     yield base_url
 
-# def test_qlever_federated_query(service_url, qlever):
+# def test_federated_query_qlever(service_url, qlever):
 #     # print(custom_fed_query.format(rdflib_endpoint_url=service_url))
 #     response = httpx.post(qlever, data={"query": custom_fed_query.format(rdflib_endpoint_url=service_url)}, headers={"accept": "application/sparql-results+json"})
 #     print(response.text)

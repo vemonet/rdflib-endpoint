@@ -151,7 +151,8 @@ addopts = [
 ]
 filterwarnings = [
     "ignore::DeprecationWarning:httpx.*:",
-    "ignore::pyparsing.exceptions.PyparsingDeprecationWarning", # https://github.com/RDFLib/rdflib/issues/3361
+    "ignore::DeprecationWarning:rdflib.*",
+    # "ignore::pyparsing.exceptions.PyparsingDeprecationWarning", # https://github.com/RDFLib/rdflib/issues/3361
 ]
 
 

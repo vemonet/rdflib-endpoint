@@ -273,6 +273,11 @@ class SparqlRouter(APIRouter):
                 update = None
             return await handle_sparql_request(request, query, update)
 
+        # @self.head(path, name="SPARQL endpoint HEAD", responses=API_RESPONSES)
+        # async def head_sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:
+        #     """Handle HEAD requests to check endpoint availability."""
+        #     return Response(status_code=200, headers={"Allow": "GET, POST, HEAD"})
+
     def _build_example_queries_from_dataset(self, dataset: DatasetExt) -> Optional[Dict[str, QueryExample]]:
         """Extract example queries from DatasetExt custom function docstrings."""
         examples: Dict[str, QueryExample] = {}
