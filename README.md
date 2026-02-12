@@ -14,10 +14,11 @@
 
 </div>
 
-`rdflib-endpoint` is a SPARQL endpoint based on RDFLib, use it to easily:
+`rdflib-endpoint` enables to:
 
+- **deploy RDFLib `Graph`** and `Dataset` as SPARQL endpoints
+- **define custom SPARQL functions** implemented in python that can be queried in a federated fashion using SPARQL `SERVICE` from another endpoint.
 - **serve local RDF files** in one command,
-- **expose custom SPARQL functions** implemented in python that can be queried in a federated fashion using SPARQL `SERVICE` from another endpoint.
 
 > Feel free to create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented.
 
@@ -65,11 +66,11 @@ rdflib-endpoint convert "*.ttl" "*.jsonld" "*.nq" --output "merged.trig"
 
 ## ✨ Deploy your SPARQL endpoint
 
-`rdflib-endpoint` enables you to easily define and deploy SPARQL endpoints based on RDFLib Graph and Dataset. Additionally it provides helpers to defines custom functions in the endpoint.
+`rdflib-endpoint` enables you to easily define and deploy SPARQL endpoints based on RDFLib `Graph` and `Dataset`. Additionally it provides helpers to defines custom functions in the endpoint.
 
 > [!TIP]
 >
-> Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example to get started, including a docker deployment.
+> Checkout the [`example`](https://github.com/vemonet/rdflib-endpoint/tree/main/example) folder for a complete working app example with custom functions to get started, including a docker deployment.
 
 ### ⚡️ Deploy as a standalone API
 
@@ -110,11 +111,7 @@ from rdflib import Dataset
 from rdflib_endpoint import SparqlRouter
 
 ds = Dataset()
-sparql_router = SparqlRouter(
-    graph=ds,
-    path="/",
-    title="SPARQL endpoint for RDFLib graph",
-)
+sparql_router = SparqlRouter(graph=ds, path="/")
 
 app = FastAPI()
 app.include_router(sparql_router)
@@ -131,13 +128,13 @@ app.include_router(sparql_router)
 | Decorator             | Triggered by                                        | Typical use                         |
 | --------------------- | --------------------------------------------------- | ----------------------------------- |
 | `@type_function`      | A triple pattern with subject typed by the function | Structured multi-field results      |
-| `@predicate_function` | A predicate in the given namespace                  | Fill object values via Python logic |
+| `@predicate_function` | A predicate in the given namespace                  | Fill object values via python logic |
 | `@extension_function` | `BIND(func:myFunc(...))`                            | Scalar or multi-binding functions   |
 | `@graph_function`     | `BIND(func:funcGraph(...) AS ?g)`                   | Return a temporary graph            |
 
 Key behaviors:
 
-- Types, predicates and functions IRIs are generated from the provided namespace concatenated to their python counterpart following SPARQL naming conventions (classes in PascalCase, predicates and functions in camelCase)
+- Types, predicates and functions IRIs are generated from the provided namespace concatenated to their python counterpart following SPARQL naming conventions (classes in PascalCase, predicates and functions in camelCase). Default namespace is `urn:sparql-function:`
 - Return a list to emit multiple result rows
 - Return dataclasses to populate multiple variables.
 - Python defaults handle missing input values.
@@ -146,6 +143,10 @@ Key behaviors:
 > [!CAUTION]
 >
 > For now RDFLib uses a global variable to define custom evaluations, that means if you declare 2 datasets in the same process the functions defined on one dataset will be also used on another dataset.
+
+> [!WARNING]
+>
+> Oxigraph does not support custom functions, so it can be only used to deploy graphs without custom functions.
 
 #### `type_function` · Typed triple-pattern functions
 
@@ -188,7 +189,7 @@ WHERE {
 
 #### `predicate_function` · Predicate evaluation
 
-Register a predicate function, ideal when the input is a simple IRI. The function is selected when the predicate IRI is in the given namespace. The decorated function receives the subject IRI as input and returns the object values.
+Register a predicate function, ideal when the input is a simple IRI. The function is selected when the predicate is the function name in camelCase in the given namespace. The decorated function receives the subject IRI as input and returns the object values.
 
 ```python
 import bioregistry
@@ -260,7 +261,7 @@ SELECT ?input ?part WHERE {
 }
 ```
 
-Use a dataclass to **populate multiple variables**, the first field of the dataclass will be returned in the bound variable, other fields will populate variables derived from the base bound variable concatenated with the fields in pascal case:
+Use a dataclass to **populate multiple variables**, the first field of the dataclass will be returned in the bound variable, other fields will populate variables derived from the base bound variable concatenated with the fields in PascalCase:
 
 ```python
 from dataclasses import dataclass
@@ -311,7 +312,7 @@ Example query:
 
 ```sparql
 PREFIX func: <urn:sparql-function:>
-SELECT * WHERE {
+SELECT DISTINCT * WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:splitGraph(?input, " ") AS ?g)
     GRAPH ?g {
@@ -371,9 +372,6 @@ SELECT ?concat ?concatLength WHERE {
     },
 )
 ````
-
-> [!WARNING]
-> Oxigraph and `oxrdflib` do not support custom functions, so it can be only used to deploy graphs without custom functions.
 
 ### ✒️ Or directly define the custom evaluation
 
