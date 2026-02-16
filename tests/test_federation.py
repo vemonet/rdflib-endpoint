@@ -274,21 +274,34 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     assert resp[0]["id"]["value"] == "http://purl.obolibrary.org/obo/CHEBI_1"
 
 
-# Qlever
-# docker run -it --rm -p 7001:7001 adfreiburg/qlever -c "mkdir -p /tmp/empty-db && cd /tmp/empty-db && touch empty.nt && qlever setup-config empty && qlever settings --format nt --input-files empty.nt && qlever index && qlever start"
-# docker run -it --rm -p 7001:7001 adfreiburg/qlever -c "qlever setup-config olympics && qlever get-data && qlever index && qlever start"
+# Qlever https://github.com/ad-freiburg/qlever
+# Qleverfile: https://github.com/qlever-dev/qlever-control/blob/main/src/qlever/Qleverfiles/Qleverfile.default
+# docker run -it --rm -p 7019:7019 -e UID=$(id -u) -e GID=$(id -g) -v $(pwd)/tests/resources/qlever:/data -w /data adfreiburg/qlever -c "qlever setup-config olympics && qlever get-data && qlever index && qlever start && tail -F olympics.server-log.txt"
+
+## Start qlever with olympics dataset:
+# docker run -it --rm -p 7019:7019 -e UID=$(id -u) -e GID=9000 -v $(pwd)/data/qlever:/data -w /data adfreiburg/qlever -c "qlever setup-config olympics && qlever get-data && qlever index && qlever start && tail -F olympics.server-log.txt"
+## Cleanup
+# rm -rf data/qlever
+## Query:
+# curl -sS -X POST http://localhost:7019 --data-urlencode "query=SELECT * WHERE { ?s ?p ?o } LIMIT 10"
 
 # @pytest.fixture(scope="module")
 # def qlever():
 #     """Start qlever container as a fixture."""
-#     container = DockerContainer("adfreiburg/qlever:commit-f35a290")
-#     container.with_exposed_ports(7001).with_bind_ports(7001, 7001)
+#     os.makedirs("data/qlever", exist_ok=True)
+#     container = DockerContainer("adfreiburg/qlever")
+#     container.with_exposed_ports(7019).with_bind_ports(7019, 7019)
+#     container.with_env("UID", str(os.getuid())).with_env("GID", "9000")
+#     container.with_volume_mapping(os.path.abspath("data/qlever"), "/data")
+#     container.with_command("-c 'cd /data && qlever setup-config olympics && qlever get-data && qlever index && qlever start && tail -F olympics.server-log.txt'")
 #     container.start()
-#     delay = wait_for_logs(container, "Started @")
-#     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(7001)}/sparql"
+#     delay = wait_for_logs(container, "The server is ready")
+#     # delay = wait_for_logs(container, "Setting index description to")
+#     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(7019)}"
 #     print(f"QLever started in {delay:.0f}s at {base_url}")
 #     # print(container.get_logs())
 #     yield base_url
+#     shutil.rmtree("data/qlever", ignore_errors=True)
 
 # def test_federated_query_qlever(service_url, qlever):
 #     resp = sparql_query(qlever, fed_query_function.format(rdflib_endpoint_url=service_url))

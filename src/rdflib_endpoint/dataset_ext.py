@@ -113,6 +113,7 @@ class DatasetExt(Dataset):
     def type_function(
         self,
         namespace: Namespace = DEFAULT_NAMESPACE,
+        use_subject: bool = False,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Decorator to register a custom triple pattern evaluated by a python function.
 
@@ -121,6 +122,7 @@ class DatasetExt(Dataset):
 
         Args:
             namespace: Base namespace used to infer input/output predicate IRIs.
+            use_subject: Whether to use the subject of the triple as the first input argument.
         """
         ns_uri_str = str(namespace)
 
@@ -129,6 +131,12 @@ class DatasetExt(Dataset):
             arg_predicates: dict[str, URIRef] = {}
             arg_defaults: dict[str, Any] = {}
             signature = inspect.signature(func)
+            arg_names = list(signature.parameters.keys())
+            subject_arg_name: str | None = None
+            if use_subject:
+                if not arg_names:
+                    raise ValueError("type_function(use_subject=True) requires at least one function argument")
+                subject_arg_name = arg_names[0]
             for param_name, param in signature.parameters.items():
                 if param_name not in arg_predicates:
                     arg_predicates[param_name] = namespace[_snake_to_camel(param_name)]
@@ -175,7 +183,10 @@ class DatasetExt(Dataset):
                 input_triples: list[tuple[str, Identifier]] = []
                 for _, pred, obj in our_triples:
                     if isinstance(pred, URIRef) and pred in arg_predicate_by_iri:
-                        input_triples.append((arg_predicate_by_iri[pred], obj))
+                        arg_name = arg_predicate_by_iri[pred]
+                        if use_subject and subject_arg_name == arg_name:
+                            continue
+                        input_triples.append((arg_name, obj))
                     elif (
                         isinstance(pred, URIRef)
                         and isinstance(obj, Variable)
@@ -191,6 +202,13 @@ class DatasetExt(Dataset):
                 for bindings in initial_bindings:
                     # Extract inputs
                     inputs: dict[str, Any] = {}
+                    if use_subject and subject_arg_name is not None:
+                        subject_value = (
+                            bindings.get(func_subject) if isinstance(func_subject, Variable) else func_subject
+                        )
+                        if subject_value is None:
+                            continue
+                        inputs[subject_arg_name] = _to_python(subject_value)
                     missing_required = False
                     for arg_name, obj in input_triples:
                         value = bindings.get(obj) if isinstance(obj, Variable) else obj

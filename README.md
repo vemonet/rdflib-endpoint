@@ -16,9 +16,9 @@
 
 `rdflib-endpoint` enables to:
 
-- **deploy RDFLib `Graph`** and `Dataset` as SPARQL endpoints
-- **define custom SPARQL functions** implemented in python that can be queried in a federated fashion using SPARQL `SERVICE` from another endpoint.
-- **serve local RDF files** in one command,
+- **deploy RDFLib `Graph`** and `Dataset` as SPARQL endpoints,
+- **define custom SPARQL functions** implemented in python that can be queried in a federated fashion using SPARQL `SERVICE` from another endpoint,
+- **serve local RDF files** in one command.
 
 > Feel free to create an [issue](/issues), or send a pull request if you are facing issues or would like to see a feature implemented.
 

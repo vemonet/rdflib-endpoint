@@ -27,8 +27,8 @@ def string_splitter(
     return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split_string.split(separator))]
 
 
-@ds.type_function()
-def uri_splitter(
+@ds.type_function(use_subject=True)
+def uri_splitter_subject(
     split_string: URIRef,
     separator: str = "/",
 ) -> List[SplitterResult]:
@@ -239,21 +239,15 @@ def test_multiple_functions_combined() -> None:
 
 
 def test_type_function_uri_input() -> None:
-    query = """PREFIX dc: <http://purl.org/dc/elements/1.1/>
-    PREFIX func: <urn:sparql-function:>
+    query = """PREFIX func: <urn:sparql-function:>
     SELECT ?splitted WHERE {
-        [] a func:UriSplitter ;
-            func:splitString <http://purl.org/dc/elements/1.1/> ;
+        <http://purl.org/dc/elements/1.1/> a func:UriSplitterSubject ;
             func:separator "/" ;
             func:splitted ?splitted ;
             func:index ?idx .
     }"""
     split_res = [str(row[0]) for row in ds.query(query)]
-    print(split_res)
-    # assert "http://purl" in split_res
-    # assert "obolibrary" in split_res
-    # assert "org/obo/CHEBI" in split_res
-    # assert "1" in split_res
+    assert split_res == ["http:", "", "purl.org", "dc", "elements", "1.1", ""]
 
 
 def test_filter_based_list() -> None:
