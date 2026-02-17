@@ -208,7 +208,7 @@ def identifier(input_iri: URIRef) -> URIRef:
     SELECT ?id WHERE {
         <https://identifiers.org/CHEBI/1> dc:identifier ?id .
     }
-```
+    ```
     """
     return URIRef(conv.standardize_uri(input_iri))
 
