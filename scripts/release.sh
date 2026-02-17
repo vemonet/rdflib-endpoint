@@ -15,6 +15,7 @@ VERSION=$(uvx hatch version)
 uvx git-cliff -o CHANGELOG.md --tag v$VERSION
 git add CHANGELOG.md src/*/__init__.py
 git commit -m "chore: bump to v$VERSION"
+git push
 git tag -a "v$VERSION" -m "Release v$VERSION"
 git push origin "v$VERSION"
 
