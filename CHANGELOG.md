@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0](https://github.com/vemonet/rdflib-endpoint/compare/v0.5.5..v0.6.0) - 2026-02-17
+
+### ⚙️ Continuous Integration
+
+- Add py 3.14 to test workflow, fix some params in tests - ([5536430](https://github.com/vemonet/rdflib-endpoint/commit/553643030a629e74dda1c8c78ef3758eab434289))
+- Fix docker gateway host for github action federated queries tests - ([5fcf336](https://github.com/vemonet/rdflib-endpoint/commit/5fcf33618c94c7dd757b05bb2fe5c005565e358d))
+- Fix federated query in gh action, somehow failing only for oxigraph when function running in gh action (custom function works when running locally) - ([9490786](https://github.com/vemonet/rdflib-endpoint/commit/94907861c41ad799ab0f85c4e86ed913e5c19def))
+
+### ⛰️ Features
+
+- Add `DatasetExt` class, to enable easily defining custom pattern and extension functions that resolves to python functions using pythonic decorated functions - ([59ff1f0](https://github.com/vemonet/rdflib-endpoint/commit/59ff1f0b40907975206334e8626a2d123197abee))
+- Auto generate example_queries from functions docstring if not provided, deprecate `example_query` to use the 1st key of `example_queries` as YASGUI default tab. Update the example to use custom decorated functions - ([d9bf67a](https://github.com/vemonet/rdflib-endpoint/commit/d9bf67a8519d952b9e7a3beb34b8e4747d47e78b))
+- Provide a default namespace for all decorator functions - ([444382c](https://github.com/vemonet/rdflib-endpoint/commit/444382ce901e1200f5c9d01cca6a7f0705b9ed53))
+- Handle when `FILTER` = is used to define a variable value (instead of `VALUES`), which is done by virtuoso when transfering `SERVICE` calls - ([687fe16](https://github.com/vemonet/rdflib-endpoint/commit/687fe163e4960859533b93e7d7369060f40b1d83))
+- Add `use_subject` arg to `type_function` to enable to use the triples subject as input arg - ([ee39318](https://github.com/vemonet/rdflib-endpoint/commit/ee3931865281f145f40c8a4534becc32c34d66ee))
+
+### 🐛 Bug Fixes
+
+- Fix types for py3.8 - ([d1e7354](https://github.com/vemonet/rdflib-endpoint/commit/d1e7354b94321c161cc56a7cf8fc71106f9698eb))
+
+### 📚 Documentation
+
+- Improve readme, example and add `.python-version` file - ([f6d6f14](https://github.com/vemonet/rdflib-endpoint/commit/f6d6f14cfc2855659c5d2f52f138e4665dbd8c88))
+- Readme, fix py3.8 typing - ([5235f2a](https://github.com/vemonet/rdflib-endpoint/commit/5235f2a72e101de661d4f696de1c11026a9395b1))
+- Fix readme - ([b7c1ae4](https://github.com/vemonet/rdflib-endpoint/commit/b7c1ae4bb75e7a3e29b68d6dff840e05ac516ba3))
+- Fix contributing - ([c895c59](https://github.com/vemonet/rdflib-endpoint/commit/c895c595c5069395a97575fa29d9eefaeae0bba0))
+
+### 🚜 Refactor
+
+- Change default function namespace from https://w3id.org/sparql-functions/ to urn:sparql-function: - ([9bb9741](https://github.com/vemonet/rdflib-endpoint/commit/9bb974139f81f98b14c902e501160a07b14aac68))
+
+### 🧪 Testing
+
+- Add tests for federated `SERVICE` call from other triplestores to rdflib-endpoint: graphdb, fuseki, blazegraph, oxigraph, rdf4j - ([43e94df](https://github.com/vemonet/rdflib-endpoint/commit/43e94df61773362b116d5cb72ae9e960f6c9a12c))
+
 ## [0.5.5](https://github.com/vemonet/rdflib-endpoint/compare/v0.5.4..v0.5.5) - 2026-02-03
 
 ### ⚙️ Continuous Integration
@@ -15,6 +50,7 @@ All notable changes to this project will be documented in this file.
 ### 🛠️ Miscellaneous Tasks
 
 - Bump to v0.5.4 - ([b107438](https://github.com/vemonet/rdflib-endpoint/commit/b107438de0950bed3eef11c68c158ec5b026e094))
+- Bump to v0.5.5 - ([4141627](https://github.com/vemonet/rdflib-endpoint/commit/41416279435ea0aceedf1d5a0fd74005b47f15a5))
 
 ## [0.5.4](https://github.com/vemonet/rdflib-endpoint/compare/v0.5.3..v0.5.4) - 2025-12-19
 
