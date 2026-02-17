@@ -16,18 +16,16 @@ cd rdflib-endpoint
 ## 🪝 Install pre-commit hooks
 
 ```sh
-./scripts/install.sh
+uv run --all-extras pre-commit install
 ```
 
 ## 🚀 Run example API
 
-The API will be automatically reloaded when the code is changed:
+Run the example SPARQL endpoint with YASGUI on http://localhost:8000, it will be automatically reloaded when the code is changed:
 
 ```sh
 ./scripts/dev.sh
 ```
-
-Access the YASGUI interface at http://localhost:8000
 
 ## ☑️ Run tests
 
