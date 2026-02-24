@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1](https://github.com/vemonet/rdflib-endpoint/compare/v0.6.0..v0.6.1) - 2026-02-24
+
+### ⚙️ Continuous Integration
+
+- Improve `release.sh` script - ([0f8bdd1](https://github.com/vemonet/rdflib-endpoint/commit/0f8bdd15500ed6caee9636a53db1440a93da2b44))
+
+### ⛰️ Features
+
+- Add `.generate_docs()` method to `DatasetExt` to easily generate markdown documentation for registered custom functions from docstring and function signature - ([0b4285e](https://github.com/vemonet/rdflib-endpoint/commit/0b4285edc9d1945f091ed8d466ae02c6781acbd2))
+
 ## [0.6.0](https://github.com/vemonet/rdflib-endpoint/compare/v0.5.5..v0.6.0) - 2026-02-17
 
 ### ⚙️ Continuous Integration
@@ -32,6 +42,10 @@ All notable changes to this project will be documented in this file.
 ### 🚜 Refactor
 
 - Change default function namespace from https://w3id.org/sparql-functions/ to urn:sparql-function: - ([9bb9741](https://github.com/vemonet/rdflib-endpoint/commit/9bb974139f81f98b14c902e501160a07b14aac68))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump to v0.6.0 - ([e73c3cd](https://github.com/vemonet/rdflib-endpoint/commit/e73c3cdaf14fccababdaa3e4d8781534771e1c3a))
 
 ### 🧪 Testing
 
