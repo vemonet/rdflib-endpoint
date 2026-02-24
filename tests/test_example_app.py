@@ -1,4 +1,4 @@
-from example.main import app
+from example.main import app, ds
 from fastapi.testclient import TestClient
 from rdflib import Graph
 
@@ -64,3 +64,41 @@ SELECT ?input ?part ?partIndex WHERE {
     VALUES ?input { "hello world" "cheese is good" }
     BIND(func:splitIndex(?input, " ") AS ?part)
 }"""
+
+
+def test_generate_docs():
+    """generate_docs() should return non-empty Markdown covering registered functions."""
+
+    docs = ds.generate_docs(verbose=True)
+    assert docs, "generate_docs() returned empty string"
+
+    # All registered functions should appear by name (ignore prefixes)
+    for meta in ds._custom_functions.values():
+        assert meta.func.__name__.lower().replace("_", "") in docs.lower(), (
+            f"{meta.func.__name__} missing from generated docs"
+        )
+
+    # Each function type label should appear
+    for label in ("type function", "predicate function", "extension function", "graph function"):
+        assert label in docs, f"decorator type '{label}' missing from generated docs"
+
+    # Every doc section should include an IRI line
+    assert "**IRI:**" in docs
+    # Docstring descriptions should be extracted
+    assert "Split a string" in docs
+    # type_function param names use prefixed predicate IRIs (func:splitString)
+    assert "func:splitString" in docs
+    # predicate_function params still use the Python name (subject input)
+    assert "input_iri" in docs
+    # Outputs section must be present
+    assert "**Outputs:**" in docs
+    # extension_function binds to ?var
+    assert "?var" in docs
+    # graph_function binds to ?g
+    assert "?g" in docs
+    # SPARQL examples should be included
+    assert "```sparql" in docs
+    # _annotation_to_str origin branch: Optional[str] renders as Union[str, None] or similar
+    assert "Optional" in docs or "Union" in docs or "str" in docs
+    # _get_ns_prefix fallback: namespace http://example.org/ext/ -> prefix "ext"
+    assert "sparqlfunction:joinStr" in docs

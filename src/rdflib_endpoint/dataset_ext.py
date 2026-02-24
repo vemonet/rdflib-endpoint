@@ -19,6 +19,8 @@ from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import FrozenBindings, QueryContext, SPARQLError
 from rdflib.term import Identifier
 
+from rdflib_endpoint.gen_docs import CustomFunction, generate_docs, snake_to_camel, snake_to_pascal
+
 DEFAULT_NAMESPACE = Namespace("urn:sparql-function:")
 
 
@@ -59,35 +61,32 @@ def _var_label(var: Variable) -> str:
     return label[1:] if label.startswith("?") else label
 
 
-def _snake_to_camel(name: str) -> str:
-    """Convert snake_case string to camelCase."""
-    parts = name.split("_")
-    return parts[0] + "".join(p.title() for p in parts[1:])
-
-
-def _snake_to_pascal(name: str) -> str:
-    """Convert snake_case string to PascalCase."""
-    return "".join(p.title() for p in name.split("_"))
-
-
 class DatasetExt(Dataset):
     """Dataset with decorator-based custom SPARQL evaluation function registration."""
 
     _tmp_graph_uris: set[Identifier]
-    _custom_functions: dict[str, Callable[..., Any]]
+    _custom_functions: dict[str, CustomFunction]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._tmp_graph_uris = set()
         self._custom_functions = {}
 
-    def _register_custom_function(self, func: Callable[..., Any]) -> None:
-        """Track a decorated function for later introspection."""
-        self._custom_functions[func.__name__] = func
+    def _register_custom_function(
+        self,
+        func: Callable[..., Any],
+        func_type: str,
+        namespace: Namespace,
+        iri: URIRef,
+    ) -> None:
+        """Track a decorated function and its metadata for later introspection."""
+        self._custom_functions[func.__name__] = CustomFunction(
+            func=func, func_type=func_type, namespace=namespace, iri=iri
+        )
 
     def get_custom_functions(self) -> list[Callable[..., Any]]:
         """Return custom functions registered via DatasetExt decorators."""
-        return list(self._custom_functions.values())
+        return [meta.func for meta in self._custom_functions.values()]
 
     def _register_tmp_graph(self, graph_uri: Identifier) -> None:
         """Register a temporary graph URI for cleanup."""
@@ -139,13 +138,13 @@ class DatasetExt(Dataset):
                 subject_arg_name = arg_names[0]
             for param_name, param in signature.parameters.items():
                 if param_name not in arg_predicates:
-                    arg_predicates[param_name] = namespace[_snake_to_camel(param_name)]
+                    arg_predicates[param_name] = namespace[snake_to_camel(param_name)]
                 if param.default is not inspect._empty:
                     arg_defaults[param_name] = param.default
 
             arg_predicate_by_iri: dict[URIRef, str] = {iri: name for name, iri in arg_predicates.items()}
             arg_predicate_set = set(arg_predicates.values())
-            class_iri = namespace[_snake_to_pascal(func.__name__)]
+            class_iri = namespace[snake_to_pascal(func.__name__)]
 
             def custom_eval_func(ctx: QueryContext, part: CompValue) -> Generator[FrozenBindings, None, None]:
                 """Create the custom eval function for this specific function based on the provided function and its signature."""
@@ -252,7 +251,7 @@ class DatasetExt(Dataset):
                                     raise SPARQLError(
                                         "Pattern function list outputs are not supported; return a list of results instead"
                                     )
-                                out_pred = namespace[_snake_to_camel(str(key))]
+                                out_pred = namespace[snake_to_camel(str(key))]
                                 if out_pred not in output_vars:
                                     continue
                                 new_bindings[output_vars[out_pred]] = _to_node(value)
@@ -264,7 +263,7 @@ class DatasetExt(Dataset):
 
             # Register with RDFLib using function name as key
             CUSTOM_EVALS[f"type_{func.__name__}"] = _with_filter_support(custom_eval_func)
-            self._register_custom_function(func)
+            self._register_custom_function(func, "type_function", namespace, class_iri)
             return func
 
         return decorator
@@ -285,7 +284,7 @@ class DatasetExt(Dataset):
 
         def decorator(func: Callable[[str], str | list[str]]) -> Callable[[str], str | list[str]]:
             # Generate predicate IRI from function name
-            predicate_iri = namespace[_snake_to_camel(func.__name__)]
+            predicate_iri = namespace[snake_to_camel(func.__name__)]
 
             def custom_eval_func(ctx: QueryContext, part: CompValue) -> Generator[FrozenBindings, None, None]:
                 """Create the custom eval function for this specific predicate."""
@@ -344,7 +343,7 @@ class DatasetExt(Dataset):
 
             # Register with RDFLib
             CUSTOM_EVALS[f"predicate_{func.__name__}"] = _with_filter_support(custom_eval_func)
-            self._register_custom_function(func)
+            self._register_custom_function(func, "predicate_function", namespace, predicate_iri)
             return func
 
         return decorator
@@ -363,7 +362,7 @@ class DatasetExt(Dataset):
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            iri_value = namespace[_snake_to_camel(func.__name__)]
+            iri_value = namespace[snake_to_camel(func.__name__)]
 
             def _eval_extension_function(ctx: QueryContext, part: CompValue) -> list[Any]:
                 """Evaluate a custom extension function call."""
@@ -409,7 +408,7 @@ class DatasetExt(Dataset):
                             for field_name, field_value in res_dict.items():
                                 if field_name == base_field:
                                     continue
-                                var_name = f"{base_label}{_snake_to_pascal(field_name)}"
+                                var_name = f"{base_label}{snake_to_pascal(field_name)}"
                                 bindings[Variable(var_name)] = _to_node(field_value)
                             query_results.append(eval_part.merge(bindings))
                         else:
@@ -417,7 +416,7 @@ class DatasetExt(Dataset):
                 return query_results
 
             CUSTOM_EVALS[str(iri_value)] = _with_filter_support(_eval_extension_function)
-            self._register_custom_function(func)
+            self._register_custom_function(func, "extension_function", namespace, iri_value)
             return func
 
         return decorator
@@ -436,7 +435,7 @@ class DatasetExt(Dataset):
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            iri_value = namespace[_snake_to_camel(func.__name__)]
+            iri_value = namespace[snake_to_camel(func.__name__)]
             graph_uri = namespace[f"graph/{func.__name__}"]
 
             def _eval_graph_function(ctx: QueryContext, part: CompValue) -> list[Any]:
@@ -473,10 +472,21 @@ class DatasetExt(Dataset):
                 return query_results
 
             CUSTOM_EVALS[str(iri_value)] = _with_filter_support(_eval_graph_function)
-            self._register_custom_function(func)
+            self._register_custom_function(func, "graph_function", namespace, iri_value)
             return func
 
         return decorator
+
+    def generate_docs(self, verbose: bool = False) -> str:
+        """Generate markdown documentation for all registered custom functions.
+
+        Parses each function's signature and docstring (description, Google-style
+        Args section, and embedded ```sparql code blocks) to produce a Markdown
+        reference document.
+        """
+        if not self._custom_functions:
+            return ""
+        return generate_docs(self._custom_functions, verbose=verbose)
 
 
 def _try_single_equality(expr: Any) -> dict[Variable, Identifier] | None:

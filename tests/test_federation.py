@@ -9,7 +9,7 @@ import pytest
 import uvicorn
 from example.main import ds
 from testcontainers.core.container import DockerContainer
-from testcontainers.core.waiting_utils import wait_for_logs
+from testcontainers.core.wait_strategies import LogMessageWaitStrategy
 
 from rdflib_endpoint import SparqlEndpoint
 
@@ -100,10 +100,10 @@ def graphdb():
     container = DockerContainer("ontotext/graphdb:10.8.4")
     container.with_exposed_ports(7200).with_bind_ports(7200, 7200)
     # container.with_env("JAVA_OPTS", "-Xms1g -Xmx4g")
+    container.waiting_for(LogMessageWaitStrategy("Started GraphDB"))
     container.start()
-    delay = wait_for_logs(container, "Started GraphDB")
     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(7200)}"
-    print(f"GraphDB started in {delay:.0f}s at {base_url}")
+    print(f"GraphDB started at {base_url}")
     # print(container.get_logs())
     # Create repository https://graphdb.ontotext.com/documentation/10.8/manage-repos-with-restapi.html
     config = """@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -136,12 +136,12 @@ def blazegraph():
     """Start blazegraph container as a fixture."""
     container = DockerContainer("lyrasis/blazegraph:2.1.4")
     container.with_exposed_ports(8080).with_bind_ports(8080, 8080)
+    container.waiting_for(LogMessageWaitStrategy("Started @"))
     container.start()
-    delay = wait_for_logs(container, "Started @")
     base_url = (
         f"http://{container.get_container_host_ip()}:{container.get_exposed_port(8080)}/bigdata/namespace/kb/sparql"
     )
-    print(f"Blazegraph started in {delay:.0f}s at {base_url}")
+    print(f"Blazegraph started at {base_url}")
     yield base_url
 
 
@@ -155,10 +155,10 @@ def oxigraph():
     """Start oxigraph container as a fixture."""
     container = DockerContainer("oxigraph/oxigraph:latest")
     container.with_exposed_ports(7878).with_bind_ports(7878, 7878)
+    container.waiting_for(LogMessageWaitStrategy("Listening for requests at"))
     container.start()
-    delay = wait_for_logs(container, "Listening for requests at")
     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(7878)}/query"
-    print(f"Oxigraph started in {delay:.0f}s at {base_url}")
+    print(f"Oxigraph started at {base_url}")
     yield base_url
 
 
@@ -177,10 +177,10 @@ def fuseki():
     container = DockerContainer("stain/jena-fuseki:latest")
     container.with_exposed_ports(3030).with_bind_ports(3030, 3030)
     container.with_env("ADMIN_PASSWORD", admin_password)
+    container.waiting_for(LogMessageWaitStrategy("Fuseki is available"))
     container.start()
-    delay = wait_for_logs(container, "Fuseki is available")
     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(3030)}"
-    print(f"Fuseki started in {delay:.0f}s at {base_url}")
+    print(f"Fuseki started at {base_url}")
     # Create dataset
     response = httpx.post(
         f"{base_url}/$/datasets",
@@ -202,10 +202,10 @@ def rdf4j():
     """Start rdf4j container as a fixture."""
     container = DockerContainer("eclipse/rdf4j-workbench:latest")
     container.with_exposed_ports(8080).with_bind_ports(8080, 8081)
+    container.waiting_for(LogMessageWaitStrategy("Server startup in"))
     container.start()
-    delay = wait_for_logs(container, "Server startup in")
     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(8080)}/rdf4j-server/repositories/testfed"
-    print(f"RDF4J started in {delay:.0f}s at {base_url}")
+    print(f"RDF4J started at {base_url}")
     # Create repository https://graphdb.ontotext.com/documentation/10.8/manage-repos-with-restapi.html
     config = """@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix config: <tag:rdf4j.org,2023:config/>.
@@ -244,8 +244,8 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     container.with_exposed_ports(8890).with_bind_ports(8890, 8890)
 #     container.with_env("VIRT_SPARQL_AllowQueryService", "1")
 #     container.with_env("DBA_PASSWORD", admin_password)
+#     container.waiting_for(LogMessageWaitStrategy("Server online at"))
 #     container.start()
-#     delay = wait_for_logs(container, "Server online at")
 #     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(8890)}/sparql"
 
 #     # Enable federated queries
@@ -258,7 +258,7 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     print(container.exec("curl -I http://host.docker.internal:8000"))
 #     # container.exec(f'isql -U dba -P {admin_password} exec=\'GRANT SPARQL_UPDATE ON GRAPH <http://host.docker.internal:8000> TO "SPARQL";\'')
 #     time.sleep(5)
-#     print(f"Virtuoso started in {delay:.0f}s at {base_url}")
+#     print(f"Virtuoso started at {base_url}")
 #     yield base_url
 
 
@@ -294,11 +294,11 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     container.with_env("UID", str(os.getuid())).with_env("GID", "9000")
 #     container.with_volume_mapping(os.path.abspath("data/qlever"), "/data")
 #     container.with_command("-c 'cd /data && qlever setup-config olympics && qlever get-data && qlever index && qlever start && tail -F olympics.server-log.txt'")
+#     container.waiting_for(LogMessageWaitStrategy("The server is ready"))
 #     container.start()
-#     delay = wait_for_logs(container, "The server is ready")
 #     # delay = wait_for_logs(container, "Setting index description to")
 #     base_url = f"http://{container.get_container_host_ip()}:{container.get_exposed_port(7019)}"
-#     print(f"QLever started in {delay:.0f}s at {base_url}")
+#     print(f"QLever started at {base_url}")
 #     # print(container.get_logs())
 #     yield base_url
 #     shutil.rmtree("data/qlever", ignore_errors=True)

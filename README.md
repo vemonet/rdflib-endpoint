@@ -136,9 +136,10 @@ Key behaviors:
 
 - Types, predicates and functions IRIs are generated from the provided namespace concatenated to their python counterpart following SPARQL naming conventions (classes in PascalCase, predicates and functions in camelCase). Default namespace is `urn:sparql-function:`
 - Return a list to emit multiple result rows
-- Return dataclasses to populate multiple variables.
-- Python defaults handle missing input values.
+- Return dataclasses to populate multiple variables
+- Python defaults handle missing input values
 - Add sparql codeblocks with a query example in the function docstring, these will be extracted and added as YASGUI queries tabs when deployed through the `SparqlEndpoint` or `SparqlRouter`
+- Properly annotating each function docstring enables `ds.generate_docs()` to automatically generate user friendly documentation that describes each SPARQL function and how to use it.
 
 > [!CAUTION]
 >
@@ -161,14 +162,35 @@ ds = DatasetExt()
 @dataclass
 class SplitterResult:
     splitted: str
+    """The part of the string that was split out."""
     index: int
+    """The zero-based index of the part in the original string."""
 
 @ds.type_function()
 def string_splitter(
     split_string: str,
     separator: str = " ",
 ) -> list[SplitterResult]:
-    """Split a string and return each part with their index."""
+    """Split a string and return each part with their index.
+
+    Args:
+        split_string: The string to split.
+        separator: The character to split on.
+
+    Example:
+        ```sparql
+        PREFIX func: <urn:sparql-function:>
+        SELECT ?input ?part ?idx
+        WHERE {
+            VALUES ?input { "hello world" "cheese is good" }
+            [] a func:StringSplitter ;
+                func:splitString ?input ;
+                func:separator " " ;
+                func:splitted ?part ;
+                func:index ?idx .
+        }
+        ```
+    """
     return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split_string.split(separator))]
 ```
 
@@ -201,15 +223,7 @@ conv = bioregistry.get_converter()
 
 @ds.predicate_function(namespace=DC._NS)
 def identifier(input_iri: URIRef) -> URIRef:
-    """Get the standardized IRI for a given input IRI.
-
-    ```sparql
-    PREFIX dc: <http://purl.org/dc/elements/1.1/>
-    SELECT ?id WHERE {
-        <https://identifiers.org/CHEBI/1> dc:identifier ?id .
-    }
-    ```
-    """
+    """Get the standardized IRI for a given input IRI."""
     return URIRef(conv.standardize_uri(input_iri))
 
 @ds.predicate_function(namespace=OWL._NS)
