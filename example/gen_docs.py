@@ -19,8 +19,8 @@ from example.main import ds  # noqa: E402  (import after path manipulation)
 
 README = ROOT / "example" / "README.md"
 
-START_MARKER = "<!-- FUNCTIONS_START -->"
-END_MARKER = "<!-- FUNCTIONS_END -->"
+START_MARKER = "<!-- AUTOGEN_DOCS_START -->"
+END_MARKER = "<!-- AUTOGEN_DOCS_END -->"
 
 
 def main() -> None:

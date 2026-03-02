@@ -32,14 +32,18 @@ Run the example SPARQL endpoint with YASGUI on http://localhost:8000, it will be
 Make sure the existing tests still work by running the test suite and linting checks. Note that any pull requests to the fairworkflows repository on github will automatically trigger running of the test suite:
 
 ```sh
-uv run pytest
+uv run --all-extras pytest
 ```
 
 To display all `print()`:
 
 ```sh
-uv run pytest -s
+uv run --all-extras pytest -s
 ```
+
+> [!WARNING]
+>
+> To run test of federated queries docker needs to be installed, and `$DOCKER_HOST` environment variable needs to be set.
 
 ## 🧹 Code formatting
 

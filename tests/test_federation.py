@@ -1,5 +1,6 @@
 import os
 import platform
+import sys
 import time
 from multiprocessing import Process, set_start_method
 from typing import Any
@@ -9,15 +10,26 @@ import pytest
 import uvicorn
 from example.main import ds
 from testcontainers.core.container import DockerContainer
-from testcontainers.core.wait_strategies import LogMessageWaitStrategy
 
 from rdflib_endpoint import SparqlEndpoint
+
+# Skip federated tests on Python 3.8
+if sys.version_info[:2] == (3, 8):
+    pytest.skip("Skipping tests on Python 3.8", allow_module_level=True)
+else:
+    from testcontainers.core.wait_strategies import LogMessageWaitStrategy
+
 
 # https://github.com/biopragmatics/curies/blob/main/tests/test_federated_sparql.py
 # Stop and delete all testcontainers:
 # docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
 # $DOCKER_HOST needs to be set, e.g. for orbstack:
 # export DOCKER_HOST=unix:///Users/$(whoami)/.orbstack/run/docker.sock uv run pytest tests/test_federation.py -s
+
+needs_docker = pytest.mark.skipif(
+    not os.environ.get("DOCKER_HOST"),
+    reason="DOCKER_HOST env var not set, skipping federated tests that require Docker",
+)
 
 
 def _get_app():
@@ -126,6 +138,7 @@ def graphdb():
     yield f"{base_url}/repositories/testfed"
 
 
+@needs_docker
 def test_federated_query_graphdb(service_url, graphdb):
     resp = sparql_query(graphdb, fed_query_function.format(rdflib_endpoint_url=service_url))
     assert resp[0]["part"]["value"] == "hello"
@@ -145,6 +158,7 @@ def blazegraph():
     yield base_url
 
 
+@needs_docker
 def test_federated_query_blazegraph(service_url, blazegraph):
     resp = sparql_query(blazegraph, fed_query_function.format(rdflib_endpoint_url=service_url))
     assert resp[0]["part"]["value"] == "hello"
@@ -162,11 +176,12 @@ def oxigraph():
     yield base_url
 
 
+@needs_docker
 def test_federated_query_oxigraph(service_url, oxigraph):
     resp = sparql_query(oxigraph, fed_query_sameas.format(rdflib_endpoint_url=service_url))
     assert resp[0]["id"]["value"] == "http://purl.obolibrary.org/obo/CHEBI_1"
 
-    # TODO: somehow this fails only when running in GitHub actions: The custom function <urn:sparql-function:splitIndex> is not supported
+    # # TODO: fails The custom function <urn:sparql-function:splitIndex> is not supported
     # resp = sparql_query(oxigraph, fed_query_function.format(rdflib_endpoint_url=service_url))
     # assert resp[0]["part"]["value"] == "hello"
 
@@ -192,6 +207,7 @@ def fuseki():
     yield f"{base_url}/testfed/sparql"
 
 
+@needs_docker
 def test_federated_query_fuseki(service_url, fuseki):
     resp = sparql_query(fuseki, fed_query_function.format(rdflib_endpoint_url=service_url))
     assert resp[0]["part"]["value"] == "hello"
@@ -223,6 +239,7 @@ def rdf4j():
     yield base_url
 
 
+@needs_docker
 def test_federated_query_rdf4j(service_url, rdf4j):
     resp = sparql_query(rdf4j, fed_query_function.format(rdflib_endpoint_url=service_url))
     assert resp[0]["part"]["value"] == "hello"
@@ -261,7 +278,7 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     print(f"Virtuoso started at {base_url}")
 #     yield base_url
 
-
+# @needs_docker
 # def test_federated_query_virtuoso(service_url, virtuoso):
 #     # NOTE: getting error when sending an extension function to virtuoso
 #     # Virtuoso RDF02 Error SR619: SPARUL LOAD SERVICE DATA access denied: database user 107 (SPARQL) has no write permission on graph http://host.docker.internal:8000
@@ -303,6 +320,7 @@ def test_federated_query_rdf4j(service_url, rdf4j):
 #     yield base_url
 #     shutil.rmtree("data/qlever", ignore_errors=True)
 
+# @needs_docker
 # def test_federated_query_qlever(service_url, qlever):
 #     resp = sparql_query(qlever, fed_query_function.format(rdflib_endpoint_url=service_url))
 #     assert resp[0]["part"]["value"] == "hello"

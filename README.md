@@ -139,7 +139,7 @@ Key behaviors:
 - Return dataclasses to populate multiple variables
 - Python defaults handle missing input values
 - Add sparql codeblocks with a query example in the function docstring, these will be extracted and added as YASGUI queries tabs when deployed through the `SparqlEndpoint` or `SparqlRouter`
-- Properly annotating each function docstring enables `ds.generate_docs()` to automatically generate user friendly documentation that describes each SPARQL function and how to use it.
+- Properly annotating each function docstring with google-style docstring enables `ds.generate_docs()` to automatically generate user friendly documentation that describes each SPARQL function and how to use it.
 
 > [!CAUTION]
 >

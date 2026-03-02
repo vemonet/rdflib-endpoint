@@ -4,7 +4,7 @@ import inspect
 import re
 import textwrap
 from dataclasses import dataclass
-from typing import Any, Callable, get_args, get_origin
+from typing import Any, Callable, Dict, List, Tuple, get_args, get_origin
 
 from rdflib import Namespace, URIRef
 
@@ -30,7 +30,7 @@ def snake_to_pascal(name: str) -> str:
     return "".join(p.title() for p in name.split("_"))
 
 
-def generate_docs(custom_functions: dict[str, CustomFunction], verbose: bool = False) -> str:
+def generate_docs(custom_functions: Dict[str, CustomFunction], verbose: bool = False) -> str:
     """Generate markdown documentation for all registered custom functions.
 
     Parses each function's signature and docstring (description, Google-style
@@ -138,7 +138,7 @@ def generate_docs(custom_functions: dict[str, CustomFunction], verbose: bool = F
             lines.append("```")
             lines.append("")
         sections.append("\n".join(lines))
-    return "\n\n".join(sections)
+    return "\n".join(sections)
 
 
 def _annotation_to_str(annotation: Any) -> str:
@@ -158,7 +158,7 @@ def _annotation_to_str(annotation: Any) -> str:
     return str(annotation).replace("typing.", "")
 
 
-def _parse_docstring(docstring: str) -> tuple[str, dict[str, str], str, list[str]]:
+def _parse_docstring(docstring: str) -> Tuple[str, Dict[str, str], str, List[str]]:
     """Parse a docstring into a description, per-argument descriptions, a return description, and SPARQL examples.
 
     Returns:
@@ -244,7 +244,7 @@ def _unwrap_return_type(annotation: Any) -> Any:
     return annotation
 
 
-def _get_dataclass_output_fields(return_annotation: Any) -> list[tuple[str, str, str]]:
+def _get_dataclass_output_fields(return_annotation: Any) -> List[Tuple[str, str, str]]:
     """Return (field_name, type_str, description) triples from a dataclass return type, or empty list.
 
     The description is read from a PEP 257 attribute docstring (a string literal
@@ -288,7 +288,7 @@ def _get_dataclass_output_fields(return_annotation: Any) -> list[tuple[str, str,
     ]
 
 
-def _get_ns_prefix(namespace: Namespace, sparql_examples: list[str]) -> str:
+def _get_ns_prefix(namespace: Namespace, sparql_examples: List[str]) -> str:
     """Derive a short prefix string from a namespace URI.
 
     - Returns 'func' for the default SPARQL function namespace.

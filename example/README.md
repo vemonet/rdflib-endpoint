@@ -32,7 +32,7 @@ docker compose up --build
 > uv run example/gen_docs.py
 > ```
 
-<!-- FUNCTIONS_START -->
+<!-- AUTOGEN_DOCS_START -->
 
 ### `func:StringSplitter`
 
@@ -69,7 +69,6 @@ WHERE {
 }
 ```
 
-
 ### `func:UriSplitter`
 
 Split a URI and return each part with their index.
@@ -105,7 +104,6 @@ WHERE {
 }
 ```
 
-
 ### `owl:sameAs`
 
 Get all alternative IRIs for a given IRI using the Bioregistry.
@@ -125,7 +123,6 @@ SELECT ?sameAs WHERE {
 }
 ```
 
-
 ### `dc:identifier`
 
 Get the standardized IRI for a given input IRI.
@@ -144,7 +141,6 @@ SELECT ?id WHERE {
     <https://identifiers.org/CHEBI/1> dc:identifier ?id .
 }
 ```
-
 
 ### `func:split`
 
@@ -174,7 +170,6 @@ SELECT ?input ?part WHERE {
     BIND(func:split(?input, " ") AS ?part)
 }
 ```
-
 
 ### `func:splitIndex`
 
@@ -206,7 +201,6 @@ SELECT ?input ?part ?partIndex WHERE {
 }
 ```
 
-
 ### `func:splitGraph`
 
 Split a string and return the results as an RDF graph.
@@ -235,7 +229,6 @@ SELECT * WHERE {
 }
 ```
 
-
 ### `sparqlfunction:joinStr`
 
 Join two strings with an optional separator.
@@ -255,4 +248,4 @@ Join two strings with an optional separator.
 |----------------------|------|-------------|
 | `?var` | `str` |  |
 
-<!-- FUNCTIONS_END -->
+<!-- AUTOGEN_DOCS_END -->
