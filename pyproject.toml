@@ -63,7 +63,6 @@ dev = [
     "pytest >=8.3.4",
     "pytest-cov >=5.0.0",
     "ruff >=0.11.7",
-    "mypy >=1.4.1",
     "pre-commit",
     "requests",
     "bioregistry",
@@ -102,7 +101,7 @@ post-install-commands = [
 dev = "uvicorn example.main:app --reload {args}"
 fmt = [
     "pre-commit run --all --all-files",
-    "mypy",
+    "uvx ty check",
 ]
 test = [
     "fmt",
@@ -153,25 +152,15 @@ filterwarnings = [
     # "ignore::pyparsing.exceptions.PyparsingDeprecationWarning", # https://github.com/RDFLib/rdflib/issues/3361
 ]
 
+# https://docs.astral.sh/ty/configuration/
+[tool.ty.src]
+include = ["src"]
 
-[tool.mypy]
-files = ["src/"]
-strict = true
-implicit_reexport = true
-follow_imports = "normal"
-ignore_missing_imports = true
-pretty = true
-show_column_numbers = true
-warn_no_return = true
-warn_unused_ignores = true
-warn_redundant_casts = true
-disallow_untyped_defs = true
-disallow_any_generics = true
-disallow_untyped_calls = false # needed due to _eval() not being typed in rdflib
+[tool.ty.terminal]
+output-format = "full"
 
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
+[tool.ty.rules]
+unused-ignore-comment = "warn"
 
 # https://docs.astral.sh/ruff/rules/
 [tool.ruff]

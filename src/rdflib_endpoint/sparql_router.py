@@ -19,7 +19,7 @@ from rdflib.plugins.sparql.parserutils import CompValue
 from rdflib.plugins.sparql.sparql import QueryContext, SPARQLError
 from rdflib.query import Processor
 
-from rdflib_endpoint.dataset_ext import DatasetExt
+from rdflib_endpoint.dataset_ext import DatasetExt, _func_name
 from rdflib_endpoint.utils import (
     API_RESPONSES,
     FORMATS,
@@ -288,7 +288,7 @@ class SparqlRouter(APIRouter):
                 continue
             query = matches[0].strip()
             if query:
-                examples[func.__name__.replace("_", " ").capitalize()] = {"query": query}
+                examples[_func_name(func).replace("_", " ").capitalize()] = {"query": query}
         return examples or None
 
     def eval_custom_functions(self, ctx: QueryContext, part: CompValue) -> List[Any]:

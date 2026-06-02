@@ -10,7 +10,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/vemonet/rdflib-endpoint/badge.svg?branch=main)](https://coveralls.io/github/vemonet/rdflib-endpoint?branch=main)
 
 [![license](https://img.shields.io/pypi/l/rdflib-endpoint.svg?color=%2334D058)](https://github.com/vemonet/rdflib-endpoint/blob/main/LICENSE.txt)
-[![types - Mypy](https://img.shields.io/badge/types-mypy-blue.svg)](https://github.com/python/mypy)
+[![types - ty](https://img.shields.io/badge/types-ty-purple.svg)](https://github.com/astral-sh/ty)
 
 </div>
 
@@ -189,7 +189,7 @@ def string_splitter(
                 func:splitted ?part ;
                 func:index ?idx .
         }
-        ```
+        ``'
     """
     return [SplitterResult(splitted=part, index=idx) for idx, part in enumerate(split_string.split(separator))]
 ```

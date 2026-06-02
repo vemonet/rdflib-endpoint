@@ -61,6 +61,11 @@ def _var_label(var: Variable) -> str:
     return label[1:] if label.startswith("?") else label
 
 
+def _func_name(func: Callable[..., Any]) -> str:
+    """Get the name of a decorated function (always a `def`/`lambda` at runtime)."""
+    return getattr(func, "__name__", repr(func))
+
+
 class DatasetExt(Dataset):
     """Dataset with decorator-based custom SPARQL evaluation function registration."""
 
@@ -80,7 +85,7 @@ class DatasetExt(Dataset):
         iri: URIRef,
     ) -> None:
         """Track a decorated function and its metadata for later introspection."""
-        self._custom_functions[func.__name__] = CustomFunction(
+        self._custom_functions[_func_name(func)] = CustomFunction(
             func=func, func_type=func_type, namespace=namespace, iri=iri
         )
 
@@ -144,7 +149,7 @@ class DatasetExt(Dataset):
 
             arg_predicate_by_iri: dict[URIRef, str] = {iri: name for name, iri in arg_predicates.items()}
             arg_predicate_set = set(arg_predicates.values())
-            class_iri = namespace[snake_to_pascal(func.__name__)]
+            class_iri = namespace[snake_to_pascal(_func_name(func))]
 
             def custom_eval_func(ctx: QueryContext, part: CompValue) -> Generator[FrozenBindings, None, None]:
                 """Create the custom eval function for this specific function based on the provided function and its signature."""
@@ -231,7 +236,7 @@ class DatasetExt(Dataset):
                     try:
                         result = func(**inputs)
                     except Exception as e:
-                        print(f"Error in custom function {func.__name__}: {e}")
+                        print(f"Error in custom function {_func_name(func)}: {e}")
                         continue
                     # Normalize results to list
                     if inspect.isgenerator(result):
@@ -262,7 +267,7 @@ class DatasetExt(Dataset):
                         yield FrozenBindings(ctx, new_bindings)
 
             # Register with RDFLib using function name as key
-            CUSTOM_EVALS[f"type_{func.__name__}"] = _with_filter_support(custom_eval_func)
+            CUSTOM_EVALS[f"type_{_func_name(func)}"] = _with_filter_support(custom_eval_func)
             self._register_custom_function(func, "type_function", namespace, class_iri)
             return func
 
@@ -284,7 +289,7 @@ class DatasetExt(Dataset):
 
         def decorator(func: Callable[[str], str | list[str]]) -> Callable[[str], str | list[str]]:
             # Generate predicate IRI from function name
-            predicate_iri = namespace[snake_to_camel(func.__name__)]
+            predicate_iri = namespace[snake_to_camel(_func_name(func))]
 
             def custom_eval_func(ctx: QueryContext, part: CompValue) -> Generator[FrozenBindings, None, None]:
                 """Create the custom eval function for this specific predicate."""
@@ -314,7 +319,7 @@ class DatasetExt(Dataset):
                             try:
                                 result = func(_to_python(subj_value))
                             except Exception as exc:
-                                print(f"Error in custom predicate {func.__name__}: {exc}")
+                                print(f"Error in custom predicate {_func_name(func)}: {exc}")
                                 continue
 
                             if inspect.isgenerator(result):
@@ -342,7 +347,7 @@ class DatasetExt(Dataset):
                     yield from binding_candidates
 
             # Register with RDFLib
-            CUSTOM_EVALS[f"predicate_{func.__name__}"] = _with_filter_support(custom_eval_func)
+            CUSTOM_EVALS[f"predicate_{_func_name(func)}"] = _with_filter_support(custom_eval_func)
             self._register_custom_function(func, "predicate_function", namespace, predicate_iri)
             return func
 
@@ -362,7 +367,7 @@ class DatasetExt(Dataset):
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            iri_value = namespace[snake_to_camel(func.__name__)]
+            iri_value = namespace[snake_to_camel(_func_name(func))]
 
             def _eval_extension_function(ctx: QueryContext, part: CompValue) -> list[Any]:
                 """Evaluate a custom extension function call."""
@@ -435,8 +440,8 @@ class DatasetExt(Dataset):
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            iri_value = namespace[snake_to_camel(func.__name__)]
-            graph_uri = namespace[f"graph/{func.__name__}"]
+            iri_value = namespace[snake_to_camel(_func_name(func))]
+            graph_uri = namespace[f"graph/{_func_name(func)}"]
 
             def _eval_graph_function(ctx: QueryContext, part: CompValue) -> list[Any]:
                 """Evaluate a custom graph function call."""

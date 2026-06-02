@@ -13,12 +13,12 @@ jobs:
     outputs:
       release_body: ${{ steps.git-cliff.outputs.content }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
       - name: Generate a changelog
-        uses: orhun/git-cliff-action@v4
+        uses: orhun/git-cliff-action@v4.8.0
         id: git-cliff
         with:
           config: pyproject.toml
@@ -27,7 +27,7 @@ jobs:
           OUTPUT: CHANGES.md
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3.0.0
         with:
           body_path: CHANGES.md
         if: startsWith(github.ref, 'refs/tags/')
