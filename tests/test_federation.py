@@ -24,7 +24,8 @@ else:
 # Stop and delete all testcontainers:
 # docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
 # $DOCKER_HOST needs to be set, e.g. for orbstack:
-# export DOCKER_HOST=unix:///Users/$(whoami)/.orbstack/run/docker.sock uv run pytest tests/test_federation.py -s
+# export DOCKER_HOST=unix:///Users/$(whoami)/.orbstack/run/docker.sock
+# uv run pytest tests/test_federation.py -s
 
 needs_docker = pytest.mark.skipif(
     not os.environ.get("DOCKER_HOST"),
