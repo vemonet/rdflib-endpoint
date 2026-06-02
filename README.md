@@ -24,13 +24,27 @@
 
 ## 📦️ Installation
 
-This package requires Python >=3.8, install it  from [PyPI](https://pypi.org/project/rdflib-endpoint/) with:
+This package requires Python >=3.8, install it from [PyPI](https://pypi.org/project/rdflib-endpoint/) with:
 
 ```shell
 pip install "rdflib-endpoint[cli,oxigraph]"
-# Or install with uv
+```
+
+Or add it to a project dependencies with `uv`:
+
+```sh
+uv add "rdflib-endpoint[web,oxigraph]"
+```
+
+Or install the CLI with `uv`:
+
+```sh
 uv tool install rdflib-endpoint --with "rdflib-endpoint[cli,oxigraph]"
-# Or run directly with uvx
+```
+
+Or run directly with `uvx`:
+
+```sh
 uvx --with "rdflib-endpoint[cli,oxigraph]" rdflib-endpoint
 ```
 
