@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import textwrap
 import warnings
 from importlib import resources
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -297,10 +298,10 @@ class SparqlRouter(APIRouter):
         examples: Dict[str, QueryExample] = {}
         for func in dataset.get_custom_functions():
             docstring = inspect.getdoc(func) or ""
-            matches = re.findall(r"```sparql\s*(.*?)```", docstring, flags=re.DOTALL | re.IGNORECASE)
+            matches = re.findall(r"```sparql\s*\n(.*?)```", docstring, flags=re.DOTALL | re.IGNORECASE)
             if not matches:
                 continue
-            query = matches[0].strip()
+            query = textwrap.dedent(matches[0]).strip()
             if query:
                 examples[_func_name(func).replace("_", " ").capitalize()] = {"query": query}
         return examples or None
