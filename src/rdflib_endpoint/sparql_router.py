@@ -219,12 +219,6 @@ class SparqlRouter(APIRouter):
                         content={"message": f"Error executing the SPARQL update on the RDFLib Graph: {e}"},
                     )
 
-        # TODO: use add_api_route? https://github.com/tiangolo/fastapi/blob/d666ccb62216e45ca78643b52c235ba0d2c53986/fastapi/routing.py#L548
-        @self.get(
-            self.path,
-            name="SPARQL endpoint",
-            responses=API_RESPONSES,
-        )
         async def get_sparql_endpoint(
             request: Request,
             query: Optional[str] = Query(None),
@@ -236,11 +230,6 @@ class SparqlRouter(APIRouter):
             """
             return await handle_sparql_request(request, query=query)
 
-        @self.post(
-            path,
-            name="SPARQL endpoint",
-            responses=API_RESPONSES,
-        )
         async def post_sparql_endpoint(request: Request) -> Response:
             """Send a SPARQL query to be executed through HTTP POST operation.
 
@@ -272,6 +261,31 @@ class SparqlRouter(APIRouter):
                 query = None
                 update = None
             return await handle_sparql_request(request, query, update)
+
+        # Register the endpoint at both the path and its trailing-slash variant.
+        # Relying on Starlette auto / redirect breaks behind a reverse proxy mounted on a sub-path
+        endpoint_paths = [self.path]
+        if self.path != "/":
+            slash_variant = self.path[:-1] if self.path.endswith("/") else self.path + "/"
+            if slash_variant and slash_variant not in endpoint_paths:
+                endpoint_paths.append(slash_variant)
+        for endpoint_path in endpoint_paths:
+            self.add_api_route(
+                endpoint_path,
+                get_sparql_endpoint,
+                methods=["GET"],
+                name="SPARQL endpoint",
+                responses=API_RESPONSES,
+                include_in_schema=endpoint_path == self.path,
+            )
+            self.add_api_route(
+                endpoint_path,
+                post_sparql_endpoint,
+                methods=["POST"],
+                name="SPARQL endpoint",
+                responses=API_RESPONSES,
+                include_in_schema=endpoint_path == self.path,
+            )
 
         # @self.head(path, name="SPARQL endpoint HEAD", responses=API_RESPONSES)
         # async def head_sparql_endpoint(request: Request, query: Optional[str] = Query(None)) -> Response:

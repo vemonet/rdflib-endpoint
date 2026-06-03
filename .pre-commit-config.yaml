@@ -30,7 +30,7 @@ repos:
         name: " 🔎 Check types with ty"
         entry: uvx ty check
         language: system
-        types: [python]
+        pass_filenames: false
 
 ci:
     autofix_commit_msg: 🎨 [pre-commit] Auto format
