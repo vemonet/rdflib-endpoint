@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2](https://github.com/vemonet/rdflib-endpoint/compare/v0.6.1..v0.6.2) - 2026-06-04
+
+### ⚙️ Continuous Integration
+
+- Fix workflow install - ([9c7d950](https://github.com/vemonet/rdflib-endpoint/commit/9c7d950adb69aa3beec301d07b21cd7edebfdfab))
+
+### 🐛 Bug Fixes
+
+- Now register path with and without trailing slash to avoid inconsistent behavior depending on proxy config - ([c7a2f82](https://github.com/vemonet/rdflib-endpoint/commit/c7a2f82b6ea69d998a42e0e5903b5dbe0efdc59b))
+- Fix indent of SPARQL queries extracted from docstring codeblocks - ([baa1c2f](https://github.com/vemonet/rdflib-endpoint/commit/baa1c2f3f77d21c9d0dee2adc69bedae2b7f02ca))
+
+### 🛠️ Miscellaneous Tasks
+
+- Clean up unused dev dependencies, and improve docs for tests using docker - ([f2078e6](https://github.com/vemonet/rdflib-endpoint/commit/f2078e67eebcd76115c0ddbfd8ce725e3e3f6bfe))
+- Update tests dependencies - ([0e5b667](https://github.com/vemonet/rdflib-endpoint/commit/0e5b6677827c2f7afb5ccc9cba470503d16291e2))
+
+### 🧪 Testing
+
+- Skip federated queries tests on python 3.8 (testcontainers latest version does not support 3.8) - ([e23a258](https://github.com/vemonet/rdflib-endpoint/commit/e23a258eeb72d620e98749a4dad5baf9969473b7))
+- Migrate type checker from `mypy` to `ty` - ([0ed8187](https://github.com/vemonet/rdflib-endpoint/commit/0ed81879e78d66ab1f3e241b7f879ba99308d750))
+
 ## [0.6.1](https://github.com/vemonet/rdflib-endpoint/compare/v0.6.0..v0.6.1) - 2026-02-24
 
 ### ⚙️ Continuous Integration
@@ -11,6 +32,10 @@ All notable changes to this project will be documented in this file.
 ### ⛰️ Features
 
 - Add `.generate_docs()` method to `DatasetExt` to easily generate markdown documentation for registered custom functions from docstring and function signature - ([0b4285e](https://github.com/vemonet/rdflib-endpoint/commit/0b4285edc9d1945f091ed8d466ae02c6781acbd2))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump to v0.6.1 - ([19694da](https://github.com/vemonet/rdflib-endpoint/commit/19694da08aa2868ee5eb71fe73c5bb8ebe7f32bc))
 
 ## [0.6.0](https://github.com/vemonet/rdflib-endpoint/compare/v0.5.5..v0.6.0) - 2026-02-17
 
