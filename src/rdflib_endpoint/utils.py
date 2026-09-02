@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, TypedDict, Union
 
 from rdflib import Namespace
+from typing_extensions import NotRequired
 
 SD = Namespace("http://www.w3.org/ns/sparql-service-description#")
 FORMATS = Namespace("http://www.w3.org/ns/formats/")
@@ -143,4 +144,4 @@ class QueryExample(TypedDict, total=False):
     """Dictionary to store example queries for the SPARQL endpoint."""
 
     query: str
-    endpoint: Optional[str]
+    endpoint: NotRequired[Optional[str]]

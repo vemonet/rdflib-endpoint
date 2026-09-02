@@ -38,6 +38,7 @@ dynamic = ["version"]
 dependencies = [
     "rdflib >=6.0.0",
     "fastapi >=0.51.0",
+    "typing-extensions",
 ]
 
 
